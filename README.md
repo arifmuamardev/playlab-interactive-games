@@ -1,5 +1,7 @@
 # PlayLab — interactive game collection
 
+![PlayLab game library](docs/screenshots/hub-desktop.png)
+
 A standalone, host-operated game collection for live events, workshops, and classrooms, and a portfolio case study. No organizational branding, authentication or database required.
 
 ## Game library
@@ -7,7 +9,7 @@ A standalone, host-operated game collection for live events, workshops, and clas
 | Game | Status | Description |
 |---|---|---|
 | Survey Showdown | Working prototype | Survey-style top-answer guessing, strikes, points, steals, question editor |
-| Quickfire Quiz | Working prototype | MC-operated multiple-choice questions, answer reveal, two-team scoreboard, JSON question-bank editing |
+| Quickfire Quiz | Working prototype | MC-operated multiple-choice questions, answer reveal, two-team scoreboard, visual question-bank editing with JSON import/export |
 | Word Relay | Planned | Collaborative word games |
 | Buzzer Battle | Planned | Buzzer-led rounds |
 
@@ -15,10 +17,10 @@ Both playable games include a separate projector display synchronized with the h
 
 ## How to run
 
-- **No install / offline:** double-click `START-MAC.command` on macOS and visit `http://localhost:8765/`, or run `node serve.cjs`. The `dist/` directory is committed and contains an offline-capable build.
+- **No install / offline:** double-click `START-MAC.command` on macOS and visit `http://localhost:8765/`, or run `node serve.cjs`. The repository includes an existing prebuilt snapshot; for the newest version run `npm install && npm run build` first. GitHub Pages always builds from source.
 - **Development:** `npm install`, then `npm run dev`. The source is in `src/`.
-- **Build / tests:** `npm run standalone`, then `npm test`. For Vite builds, use `npm run build`.
-- **Publish:** the included GitHub Pages Actions workflow verifies the current source and builds fresh `dist/` output from the `main` branch. See `DEPLOYMENT.md`.
+- **Build / tests:** `npm test`, then `npm run build` (also creates the offline service worker).
+- **Publish:** the included GitHub Pages Actions workflow deploys `dist/` from the `main` branch. See `DEPLOYMENT.md`.
 
 ## Run a session
 
@@ -47,4 +49,26 @@ Position as a **browser-based interactive event and classroom toolkit** demonstr
 
 Non-affiliated entertainment demo; not an official TV game-show franchise.
 
-Read [the product plan](docs/PRODUCT-PLAN.md) and [the master plan](docs/MASTER-PLAN.md) for architecture goals, feature boundaries, and portfolio positioning.
+## Screenshots
+
+- [Survey Showdown control room](docs/screenshots/survey-host.png)
+- [Quickfire Quiz control room](docs/screenshots/quickfire-host.png)
+
+Read [the product plan](docs/PRODUCT-PLAN.md) for architecture goals, honest feature boundaries and portfolio positioning.
+
+## Modular architecture (v0.3 development)
+
+- `src/core/useSyncedSession.js` provides local-first host/projector synchronization.
+- `src/core/gameRegistry.js` defines catalog metadata.
+- `src/games/survey/index.jsx` hosts the survey mechanics, with pure rules in `src/data.js`.
+- `src/games/quickfire/index.jsx` hosts Quickfire, with pure rules in `src/games/quickfire/data.js`.
+- `src/components/shared.jsx` holds reusable presentation components.
+- `src/main.jsx` routes playable game modules; planned games only appear in the catalog.
+
+Changes to source are verified by `npm test` and `npm run build` in GitHub Actions. Cross-device multiplayer is not implemented; the shared session hook only syncs windows in the same browser profile.
+
+## My Dashboard (local-first workspace)
+
+Open `?page=dashboard` from the game catalog. The Overview and My Games tabs show current browser-local game sessions; Question packs lets you save, import, export and load versioned game content. Pack operations require confirmation before replacing an active game. No account or database is required. Data does not sync to other devices; export important packs as a backup.
+
+See [Dashboard MVP](docs/DASHBOARD-MVP.md) for the precise format, limitations, and test plan.
