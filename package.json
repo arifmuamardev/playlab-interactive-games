@@ -1,0 +1,23 @@
+{
+  "name": "playlab-interactive-games",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build && node scripts/offline.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node scripts/check-data.mjs && node --check dist/app.js && node scripts/smoke-render.cjs",
+    "standalone": "node scripts/build-offline.cjs && node scripts/offline.mjs",
+    "serve:standalone": "node serve.cjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0",
+    "typescript": "^5.8.3"
+  }
+}
