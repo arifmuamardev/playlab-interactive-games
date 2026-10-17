@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import {buildConfiguredMatch,writeConfiguredMatch,hasStoredMatch} from '../src/dashboard/setup.js';
+import {buildConfiguredMatch,writeConfiguredMatch,hasStoredMatch,writeRehearsalMatch} from '../src/dashboard/setup.js';
+import {STARTER_TEMPLATES,starterTemplatesFor} from '../src/dashboard/starterTemplates.js';
+import {REHEARSAL_KEYS} from '../src/core/rehearsal.js';
 import {LIBRARY_KEY,PACK_SCHEMA,PACK_LIMIT,createPack,normalizePack,readPackLibrary,writePackLibrary,readGameSession,resetGameSession,applyPackToSession} from '../src/dashboard/storage.js';
 import {makeInitialState,STORAGE_KEY} from '../src/data.js';
 import {quickfireInitial,QUICKFIRE_KEY} from '../src/games/quickfire/data.js';
@@ -80,5 +82,29 @@ assert.equal(prepareStorage.getItem(STORAGE_KEY),null,'Setting up Quickfire must
 const surveyReady=writeConfiguredMatch({game:'survey',source:'demo',teamNames:['Red','Blue']},prepareStorage);
 assert.equal(surveyReady.questions.length,6);
 assert.deepEqual(surveyReady.progress,{});
-console.log('Local dashboard library and session setup validation passed.');
+// Built-in starter packs are valid, independently reusable, and not saved as user-owned packs.
+assert.equal(STARTER_TEMPLATES.length,4);
+for(const template of STARTER_TEMPLATES){
+  assert.ok(template.questions.length>0);
+  const built=buildConfiguredMatch({game:template.game,source:'starter',templateId:template.id,teamNames:['First','Second']},prepareStorage);
+  assert.equal(built.questions.length,template.questions.length);
+  if(template.game==='survey'){
+    assert.ok(/fictional|illustrative|not real/i.test(template.description));
+    for(const q of template.questions)assert.equal(q.answers.reduce((sum,a)=>sum+a.points,0),100);
+  }
+}
+assert.equal(starterTemplatesFor('quickfire').length,2);
+assert.throws(()=>buildConfiguredMatch({game:'survey',source:'starter',templateId:'quickfire-computing-v1',teamNames:['A','B']},prepareStorage),/another game/);
+assert.throws(()=>buildConfiguredMatch({game:'survey',source:'starter',templateId:'unknown',teamNames:['A','B']},prepareStorage),/not found/);
+const liveSurveyBefore=prepareStorage.getItem(STORAGE_KEY),liveQuizBefore=prepareStorage.getItem(QUICKFIRE_KEY),libraryBefore=prepareStorage.getItem(LIBRARY_KEY);
+const practiceSurvey=writeRehearsalMatch({game:'survey',source:'starter',templateId:'survey-community-v1',teamNames:['MC A','MC B']},prepareStorage);
+const practiceQuiz=writeRehearsalMatch({game:'quickfire',source:'starter',templateId:'quickfire-general-v1',teamNames:['MC A','MC B']},prepareStorage);
+assert.equal(practiceSurvey.questions.length,3);
+assert.equal(practiceQuiz.questions.length,4);
+assert.ok(prepareStorage.getItem(REHEARSAL_KEYS.survey));
+assert.ok(prepareStorage.getItem(REHEARSAL_KEYS.quickfire));
+assert.equal(prepareStorage.getItem(STORAGE_KEY),liveSurveyBefore);
+assert.equal(prepareStorage.getItem(QUICKFIRE_KEY),liveQuizBefore);
+assert.equal(prepareStorage.getItem(LIBRARY_KEY),libraryBefore);
+console.log('Local dashboard library, starter templates and isolated rehearsal validation passed.');
 
