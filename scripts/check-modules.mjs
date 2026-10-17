@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {GAME_CATALOG} from '../src/core/gameRegistry.js';
+import {makeStageEvent,playStageCue} from '../src/games/stageEffects.js';
 import {QUICKFIRE_QUESTIONS,normalizeQuickfireQuestions,quickfireInitial,changeQuickfireScore,awardQuickfirePoints,undoQuickfireAward} from '../src/games/quickfire/data.js';
 const playable=GAME_CATALOG.filter(g=>g.slug);
 assert.deepEqual(playable.map(g=>g.slug),['survey','quickfire']);
@@ -37,4 +38,20 @@ for(const file of ['src/core/useSyncedSession.js','src/games/survey/index.jsx','
 }
 const main=fs.readFileSync('src/main.jsx','utf8');
 assert(main.includes('SurveyGame')&&main.includes('QuickfireApp'), 'Both playable games must remain routed');
-console.log('Catalog, module boundaries, Quickfire scoring and question-validation tests passed.');
+const event=makeStageEvent('reveal',{team:0});
+assert.equal(event.kind,'reveal');
+assert.equal(event.team,0);
+assert.ok(event.nonce);
+assert.ok(Math.abs(Date.now()-event.stamp)<5000);
+let oscillators=0;
+const audio={
+  state:'running',currentTime:3,destination:{},
+  createOscillator:()=>({frequency:{setValueAtTime(){}},connect(){},start(){oscillators++},stop(){}}),
+  createGain:()=>({gain:{setValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){}})
+};
+playStageCue('award',audio);
+assert.equal(oscillators,4,'Award should create one short four-note celebration');
+const previous=oscillators;
+playStageCue('reveal',{...audio,state:'suspended'});
+assert.equal(oscillators,previous,'Audio must not play before explicit resume');
+console.log('Catalog, module boundaries, Quickfire scoring, question validation and projector cues passed.');
