@@ -60,14 +60,30 @@ function DashboardScreen(){
     <section className="pf-dash-section pf-library-promo"><div className="pf-promo-illustration" aria-hidden="true"><span>Q</span><span>A</span><Spark character="✳"/></div><div><span className="pf-eyebrow">THE QUESTION VAULT</span><h2>Keep your best ideas ready.</h2><p>Save question packs for class, share exports and reuse them in future games without starting from scratch.</p><a className="pf-button pf-button-dark" href="?page=dashboard&tab=packs"><FolderOpen size={18}/> Open question library</a></div></section>
   </div>;
 }
+/** Hidden reference screens remain available for side-by-side visual comparison. */
 export function PlayfulDesignLab(){
   const screen=new URLSearchParams(location.search).get('screen')==='dashboard'?'dashboard':'catalog';
-  return <div className="playful-lab"><div className="pf-lab-ribbon"><span><Sparkles size={16}/> DESIGN LAB — playful visual direction</span><span>This is a preview. Your existing PlayLab is unchanged.</span></div>
-    <header className="pf-header"><a className="pf-logo-link" href={labUrl('catalog')} aria-label="PlayLab playful design preview home"><PlayLabLogo/></a>
-      <nav aria-label="Design preview navigation" className="pf-nav"><a href={labUrl('catalog')} aria-current={screen==='catalog'?'page':undefined}><Home size={17}/> Game catalog</a><a href={labUrl('dashboard')} aria-current={screen==='dashboard'?'page':undefined}><LayoutDashboard size={17}/> Dashboard</a></nav>
-      <a href="./" className="pf-existing-link">Current website <ArrowUpRight size={16}/></a>
+  return <PlayfulExperience preview screen={screen}/>;
+}
+
+/** Approved playful catalog now powers the actual PlayLab homepage. */
+export function PlayfulCatalog(){return <PlayfulExperience screen="catalog"/>;}
+
+function PlayfulExperience({screen='catalog',preview=false}){
+  return <div className={'playful-lab '+(preview?'pf-preview':'pf-production')}>
+    {preview&&<div className="pf-lab-ribbon"><span><Sparkles size={16}/> DESIGN LAB — playful visual direction</span><span>This is a preview. Your existing PlayLab is unchanged.</span></div>}
+    <header className="pf-header">
+      <a className="pf-logo-link" href={preview?labUrl('catalog'):'./'} aria-label={preview?'PlayLab playful design preview home':'PlayLab home'}><PlayLabLogo/></a>
+      <nav aria-label={preview?'Design preview navigation':'Main navigation'} className="pf-nav">
+        <a href={preview?labUrl('catalog'):'./'} aria-current={screen==='catalog'?'page':undefined}><Home size={17}/> Game catalog</a>
+        <a href={preview?labUrl('dashboard'):'?page=dashboard'} aria-current={screen==='dashboard'?'page':undefined}><LayoutDashboard size={17}/> {preview?'Dashboard':'My dashboard'}</a>
+      </nav>
+      <a href={preview?'./':'?page=dashboard&tab=setup'} className="pf-existing-link">{preview?'Current website':'Set up a game'} <ArrowUpRight size={16}/></a>
     </header>
     <main className="pf-content">{screen==='catalog'?<CatalogScreen/>:<DashboardScreen/>}</main>
-    <footer className="pf-footer"><div><PlayLabLogo/><p>More play. Less ordinary.</p></div><div><span>INDEPENDENT GAME TOOLKIT</span><p>For real classrooms, workshops & live events.</p><a href="?page=dashboard&tab=setup">Open working dashboard <ArrowUpRight size={15}/></a></div></footer>
+    <footer className="pf-footer"><div><PlayLabLogo/><p>More play. Less ordinary.</p></div>
+      <div><span>INDEPENDENT GAME TOOLKIT</span><p>For real classrooms, workshops & live events.</p>
+        <a href="?page=dashboard&tab=setup">Get your game ready <ArrowUpRight size={15}/></a>
+      </div></footer>
   </div>;
 }
