@@ -21,12 +21,21 @@ function useQuickfire(){return useSyncedSession(QUICKFIRE_SESSION);}
 function QuickfireBoard({game,preview=false}){
   const q=game.questions[game.questionIndex],visible=game.revealed[q.id]||false;
   const moment=useStageMoment(game.lastEvent,['score'],1850);
+  const questionRef=useRef(null),optionsRef=useRef(null),previousQuestion=useRef(q.id);
+  useEffect(()=>{
+    if(previousQuestion.current===q.id)return;
+    previousQuestion.current=q.id;
+    if(preview||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    const timing={duration:420,easing:'cubic-bezier(.2,.8,.15,1)'};
+    questionRef.current?.animate?.([{opacity:.15,transform:'translateY(-12px)'},{opacity:1,transform:'translateY(0)'}],timing);
+    optionsRef.current?.animate?.([{opacity:.45,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],timing);
+  },[q.id,preview]);
   return <div className={'quick-board '+(preview?'quick-board--preview':'')}>
     <div className="quick-stars">✦ <span>PLAYLAB · QUICKFIRE QUIZ</span> ✦</div>
     <div className="quick-head"><h1>QUICKFIRE <em>QUIZ</em></h1><div className="quick-counter">QUESTION {String(game.questionIndex+1).padStart(2,'0')} / {game.questions.length}</div></div>
     <div className="quick-scores">{[0,1].map(i=><div key={i}><span>{game.teamNames[i]}</span><strong>{game.scores[i]}</strong></div>)}</div>
-    <div className="quick-question" key={q.id}>{q.question}</div>
-    <div className="quick-options" key={q.id}>{q.options.map((choice,i)=><div key={q.id+'-'+i+(visible?'-revealed':'-hidden')} className={'quick-option '+(visible?(i===q.answer?'correct':'muted'):'')}><span>{'ABCD'[i]}</span><strong>{choice}</strong>{visible&&i===q.answer&&<Check size={27}/>}</div>)}</div>
+    <div className="quick-question" ref={questionRef}>{q.question}</div>
+    <div className="quick-options" ref={optionsRef}>{q.options.map((choice,i)=><div key={i} className={'quick-option '+(visible?(i===q.answer?'correct':'muted'):'')}><span>{'ABCD'[i]}</span><strong>{choice}</strong>{visible&&i===q.answer&&<Check size={27}/>}</div>)}</div>
     <div className="quick-footer">{visible?<span className="quick-explanation">{q.explanation||'Correct answer highlighted.'}</span>:<span>Discuss with your team. The host will reveal the answer.</span>}</div>
     {!preview&&moment&&<div className="quick-score-celebration" role="status" key={moment.nonce}>
       <div className="projector-confetti" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i}/>)}</div>
