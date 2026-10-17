@@ -1,6 +1,7 @@
 import React, {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {QuestionBuilder,useQuestionDraft} from '../../components/QuestionBuilder.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -205,26 +206,45 @@ function HostApp({game,change}){
   </div>;
 }
 function QuestionEditor({questions,onSave,onClose}){
-  const [items,setItems]=useState(()=>structuredClone(questions));
-  const [selected,setSelected]=useState(0),[error,setError]=useState('');
+  const {items,setItems,selected,setSelected,error,setError,mutate}=useQuestionDraft(questions);
   const q=items[selected];
-  const mutate=fn=>setItems(old=>fn(structuredClone(old)));
-  const updateQ=(field,value)=>mutate(old=>{old[selected][field]=value;return old});
-  const updateA=(i,field,value)=>mutate(old=>{old[selected].answers[i][field]=value;return old});
-  const addRound=()=>{mutate(old=>[...old,{id:uid(),question:'',multiplier:1,answers:[{text:'',points:50},{text:'',points:50}]}]);setSelected(items.length);setError('')};
-  const deleteRound=()=>{if(items.length===1){setError('Keep at least one round.');return;}if(!window.confirm('Delete this question?'))return;mutate(old=>old.filter((_,i)=>i!==selected));setSelected(Math.max(0,selected-1));setError('')};
-  const save=()=>{try{const normalized=normalizeQuestions(items);onSave(normalized)}catch(e){setError(e.message)}};
-  return <div className="modal-backdrop" onClick={onClose}><div className="modal editor-modal" role="dialog" aria-modal="true" aria-label="Edit question bank" onClick={e=>e.stopPropagation()}>
-    <div className="modal-head"><div><span className="eyebrow">CONTENT STUDIO</span><h2>Edit question bank</h2><p>Update questions and points without touching the code.</p></div><button className="square-btn" onClick={onClose} aria-label="Close"><X/></button></div>
-    <div className="editor-layout"><div className="editor-list">{items.map((item,i)=><button key={item.id} onClick={()=>{setSelected(i);setError('')}} className={'editor-list-item '+(i===selected?'current':'')}><small>ROUND {String(i+1).padStart(2,'0')}</small><span>{item.question||'Untitled question'}</span><i>{item.multiplier}×</i></button>)}<button className="add-round" onClick={addRound}><Plus size={18}/> Add question</button></div>
-      <div className="editor-form"><label htmlFor="editor-question">QUESTION</label><textarea id="editor-question" value={q.question} rows={3} maxLength={240} placeholder="Sebutkan..." onChange={e=>updateQ('question',e.target.value)}/><div className="editor-multi"><label htmlFor="editor-multiplier">POINT MULTIPLIER</label><select id="editor-multiplier" value={q.multiplier} onChange={e=>updateQ('multiplier',Number(e.target.value))}><option value={1}>1× — normal round</option><option value={2}>2× — double points</option><option value={3}>3× — triple points</option></select></div>
-      <div className="answer-editor-label"><label>ANSWERS & SURVEY POINTS</label><span>{q.answers.reduce((s,a)=>s+(Number(a.points)||0),0)} base points total (100 recommended)</span></div>
-      <div className="editor-answer-rows">{q.answers.map((a,i)=><div className="editor-answer-row" key={i}><span>{String(i+1).padStart(2,'0')}</span><input aria-label={'Answer '+(i+1)} placeholder="Answer text" maxLength={70} value={a.text} onChange={e=>updateA(i,'text',e.target.value)}/><input aria-label={'Points for answer '+(i+1)} type="number" min="1" max="100" step="1" value={a.points} onChange={e=>updateA(i,'points',e.target.value)}/><button disabled={q.answers.length<=2} aria-label={'Remove answer '+(i+1)} title="Remove answer" className="remove-answer" onClick={()=>mutate(old=>{old[selected].answers.splice(i,1);return old})}><Trash2 size={16}/></button></div>)}</div>
-      <div className="editor-form-bottom"><button className="btn btn-tool" disabled={q.answers.length>=8} onClick={()=>mutate(old=>{old[selected].answers.push({text:'',points:1});return old})}><Plus size={17}/> Add answer</button><button className="btn btn-delete" onClick={deleteRound}><Trash2 size={16}/> Delete round</button></div>
-      </div></div>
-    {error&&<div role="alert" className="form-error"><ShieldAlert size={17}/>{error}</div>}
-    <div className="modal-footer"><div><ShieldAlert size={16}/> Saving changes clears the current match scores.</div><div><button className="btn btn-soft" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={save}><Save size={17}/> Save questions</button></div></div>
-  </div></div>;
+  const updateQ=(field,value)=>mutate(draft=>{draft[selected][field]=value;});
+  const updateA=(i,field,value)=>mutate(draft=>{draft[selected].answers[i][field]=value;});
+  const addRound=()=>{
+    if(items.length>=60)return;
+    setItems(old=>[...old,{id:uid(),question:'',multiplier:1,answers:[{text:'',points:50},{text:'',points:50}]}]);
+    setSelected(items.length);setError('');
+  };
+  const deleteRound=()=>{
+    if(items.length===1){setError('Keep at least one round.');return;}
+    if(!window.confirm('Delete this question?'))return;
+    setItems(old=>old.filter((_,i)=>i!==selected));
+    setSelected(Math.max(0,selected-1));setError('');
+  };
+  const save=()=>{try{onSave(normalizeQuestions(items));setError('');}catch(err){setError(err.message)}};
+  return <QuestionBuilder label="Edit question bank" title="Edit question bank"
+    eyebrow="CONTENT STUDIO · SURVEY" description="Update questions and points without touching the code."
+    items={items} selected={selected} onSelect={i=>{setSelected(i);setError('');}}
+    onAdd={addRound} addLabel="Add question" kindLabel="ROUND" itemBadge={item=>item.multiplier+'×'}
+    className="editor-modal" error={error}
+    saveNote="Saving changes clears the current match scores." onSave={save} onClose={onClose}>
+    <label htmlFor="editor-question">QUESTION</label>
+    <textarea id="editor-question" value={q.question} rows={3} maxLength={240} placeholder="Sebutkan..." onChange={e=>updateQ('question',e.target.value)}/>
+    <div className="editor-multi"><label htmlFor="editor-multiplier">POINT MULTIPLIER</label>
+      <select id="editor-multiplier" value={q.multiplier} onChange={e=>updateQ('multiplier',Number(e.target.value))}><option value={1}>1× — normal round</option><option value={2}>2× — double points</option><option value={3}>3× — triple points</option></select>
+    </div>
+    <div className="answer-editor-label"><label>ANSWERS & SURVEY POINTS</label><span>{q.answers.reduce((sum,a)=>sum+(Number(a.points)||0),0)} base points total (100 recommended)</span></div>
+    <div className="editor-answer-rows">{q.answers.map((a,i)=><div className="editor-answer-row" key={i}>
+      <span>{String(i+1).padStart(2,'0')}</span>
+      <input aria-label={'Answer '+(i+1)} placeholder="Answer text" maxLength={70} value={a.text} onChange={e=>updateA(i,'text',e.target.value)}/>
+      <input aria-label={'Points for answer '+(i+1)} type="number" min="1" max="100" step="1" value={a.points} onChange={e=>updateA(i,'points',e.target.value)}/>
+      <button disabled={q.answers.length<=2} aria-label={'Remove answer '+(i+1)} title="Remove answer" className="remove-answer" onClick={()=>mutate(draft=>{draft[selected].answers.splice(i,1);})}><Trash2 size={16}/></button>
+    </div>)}</div>
+    <div className="editor-form-bottom">
+      <button className="btn btn-tool" disabled={q.answers.length>=8} onClick={()=>mutate(draft=>{draft[selected].answers.push({text:'',points:1});})}><Plus size={17}/> Add answer</button>
+      <button className="btn btn-delete" onClick={deleteRound}><Trash2 size={16}/> Delete round</button>
+    </div>
+  </QuestionBuilder>;
 }
 function DisplayApp({game}){
   const ref=useRef(null);const [soundEnabled,toggleSound]=useCue(game.lastEvent);
