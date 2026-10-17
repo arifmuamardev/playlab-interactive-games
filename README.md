@@ -82,3 +82,7 @@ From **My Dashboard → Game setup** (or a game's **Set up** link), choose Surve
 Open `?page=dashboard` from the game catalog. The Overview and My Games tabs show current browser-local game sessions; Question packs lets you save, import, export and load versioned game content. Pack operations require confirmation before replacing an active game. No account or database is required. Data does not sync to other devices; export important packs as a backup.
 
 See [Dashboard MVP](docs/DASHBOARD-MVP.md) for the precise format, limitations, and test plan.
+
+## Shared Game Builder
+
+Survey and Quickfire now use one accessible editor shell, question-list navigation and immutable draft hook, while retaining game-specific answer fields and validation. Changes are saved only through each game's existing confirmation/reset behavior. See [shared builder architecture](docs/SHARED-GAME-BUILDER.md).
