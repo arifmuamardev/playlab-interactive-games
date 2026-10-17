@@ -1,0 +1,124 @@
+/* PlayLab gameplay polish v1: clearer live controls with the playful catalog's visual language.
+ * All rules are scoped to host controls; projector geometry and game mechanics stay intact. */
+.gameplay-polished{
+ --gp-ink:#302652;--gp-lilac:#eee6ff;--gp-outline:#cbc0e4;--gp-accent:#6246c9;
+ background:#fffcf5;color:var(--gp-ink);min-height:100vh;
+}
+.gameplay-survey{--gp-wash:#fff0e7;--gp-accent:#a74768;--gp-outline:#e7c4bf}
+.gameplay-quickfire{--gp-wash:#eee7ff;--gp-accent:#5840b7;--gp-outline:#cfc4ef}
+.gameplay-polished .host-header{
+ background:#fff;border-bottom:2px solid #ebe5f2;
+}
+.gameplay-polished .host-header .brand-mark{
+ background:#ffdc6e;color:#362957;box-shadow:3px 3px 0 #362957;
+ border:2px solid #362957;transform:rotate(-4deg)
+}
+.gameplay-polished .host-header .brand strong{color:#342c5c}
+.gameplay-polished .host-header .btn-primary{
+ background:#483180;border-color:#483180;color:#fff;border-radius:12px;font-weight:800
+}
+.gameplay-polished .host-header .btn-primary:hover{background:#6244ab}
+.gameplay-polished .host-main{padding-top:34px}
+.gameplay-polished .intro h1{color:#312852;font-weight:900;letter-spacing:-.045em}
+.gameplay-polished .intro h1 em{color:var(--gp-accent)}
+.gameplay-polished .intro p{color:#665e80}
+.gameplay-polished .eyebrow{color:var(--gp-accent)}
+.gameplay-progress-pill{
+ border:2px solid #382955;border-radius:999px;padding:11px 17px;
+ color:#3d3068;box-shadow:3px 4px 0 #382955;font-weight:900;font-size:11px;
+ white-space:nowrap;letter-spacing:.055em;background:#ffe29c;margin-bottom:10px;
+}
+.gameplay-progress-pill span{color:#ab5471;font-size:15px;margin-right:5px}
+.gameplay-status-strip{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:-3px 0 24px;
+}
+.gameplay-status-strip>div{
+ border:1.5px solid var(--gp-outline);border-radius:13px;padding:13px 17px;
+ background:var(--gp-wash);display:grid;align-content:center;gap:7px;min-width:0
+}
+.gameplay-status-strip>div:nth-child(2){background:#fff;border-color:#e4deec}
+.gameplay-status-strip>div:nth-child(3){background:#f9f3df;border-color:#e9ddba}
+.gameplay-status-strip span{
+ font-size:10px;font-weight:900;letter-spacing:.09em;color:#756c83
+}
+.gameplay-status-strip strong{font-size:14px;font-weight:850;color:#352a5d;overflow-wrap:anywhere}
+.gameplay-polished .control-card{
+ border:1.5px solid #e5dded;border-radius:17px;
+ box-shadow:0 5px 0 #4533690a;padding:23px;background:#fff
+}
+.gameplay-polished .section-head h2,.gameplay-polished .card-head h2{color:#2f2854;font-weight:900}
+.gameplay-polished .section-head p,.gameplay-polished .card-head p{color:#716985;font-size:12px}
+.gameplay-polished .preview-frame{
+ border:6px solid #ddd2f3;border-radius:18px;
+ box-shadow:0 5px 0 #34275c30
+}
+.gameplay-polished .btn-primary,
+.gameplay-polished .btn-next{
+ background:#5140a4;border-color:#5140a4;color:#fff;border-radius:10px;font-weight:850
+}
+.gameplay-polished .btn-primary:hover:not(:disabled),.gameplay-polished .btn-next:hover:not(:disabled){background:#6a55c0}
+.gameplay-polished .btn-soft,.gameplay-polished .btn-tool,.gameplay-polished .btn-plain-wide{
+ border-radius:9px;border-color:#dfd5ec;background:#fbf9ff;color:#483b75
+}
+.gameplay-polished .btn-tool:hover:not(:disabled),.gameplay-polished .btn-soft:hover:not(:disabled){background:#f0eaff}
+.gameplay-polished :is(button,input,select,textarea,a):focus-visible{
+ outline:3px solid #6c42c5;outline-offset:3px
+}
+.gameplay-polished .reveal-button{
+ border-color:#ddd5e8;border-radius:11px;background:#fff;font-weight:750
+}
+.gameplay-polished .reveal-button--on{background:#e7f7ee;border-color:#93d0b1}
+.gameplay-polished .reveal-button--on .reveal-index{background:#b5e5ca;color:#21583a}
+.gameplay-polished .quick-team-editor{
+ border-radius:10px;background:#faf8ff;padding:9px;border:1px solid #ece5f4
+}
+.gameplay-polished .quick-team-editor input{border-radius:8px}
+.gameplay-polished .quick-main-action{margin-top:12px;padding:14px 16px;font-size:14px}
+.gameplay-polished .quick-main-action[aria-pressed='true']{
+ background:#207761;border-color:#207761
+}
+.gameplay-polished .quick-control-question{color:#29244a}
+.gameplay-polished .quick-correct-hint{
+ display:inline-block;background:#f7f0db;border:1px solid #ebdfbc;
+ border-radius:8px;color:#685630;padding:8px 11px;line-height:1.5
+}
+.quick-undo-row{margin-top:16px;border-top:1px dashed #e0d9eb;padding-top:14px;display:grid;gap:9px}
+.quick-undo-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.quick-undo-button kbd{font:800 10px ui-monospace,monospace;background:#eee7ff;padding:3px 7px;border-radius:5px}
+.quick-undo-row>span{font-size:11px;color:#675a79;text-align:center}
+.gameplay-guidance{
+ font-size:11px;line-height:1.55;border-radius:9px;color:#765e40;
+ background:#fff7e3;border:1px solid #eddfc1;padding:10px 12px;margin:9px 0
+}
+.gameplay-polished :is(.award-btn,.select-team,.square-btn){border-radius:9px}
+.gameplay-polished button:disabled{cursor:not-allowed;opacity:.52}
+.gameplay-polished .host-footer{color:#746d82}
+@media(max-width:940px){
+ .gameplay-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gameplay-status-strip>div:last-child{grid-column:1/-1}
+}
+@media(max-width:600px){
+ .gameplay-polished .host-main{padding-top:25px}
+ .gameplay-polished .intro{align-items:flex-start;flex-wrap:wrap;gap:7px}
+ .gameplay-progress-pill{padding:9px 13px;font-size:10px}
+ .gameplay-status-strip{grid-template-columns:1fr;gap:7px}
+ .gameplay-status-strip>div:last-child{grid-column:auto}
+ .gameplay-status-strip>div{padding:12px 13px;gap:4px}
+ .gameplay-status-strip strong{font-size:12px}
+ .gameplay-polished .control-card{padding:16px}
+ .gameplay-polished .host-header-right{flex-wrap:wrap;justify-content:flex-end}
+}
+@media(prefers-reduced-motion:reduce){
+ .gameplay-polished *{transition:none!important}
+}
+
+/* A stacked mobile header avoids brand/projector controls competing for a 360px row. */
+@media(max-width:630px){
+ .gameplay-polished .host-header{display:flex;flex-direction:column;align-items:stretch;height:auto;min-width:0;gap:12px;padding:13px 15px}
+ .gameplay-polished .host-header .brand{min-width:0}
+ .gameplay-polished .host-header-right{width:100%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+ .gameplay-polished .host-header-right .btn-primary{flex:none;max-width:60px}
+ .gameplay-polished .host-main{max-width:100%;min-width:0;padding-left:15px;padding-right:15px}
+ .gameplay-polished .host-grid,.gameplay-polished .quick-layout,.gameplay-polished .host-primary,.gameplay-polished .host-sidebar,.gameplay-polished .quick-controls{min-width:0}
+ .gameplay-polished .control-card,.gameplay-polished .preview-section{min-width:0}
+}

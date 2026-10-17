@@ -86,3 +86,9 @@ See [Dashboard MVP](docs/DASHBOARD-MVP.md) for the precise format, limitations, 
 ## Shared Game Builder
 
 Survey and Quickfire now use one accessible editor shell, question-list navigation and immutable draft hook, while retaining game-specific answer fields and validation. Changes are saved only through each game's existing confirmation/reset behavior. See [shared builder architecture](docs/SHARED-GAME-BUILDER.md).
+
+## Gameplay control-room polish
+
+The Survey and Quickfire host control rooms now use the playful PlayLab visual vocabulary while retaining the existing projector layout, question formats, browser storage keys, and game rules. Survey includes a visible round-state / score-bank summary, selected-team accessibility state, and prevents awarding an empty score bank. Quickfire adds a live status strip, **R** reveal/hide, **N/P** next/previous question, **U** undo the most recent manual score change, and a single-step **Undo last score change** button. Shortcuts are disabled while typing or using the question editor. Undo restores the exact previous score totals even when subtraction was clamped at zero.
+
+All state still belongs to one browser profile and origin; neither live account sync nor cross-device multiplayer has been added. Host-only styling does not replace the separate audience projector display.
