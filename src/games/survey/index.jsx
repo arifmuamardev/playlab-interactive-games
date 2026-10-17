@@ -33,6 +33,15 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
   const scores=getScores(game);const bank=p.awardedTeam===null?sumBank(q,p):p.awardedAmount;
   const revealed=p.revealed||[];
   const [flair,setFlair]=useState(null);const flairTimer=useRef();const seen=useRef(game.lastEvent?.nonce);
+  const questionRef=useRef(null),answersRef=useRef(null),previousQuestion=useRef(q?.id);
+  useEffect(()=>{
+    if(previousQuestion.current===q?.id)return;
+    previousQuestion.current=q?.id;
+    if(preview||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
+    const timing={duration:410,easing:'cubic-bezier(.2,.8,.15,1)'};
+    questionRef.current?.animate?.([{opacity:.15,transform:'translateY(-12px)'},{opacity:1,transform:'translateY(0)'}],timing);
+    answersRef.current?.animate?.([{opacity:.4,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],timing);
+  },[q?.id,preview]);
   useEffect(()=>{
     const ev=game.lastEvent;if(!ev?.nonce||seen.current===ev.nonce)return;
     seen.current=ev.nonce;
@@ -59,8 +68,8 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
           <div className="team-number">{scores[team].toLocaleString('id-ID')}</div>
         </div>)}
       </div>
-      <div className="stage-question" key={q.id}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><h1>{q.question}</h1></div>
-      <div key={q.id} className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
+      <div className="stage-question" ref={questionRef}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><h1>{q.question}</h1></div>
+      <div ref={answersRef} className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
         {q.answers.map((a,i)=><div key={q.id+'-'+i} className={'stage-answer '+(revealed.includes(i)?'is-revealed':'is-hidden')}>
           <div className="answer-number">{String(i+1).padStart(2,'0')}</div>
           {revealed.includes(i)?<div className="answer-content" key={'show-'+q.id+'-'+i}>{a.text}</div>:<div className="answer-mask"><span/><span/><span/><span/><span/></div>}
