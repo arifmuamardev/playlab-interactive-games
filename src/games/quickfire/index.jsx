@@ -31,7 +31,7 @@ function QuickfireHost({game,change}){
   const q=game.questions[game.questionIndex],visible=game.revealed[q.id]||false;
   const [editor,setEditor]=useState(false);
   const setQuestion=n=>change(old=>({...old,questionIndex:Math.max(0,Math.min(old.questions.length-1,n))}));
-  const reveal=()=>change(old=>({...old,revealed:{...old.revealed,[q.id]:!visible}}));
+  const reveal=()=>change(old=>{const question=old.questions[old.questionIndex];return {...old,revealed:{...old.revealed,[question.id]:!old.revealed[question.id]}};});
   const award=(team,points)=>change(old=>awardQuickfirePoints(old,team,points));
   const undoScore=()=>change(old=>undoQuickfireAward(old));
   useEffect(()=>{
