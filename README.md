@@ -18,7 +18,7 @@ Both playable games include a separate projector display synchronized with the h
 - **No install / offline:** double-click `START-MAC.command` on macOS and visit `http://localhost:8765/`, or run `node serve.cjs`. The `dist/` directory is committed and contains an offline-capable build.
 - **Development:** `npm install`, then `npm run dev`. The source is in `src/`.
 - **Build / tests:** `npm run standalone`, then `npm test`. For Vite builds, use `npm run build`.
-- **Publish:** the included GitHub Pages Actions workflow deploys `dist/` from the `main` branch. See `DEPLOYMENT.md`.
+- **Publish:** the included GitHub Pages Actions workflow verifies the current source and builds fresh `dist/` output from the `main` branch. See `DEPLOYMENT.md`.
 
 ## Run a session
 

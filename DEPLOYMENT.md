@@ -5,7 +5,7 @@ PlayLab is a **standalone, brand-neutral portfolio project**, not part of any or
 1. Create a separate **public** GitHub repository, suggested name `playlab-interactive-games`.
 2. Upload these files to its default `main` branch.
 3. In Settings > Pages, select **GitHub Actions** as the source.
-4. The workflow in `.github/workflows/pages.yml` deploys the prebuilt `dist/` folder after each push to `main`.
+4. The workflow in `.github/workflows/pages.yml` runs prototype checks, compiles source using Vite, and deploys the verified output after pushes to `main`. Pull requests run verification without publishing.
 5. Check the Actions tab for the deployment result and perform a two-window projector rehearsal.
 
 The resulting default project Pages address is usually `https://<username>.github.io/playlab-interactive-games/` if Pages is enabled.

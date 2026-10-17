@@ -1,36 +1,75 @@
-name: Deploy PlayLab to GitHub Pages
+name: Test, Build and Deploy PlayLab
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: github-pages
+  group: playlab-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  verify:
+    name: Verify and build application
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run prototype regression checks
+        run: npm test
+      - name: Build from source
+        run: npm run build
+      - name: Verify static output
+        run: |
+          test -f dist/index.html
+          test -f dist/sw.js
+          test -d dist/assets
+      - name: Upload verified site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playlab-verified-site
+          path: dist/
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy verified site to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Verify prebuilt application
-        run: npm test
+      - name: Download verified site
+        uses: actions/download-artifact@v4
+        with:
+          name: playlab-verified-site
+          path: dist/
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload prebuilt static app
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./dist
+          path: dist/
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
