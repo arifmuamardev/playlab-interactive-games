@@ -111,3 +111,14 @@
 @media(prefers-reduced-motion:reduce){
  .gameplay-polished *{transition:none!important}
 }
+
+/* A stacked mobile header avoids brand/projector controls competing for a 360px row. */
+@media(max-width:630px){
+ .gameplay-polished .host-header{display:flex;flex-direction:column;align-items:stretch;height:auto;min-width:0;gap:12px;padding:13px 15px}
+ .gameplay-polished .host-header .brand{min-width:0}
+ .gameplay-polished .host-header-right{width:100%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+ .gameplay-polished .host-header-right .btn-primary{flex:none;max-width:60px}
+ .gameplay-polished .host-main{max-width:100%;min-width:0;padding-left:15px;padding-right:15px}
+ .gameplay-polished .host-grid,.gameplay-polished .quick-layout,.gameplay-polished .host-primary,.gameplay-polished .host-sidebar,.gameplay-polished .quick-controls{min-width:0}
+ .gameplay-polished .control-card,.gameplay-polished .preview-section{min-width:0}
+}
