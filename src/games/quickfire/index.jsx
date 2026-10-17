@@ -1,6 +1,7 @@
 import React, {useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {QuickfireQuestionEditor} from './QuestionEditor.jsx';
 import {PlayLabBrand,ControlCard} from '../../components/shared.jsx';
 import {QUICKFIRE_KEY,QUICKFIRE_CHANNEL,quickfireInitial,normalizeQuickfireQuestions,changeQuickfireScore} from './data.js';
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
@@ -25,18 +26,11 @@ function QuickfireBoard({game,preview=false}){
 }
 function QuickfireHost({game,change}){
   const q=game.questions[game.questionIndex],visible=game.revealed[q.id]||false;
-  const [editor,setEditor]=useState(false),[draft,setDraft]=useState(''),[error,setError]=useState('');
+  const [editor,setEditor]=useState(false);
   const setQuestion=n=>change(old=>({...old,questionIndex:Math.max(0,Math.min(old.questions.length-1,n))}));
   const reveal=()=>change(old=>({...old,revealed:{...old.revealed,[q.id]:!visible}}));
   const award=(team,points)=>change(old=>({...old,scores:changeQuickfireScore(old.scores,team,points)}));
-  const openEditor=()=>{setDraft(JSON.stringify({questions:game.questions},null,2));setError('');setEditor(true)};
-  const saveEditor=()=>{
-    try{
-      const clean=normalizeQuickfireQuestions(JSON.parse(draft));
-      if(!window.confirm('Replace all trivia questions and reset the match?'))return;
-      change(old=>({...old,questions:clean,questionIndex:0,revealed:{},scores:[0,0]}));setEditor(false);
-    }catch(err){setError(err.message)}
-  };
+  const openEditor=()=>setEditor(true);
   const exportQuestions=()=>{
     const blob=new Blob([JSON.stringify({questions:game.questions},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='playlab-quickfire-questions.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
@@ -49,11 +43,15 @@ function QuickfireHost({game,change}){
       <aside className="quick-controls">
         <ControlCard title="Question control" description="Run the round from this screen."><div className="quick-nav"><button className="btn btn-soft" disabled={game.questionIndex===0} onClick={()=>setQuestion(game.questionIndex-1)}><ChevronLeft size={17}/> Previous</button><span>{game.questionIndex+1} / {game.questions.length}</span><button className="btn btn-soft" disabled={game.questionIndex===game.questions.length-1} onClick={()=>setQuestion(game.questionIndex+1)}>Next <ChevronRight size={17}/></button></div><h3 className="quick-control-question">{q.question}</h3><p className="quick-correct-hint">Answer: {'ABCD'[q.answer]} · {q.options[q.answer]}</p><button className="btn btn-primary quick-main-action" onClick={reveal}>{visible?<EyeOff size={17}/>:<Eye size={17}/>} {visible?'Hide answer':'Reveal correct answer'}</button></ControlCard>
         <ControlCard title="Team points" description="Manually award or remove 10 points per correct response.">{[0,1].map(i=><div className="quick-team-editor" key={i}><input aria-label={`Team ${i+1} name`} maxLength={45} value={game.teamNames[i]} onChange={e=>change(old=>({...old,teamNames:old.teamNames.map((n,j)=>i===j?e.target.value:n)}))}/><strong>{game.scores[i]}</strong><button className="square-btn" onClick={()=>award(i,-10)} aria-label={`Subtract ten points from team ${i+1}`}><Minus size={16}/></button><button className="square-btn" onClick={()=>award(i,10)} aria-label={`Add ten points to team ${i+1}`}><Plus size={16}/></button></div>)}</ControlCard>
-        <ControlCard title="Question bank" description="Editable JSON for reusable lesson and event sets."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit / import</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...old,scores:[0,0],questionIndex:0,revealed:{}}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
+        <ControlCard title="Question bank" description="Editable JSON for reusable lesson and event sets."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...old,scores:[0,0],questionIndex:0,revealed:{}}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
       </aside></div>
       <footer className="host-footer"><span>PlayLab · Quickfire Quiz v0.2</span><span>Local-only state · Use the same browser profile for host and projector</span></footer>
     </main>
-    {editor&&<div className="modal-backdrop" onClick={()=>setEditor(false)}><div className="modal quick-editor" role="dialog" aria-modal="true" aria-label="Edit trivia questions" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><h2>Quickfire question editor</h2><p>Each question has four options. The correct answer is a zero-based index (0–3).</p></div><button className="square-btn" onClick={()=>setEditor(false)} aria-label="Close"><X/></button></div><div className="quick-editor-body"><label htmlFor="json-editor">Paste or edit a JSON question bank</label><textarea id="json-editor" spellCheck={false} value={draft} onChange={e=>setDraft(e.target.value)}/>{error&&<p role="alert" className="form-error">{error}</p>}</div><div className="modal-footer"><span>Saving replaces the bank and resets scores.</span><div><button className="btn btn-soft" onClick={()=>setEditor(false)}>Cancel</button><button className="btn btn-primary" onClick={saveEditor}>Save questions</button></div></div></div></div>}
+    {editor&&<QuickfireQuestionEditor questions={game.questions} onClose={()=>setEditor(false)} onSave={questions=>{
+      if(!window.confirm('Replace all trivia questions and reset the match?'))return;
+      change(old=>({...old,questions,questionIndex:0,revealed:{},scores:[0,0]}));
+      setEditor(false);
+    }}/>} 
   </div>;
 }
 export function QuickfireApp(){
