@@ -22,6 +22,8 @@ test('Shared Survey builder validates new rounds and updates projector without l
   await expect(dialog.locator('.editor-answer-row')).toHaveCount(3);
   await dialog.getByRole('button',{name:'Remove answer 3'}).click();
   await expect(dialog.locator('.editor-answer-row')).toHaveCount(2);
+  await dialog.getByRole('textbox',{name:'Answer 1'}).fill('Review notes');
+  await dialog.getByRole('textbox',{name:'Answer 2'}).fill('Practice regularly');
   await dialog.getByRole('button',{name:'Save questions'}).click();
   await expect(dialog).toHaveCount(0);
   await host.getByRole('combobox',{name:'Select round'}).selectOption('6');
