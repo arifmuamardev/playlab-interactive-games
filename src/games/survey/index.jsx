@@ -3,6 +3,8 @@ import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLe
 import {useSyncedSession} from '../../core/useSyncedSession.js';
 import {QuestionBuilder,useQuestionDraft} from '../../components/QuestionBuilder.jsx';
 import '../gameplay-polish.css';
+import '../projector-fx.css';
+import {useProjectorAudio} from '../stageEffects.js';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -25,31 +27,6 @@ function updateProgress(game, patch, eventKind){
   const q=game.questions[game.roundIndex];if(!q)return game;
   const old=progressFor(game,q.id);
   return {...game,progress:{...game.progress,[q.id]:{...old,...patch}},lastEvent:eventKind?dispatchEvent(eventKind):game.lastEvent};
-}
-function playCue(kind,ctx){
-  if(!ctx)return;
-  const now=ctx.currentTime+0.025;
-  const note=(freq,start,duration,shape='sine',volume=.09)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=shape;osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.02);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start(start);osc.stop(start+duration+.03);
-  };
-  if(kind==='reveal'){note(523,now,.18);note(784,now+.12,.28);}
-  if(kind==='strike'){note(196,now,.21,'sawtooth',.06);note(147,now+.18,.30,'sawtooth',.06);}
-  if(kind==='award'){note(392,now,.18);note(523,now+.16,.18);note(659,now+.32,.18);note(784,now+.48,.42);}
-  if(kind==='next'){note(392,now,.09,'triangle',.05);}
-}
-function useCue(lastEvent){
-  const [enabled,setEnabled]=useState(false);
-  const audio=useRef(null),lastSeen=useRef(lastEvent?.nonce||null);
-  useEffect(()=>{
-    if(!lastEvent?.nonce || lastSeen.current===lastEvent.nonce)return;
-    lastSeen.current=lastEvent.nonce;
-    if(Date.now()-lastEvent.stamp<6000 && enabled){try{playCue(lastEvent.kind,audio.current)}catch{}}
-  },[lastEvent,enabled]);
-  async function toggle(){
-    if(enabled){setEnabled(false);return;}
-    try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=audio.current??new Ctx();audio.current=ctx;await ctx.resume();setEnabled(true);playCue('next',ctx)}catch{setEnabled(false)}
-  }
-  return [enabled,toggle];
 }
 function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
   const q=game.questions[game.roundIndex];const p=progressFor(game,q?.id);
@@ -74,7 +51,7 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
         <div className="stage-event-label"><span className="stage-mini-star">✦</span><span>PLAYLAB · LIVE GAMES</span></div>
         <div className="stage-headline">SURVEY <em>SHOWDOWN</em><span className="stage-accent">✦</span></div>
         <RoundPill current={game.roundIndex} total={game.questions.length} multiplier={q.multiplier}/>
-        {!preview&&<div className="display-actions"><button className="display-tool" onClick={soundAction} title="Enable sound on this screen">{soundEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}<span>{soundEnabled?'Sound on':'Enable sound'}</span></button><button className="display-tool" onClick={fullscreenAction} title="Go fullscreen"><Maximize size={18}/><span>Fullscreen</span></button></div>}
+        {!preview&&<div className="display-actions"><button className="display-tool" onClick={soundAction} aria-pressed={soundEnabled} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} title={soundEnabled?'Mute game sounds':'Enable game sounds on this screen'}>{soundEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}<span>{soundEnabled?'Sound on':'Enable sound'}</span></button><button className="display-tool" onClick={fullscreenAction} title="Go fullscreen"><Maximize size={18}/><span>Fullscreen</span></button></div>}
       </div>
       <div className="score-ribbon">
         {[0,1].map(team=><div className={'team-score team-score--'+team+(p.activeTeam===team&&p.awardedTeam===null?' is-active':'')+(p.awardedTeam===team?' is-winner':'')} key={team}>
@@ -82,8 +59,8 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
           <div className="team-number">{scores[team].toLocaleString('id-ID')}</div>
         </div>)}
       </div>
-      <div className="stage-question"><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><h1>{q.question}</h1></div>
-      <div className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
+      <div className="stage-question" key={q.id}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><h1>{q.question}</h1></div>
+      <div key={q.id} className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
         {q.answers.map((a,i)=><div key={q.id+'-'+i} className={'stage-answer '+(revealed.includes(i)?'is-revealed':'is-hidden')}>
           <div className="answer-number">{String(i+1).padStart(2,'0')}</div>
           {revealed.includes(i)?<div className="answer-content" key={'show-'+q.id+'-'+i}>{a.text}</div>:<div className="answer-mask"><span/><span/><span/><span/><span/></div>}
@@ -97,7 +74,7 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
       </div>
       <div className="stage-bottom-brand">A GAME BY PLAYLAB <span>✦</span> BUILT FOR CLASSROOMS & LIVE EVENTS</div>
     </div>
-    {flair&&<div className="award-overlay" key={flair.nonce}><div className="award-burst">✦ ✦ ✦</div><Trophy size={60}/><span>SELAMAT!</span><strong>{flair.team}</strong><b>+{flair.points} POIN</b></div>}
+    {!preview&&flair&&<div className="award-overlay" role="status" key={flair.nonce}><div className="projector-confetti" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i}/>)}</div><div className="award-burst">✦ ✦ ✦</div><Trophy size={60}/><span>SELAMAT!</span><strong>{flair.team}</strong><b>+{flair.points} POIN</b></div>}
   </div>
 }
 function HostApp({game,change}){
@@ -250,7 +227,7 @@ function QuestionEditor({questions,onSave,onClose}){
   </QuestionBuilder>;
 }
 function DisplayApp({game}){
-  const ref=useRef(null);const [soundEnabled,toggleSound]=useCue(game.lastEvent);
+  const ref=useRef(null);const [soundEnabled,toggleSound]=useProjectorAudio(game.lastEvent);
   const full=()=>{const el=ref.current;if(!document.fullscreenElement){el?.requestFullscreen?.().catch(()=>{})}else{document.exitFullscreen?.()}};
   return <main className="display-view" ref={ref}><Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/></main>
 }
