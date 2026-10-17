@@ -33,7 +33,7 @@ test('Setup reuses saved Quickfire question pack and updates live projector only
   await dashboard.getByRole('button',{name:/Quickfire Quiz/}).click();
   await dashboard.getByRole('button',{name:'Continue'}).click();
   await dashboard.getByRole('radio',{name:/Use a saved question pack/}).check();
-  await dashboard.getByLabel('Saved question pack').selectOption({label:'Weekly classroom quiz · 6 questions'});
+  await dashboard.locator('#setup-pack').selectOption({label:'Weekly classroom quiz · 6 questions'});
   await dashboard.getByRole('button',{name:'Continue'}).click();
   await dashboard.getByLabel('Team 1').fill('Group A');
   await dashboard.getByLabel('Team 2').fill('Group B');
