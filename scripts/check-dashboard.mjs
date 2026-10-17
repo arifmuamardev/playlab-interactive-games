@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import {LIBRARY_KEY,PACK_SCHEMA,PACK_LIMIT,createPack,normalizePack,readPackLibrary,writePackLibrary,readGameSession,resetGameSession,applyPackToSession} from '../src/dashboard/storage.js';
+import {makeInitialState,STORAGE_KEY} from '../src/data.js';
+import {quickfireInitial,QUICKFIRE_KEY} from '../src/games/quickfire/data.js';
+
+function fakeStorage(){const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};}
+const storage=fakeStorage();
+assert.deepEqual(readPackLibrary(storage),[]);
+assert.equal(readGameSession('survey',storage),null);
+assert.equal(readGameSession('quickfire',storage),null);
+const survey=makeInitialState(),quickfire=quickfireInitial();
+const pack=createPack('survey','  Term review  ',survey.questions);
+assert.equal(pack.name,'Term review');
+assert.equal(pack.schema,PACK_SCHEMA);
+assert.equal(pack.questions.length,6);
+assert.equal(LIBRARY_KEY,'playlab-content-packs-v1');
+assert.throws(()=>createPack('wrong','Unknown',survey.questions));
+assert.throws(()=>createPack('survey',' ',survey.questions));
+assert.throws(()=>normalizePack({...pack,version:2}));
+assert.throws(()=>normalizePack({...pack,questions:[]}));
+const quizPack=createPack('quickfire','Lecture trivia',quickfire.questions);
+assert.equal(quizPack.questions.length,6);
+writePackLibrary([pack,quizPack],storage);
+assert.equal(readPackLibrary(storage).length,2);
+assert.throws(()=>writePackLibrary([pack,pack],storage));
+assert.throws(()=>writePackLibrary(Array.from({length:PACK_LIMIT+1},()=>pack),storage));
+
+const altered={...survey,teamNames:['Alpha','Beta'],progress:{'demo-1':{revealed:[0],strikes:0,activeTeam:0,phase:'play',awardedTeam:0,awardedAmount:34}}};
+storage.setItem(STORAGE_KEY,JSON.stringify(altered));
+assert.deepEqual(readGameSession('survey',storage).scores,[34,0]);
+const resetSurvey=resetGameSession('survey',storage);
+assert.deepEqual(resetSurvey.progress,{});
+assert.deepEqual(resetSurvey.teamNames,['Alpha','Beta']);
+assert.equal(resetSurvey.questions.length,6);
+const setPack={...pack,questions:[survey.questions[0]]};
+const applied=applyPackToSession(setPack,storage);
+assert.equal(applied.questions.length,1);
+assert.deepEqual(readGameSession('survey',storage).scores,[0,0]);
+assert.equal(applied.teamNames[0],'Alpha');
+
+storage.setItem(QUICKFIRE_KEY,JSON.stringify({...quickfire,scores:[20,10],questionIndex:1,teamNames:['Class A','Class B']}));
+assert.deepEqual(readGameSession('quickfire',storage).scores,[20,10]);
+const resetQuiz=resetGameSession('quickfire',storage);
+assert.deepEqual(resetQuiz.scores,[0,0]);
+assert.equal(resetQuiz.teamNames[0],'Class A');
+const loadedQuiz=applyPackToSession({...quizPack,questions:[quickfire.questions[0]]},storage);
+assert.deepEqual(loadedQuiz.scores,[0,0]);
+assert.equal(loadedQuiz.questions.length,1);
+assert.equal(loadedQuiz.teamNames[0],'Class A');
+assert.equal(readGameSession('quickfire',storage).questions.length,1);
+storage.setItem(LIBRARY_KEY,JSON.stringify({version:999,packs:[]}));
+assert.throws(()=>readPackLibrary(storage),/library|version/i);
+console.log('Local dashboard library validation, import format, session isolation and reset tests passed.');

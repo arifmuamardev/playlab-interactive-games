@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {SurveyGame} from './games/survey/index.jsx';
 import {QuickfireApp} from './games/quickfire/index.jsx';
 import {GameHub} from './GameHub.jsx';
+import {Dashboard} from './dashboard/Dashboard.jsx';
 import './styles.css';
 
 /** Registry of playable modules; catalog-only planned entries have no component. */
@@ -15,6 +16,7 @@ function App(){
   },[]);
   const selected=new URLSearchParams(location.search).get('game');
   const View=GAME_VIEWS[selected];
-  return View?<View/>:<GameHub/>;
+  if(View)return <View/>;
+  return new URLSearchParams(location.search).get('page')==='dashboard'?<Dashboard/>:<GameHub/>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
