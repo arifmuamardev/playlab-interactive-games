@@ -2,9 +2,9 @@ import {STORAGE_KEY,makeInitialState,normalizeQuestions} from '../data.js';
 import {QUICKFIRE_KEY,quickfireInitial,normalizeQuickfireQuestions} from '../games/quickfire/data.js';
 import {readGameSession,readPackLibrary,normalizePack} from './storage.js';
 import {findStarterTemplate} from './starterTemplates.js';
+import {REHEARSAL_KEYS} from '../core/rehearsal.js';
 
 const GAME_KEYS={survey:STORAGE_KEY,quickfire:QUICKFIRE_KEY};
-export const REHEARSAL_KEYS={survey:'playlab-survey-rehearsal-v1',quickfire:'playlab-quickfire-rehearsal-v1'};
 
 /** Prepares a new match without changing the current match or saved question packs.
  * Call writeConfiguredMatch only after the user has reviewed and confirmed.
