@@ -1,12 +1,23 @@
 import React, {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
-import {CHANNEL,STORAGE_KEY,getScores,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
+import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
 const IS_DISPLAY=new URLSearchParams(location.search).get('view')==='display';
+const IS_REHEARSAL=isRehearsal();
 function uid(){return `r-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;}
 function dispatchEvent(kind,detail=''){return {kind,detail,stamp:Date.now(),nonce:Math.random().toString(36).slice(2)};}
-const SURVEY_SESSION={storageKey:STORAGE_KEY,channelName:CHANNEL,messageType:'state',readInitial:readSavedState,isValid:state=>state?.version===1 && Array.isArray(state.questions)};
+const SURVEY_SESSION={
+  storageKey:IS_REHEARSAL?REHEARSAL_KEYS.survey:STORAGE_KEY,
+  channelName:IS_REHEARSAL?CHANNEL+'-rehearsal':CHANNEL,
+  messageType:'state',
+  readInitial:IS_REHEARSAL?()=>{
+    try{const saved=JSON.parse(localStorage.getItem(REHEARSAL_KEYS.survey));return saved?.version===1&&Array.isArray(saved.questions)&&saved.questions.length?saved:makeInitialState();}
+    catch{return makeInitialState();}
+  }:readSavedState,
+  isValid:state=>state?.version===1&&Array.isArray(state.questions)
+};
 function useGame(){return useSyncedSession(SURVEY_SESSION);}
 function updateProgress(game, patch, eventKind){
   const q=game.questions[game.roundIndex];if(!q)return game;
@@ -221,4 +232,4 @@ function DisplayApp({game}){
   return <main className="display-view" ref={ref}><Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/></main>
 }
 
-export function SurveyGame(){const [game,change]=useGame();return IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>;}
+export function SurveyGame(){const [game,change]=useGame();return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=survey">Back to setup</a></aside>}{IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>}</>;}

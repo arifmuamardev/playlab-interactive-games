@@ -15,3 +15,9 @@
 
 /* Dashboard navigation should wrap beneath the catalog logo on narrow screens. */
 @media(max-width:600px){.hub-header{height:auto;min-height:86px;flex-wrap:wrap;row-gap:12px;padding:17px 22px}.hub-header .brand{min-width:0}.hub-dashboard-link{max-width:100%;white-space:nowrap}}
+
+/* Practice is explicitly distinguishable from real live-event controls. */
+.playlab-practice-banner{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:450;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;max-width:min(96vw,860px);padding:9px 15px;border-radius:11px;border:1px solid #efd9a4;background:#fff4d9;color:#674923;box-shadow:0 5px 22px #061d2a2a;font:700 12px/1.45 Inter,system-ui,sans-serif;text-align:center}
+.playlab-practice-banner strong{color:#7b3d28;text-transform:uppercase;letter-spacing:.08em}
+.playlab-practice-banner a{color:#326875;text-decoration:underline;font-weight:800}
+@media(max-width:600px){.playlab-practice-banner{width:calc(100% - 18px);font-size:11px;padding:7px 10px}}

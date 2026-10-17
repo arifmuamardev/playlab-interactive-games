@@ -1,16 +1,18 @@
 import React, {useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {QuickfireQuestionEditor} from './QuestionEditor.jsx';
 import {PlayLabBrand,ControlCard} from '../../components/shared.jsx';
 import {QUICKFIRE_KEY,QUICKFIRE_CHANNEL,quickfireInitial,normalizeQuickfireQuestions,changeQuickfireScore} from './data.js';
+const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
-  try {const value=JSON.parse(localStorage.getItem(QUICKFIRE_KEY));
+  try {const value=JSON.parse(localStorage.getItem(IS_REHEARSAL?REHEARSAL_KEYS.quickfire:QUICKFIRE_KEY));
     return value?.version===1&&Array.isArray(value.questions)&&value.questions.length&&value.scores?.length===2?value:quickfireInitial();
   }catch{return quickfireInitial();}
 }
-const QUICKFIRE_SESSION={storageKey:QUICKFIRE_KEY,channelName:QUICKFIRE_CHANNEL,messageType:'quickfire',readInitial:readQuickfire,
+const QUICKFIRE_SESSION={storageKey:IS_REHEARSAL?REHEARSAL_KEYS.quickfire:QUICKFIRE_KEY,channelName:IS_REHEARSAL?QUICKFIRE_CHANNEL+'-rehearsal':QUICKFIRE_CHANNEL,messageType:'quickfire',readInitial:readQuickfire,
   isValid:state=>state?.version===1&&Array.isArray(state.questions)&&state.questions.length>0&&Array.isArray(state.scores)&&state.scores.length===2};
 function useQuickfire(){return useSyncedSession(QUICKFIRE_SESSION);}
 function QuickfireBoard({game,preview=false}){
@@ -57,6 +59,6 @@ function QuickfireHost({game,change}){
 export function QuickfireApp(){
   const [game,change]=useQuickfire();const ref=useRef(null);
   const display=new URLSearchParams(location.search).get('view')==='display';
-  if(display)return <main className="display-view" ref={ref}><div className="quick-full-actions"><button onClick={()=>document.fullscreenElement?document.exitFullscreen():ref.current?.requestFullscreen?.()}><Maximize size={16}/> Fullscreen</button></div><QuickfireBoard game={game}/></main>;
-  return <QuickfireHost game={game} change={change}/>;
+  if(display)return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Separate from the real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<main className="display-view" ref={ref}><div className="quick-full-actions"><button onClick={()=>document.fullscreenElement?document.exitFullscreen():ref.current?.requestFullscreen?.()}><Maximize size={16}/> Fullscreen</button></div><QuickfireBoard game={game}/></main></>;
+  return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<QuickfireHost game={game} change={change}/></>;
 }

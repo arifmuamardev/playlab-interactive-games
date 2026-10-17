@@ -59,3 +59,7 @@
  .setup-actions{flex-wrap:wrap}
 }
 @media(max-width:370px){.setup-card{padding:15px}.setup-actions .dash-action{padding:11px 10px;font-size:11px}}
+
+.setup-launch-buttons{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;min-width:0}
+.setup-launch-buttons .dash-action{white-space:normal;text-align:center}
+@media(max-width:700px){.setup-launch-buttons{width:100%;justify-content:stretch}.setup-launch-buttons .dash-action{flex:1 1 180px}}

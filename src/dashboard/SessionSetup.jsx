@@ -2,7 +2,8 @@ import React,{useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,Check,Gamepad2,MonitorPlay,ShieldAlert} from 'lucide-react';
 import {GAME_CATALOG} from '../core/gameRegistry.js';
 import {gameTitle,readGameSession,readPackLibrary} from './storage.js';
-import {buildConfiguredMatch,hasStoredMatch,writeConfiguredMatch} from './setup.js';
+import {buildConfiguredMatch,hasStoredMatch,writeConfiguredMatch,writeRehearsalMatch} from './setup.js';
+import {starterTemplatesFor} from './starterTemplates.js';
 import './setup.css';
 
 const PLAYABLE=GAME_CATALOG.filter(item=>item.slug);
@@ -20,6 +21,7 @@ export function SessionSetup(){
   const [step,setStep]=useState(0);
   const [source,setSource]=useState('demo');
   const [packId,setPackId]=useState('');
+  const [templateId,setTemplateId]=useState('');
   const [teams,setTeams]=useState(()=>savedNames(initialGame()||'quickfire'));
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -29,17 +31,20 @@ export function SessionSetup(){
   });
   const [existing]=useState(()=>Object.fromEntries(PLAYABLE.map(item=>[item.slug,readGameSession(item.slug)])));
   const available=library.packs.filter(item=>item.game===game);
+  const starters=starterTemplatesFor(game);
+  const starter=starters.find(item=>item.id===templateId);
   const chosen=available.find(item=>item.id===packId);
-  const questions=source==='pack'?chosen?.questions:source==='current'?existing[game]?.questions:null;
+  const questions=source==='pack'?chosen?.questions:source==='starter'?starter?.questions:source==='current'?existing[game]?.questions:null;
   const displayedCount=questions?.length||(source==='demo'?6:0);
   const invalidTeam=teams.some(name=>!name.trim()||name.trim().length>45)||teams[0].trim().toLocaleLowerCase()===teams[1].trim().toLocaleLowerCase();
   const selectedGame=PLAYABLE.find(item=>item.slug===game);
   function chooseGame(slug){
-    setGame(slug);setSource('demo');setPackId('');setTeams(savedNames(slug));setError('');
+    setGame(slug);setSource('demo');setPackId('');setTemplateId('');setTeams(savedNames(slug));setError('');
   }
   function next(){
     setError('');
     if(step===0&&!game){setError('Choose a game to continue.');return;}
+    if(step===1&&source==='starter'&&!starter){setError('Choose a starter template to continue.');return;}
     if(step===1&&source==='pack'&&!chosen){setError('Choose a saved question pack to continue.');return;}
     if(step===1&&source==='current'&&!existing[game]){setError('This game has no saved match to reuse.');return;}
     if(step===2&&invalidTeam){setError('Enter two distinct team names (1–45 characters each).');return;}
@@ -48,7 +53,7 @@ export function SessionSetup(){
   function launch(){
     if(busy)return;
     setError('');
-    const config={game,source,packId,teamNames:teams};
+    const config={game,source,packId,templateId,teamNames:teams};
     try{
       // Validate content, format compatibility, names and IDs before a destructive confirmation.
       buildConfiguredMatch(config);
@@ -57,6 +62,18 @@ export function SessionSetup(){
       writeConfiguredMatch(config);
       window.location.assign('?game='+encodeURIComponent(game));
     }catch(err){setBusy(false);setError(err.message||'Could not prepare the game. No match was changed.');}
+  }
+  function rehearse(){
+    setError('');
+    try{
+      const config={game,source,packId,templateId,teamNames:teams};
+      buildConfiguredMatch(config);
+      // Write only the rehearsal key, then open an independent practice host.
+      writeRehearsalMatch(config);
+      const url=new URL('?game='+encodeURIComponent(game)+'&mode=rehearsal',location.href);
+      const popup=window.open(url.toString(),'_blank');
+      if(!popup)setError('Practice window was blocked by your browser. Allow popups for PlayLab and try again.');
+    }catch(err){setError(err.message||'Could not start practice mode.');}
   }
   return <div className="dash-setup">
     <div className="setup-intro">
@@ -77,7 +94,9 @@ export function SessionSetup(){
           <label className={'setup-source '+(source==='demo'?'selected':'')}><input type="radio" name="question-source" value="demo" checked={source==='demo'} onChange={()=>{setSource('demo');setError('');}}/><span><strong>Sample questions</strong><small>Use the included 6-question demonstration pack. Survey points are fictional examples.</small></span></label>
           <label className={'setup-source '+(source==='current'?'selected':'')}><input type="radio" name="question-source" value="current" disabled={!existing[game]} checked={source==='current'} onChange={()=>{setSource('current');setError('');}}/><span><strong>Reuse current game questions</strong><small>{existing[game]?`${existing[game].questions.length} questions from the saved match (scores reset)`:'No saved match exists in this browser'}</small></span></label>
           <label className={'setup-source '+(source==='pack'?'selected':'')}><input type="radio" name="question-source" value="pack" disabled={!available.length||Boolean(library.error)} checked={source==='pack'} onChange={()=>{setSource('pack');setError('');}}/><span><strong>Use a saved question pack</strong><small>{available.length?`${available.length} compatible packs in your local library`:'No compatible saved packs yet'}</small></span></label>
+          <label className={'setup-source '+(source==='starter'?'selected':'')}><input type="radio" name="question-source" value="starter" checked={source==='starter'} onChange={()=>{setSource('starter');setTemplateId('');setError('');}}/><span><strong>Ready-to-use classroom & event templates</strong><small>{starters.length} curated options. Survey point values are fictional, not collected responses.</small></span></label>
         </div>
+        {source==='starter'&&<div className="setup-field"><label htmlFor="setup-template">Starter template</label><select id="setup-template" value={templateId} onChange={e=>{setTemplateId(e.target.value);setError('');}}><option value="">Choose a template</option>{starters.map(item=><option key={item.id} value={item.id}>{item.title} · {item.questions.length} questions</option>)}</select>{starter&&<p className="setup-hint">{starter.description}</p>}</div>}
         {source==='pack'&&<div className="setup-field"><label htmlFor="setup-pack">Saved question pack</label><select id="setup-pack" value={packId} onChange={e=>{setPackId(e.target.value);setError('');}}><option value="">Choose a pack</option>{available.map(pack=><option key={pack.id} value={pack.id}>{pack.name} · {pack.questions.length} questions</option>)}</select></div>}
         {library.error&&<p className="setup-warning" role="status">Your saved question library could not be read: {library.error}. Sample questions remain available.</p>}
       </>}
@@ -88,13 +107,13 @@ export function SessionSetup(){
       </>}
       {step===3&&<>
         <h3>Review your new match</h3><p className="setup-support">Once you launch, the game opens in its host control room. Open the projector from there.</p>
-        <dl className="setup-review"><div><dt>Game</dt><dd>{selectedGame?.title}</dd></div><div><dt>Questions</dt><dd>{source==='demo'?'Sample questions':source==='current'?'Current saved questions':chosen?.name} · {displayedCount} questions</dd></div><div><dt>Teams</dt><dd>{teams[0].trim()} vs {teams[1].trim()}</dd></div><div><dt>Start condition</dt><dd>Question 1 · Scores 0–0</dd></div><div><dt>Storage</dt><dd>This browser only · No account</dd></div></dl>
+        <dl className="setup-review"><div><dt>Game</dt><dd>{selectedGame?.title}</dd></div><div><dt>Questions</dt><dd>{source==='demo'?'Sample questions':source==='current'?'Current saved questions':source==='starter'?starter?.title:chosen?.name} · {displayedCount} questions</dd></div><div><dt>Teams</dt><dd>{teams[0].trim()} vs {teams[1].trim()}</dd></div><div><dt>Start condition</dt><dd>Question 1 · Scores 0–0</dd></div><div><dt>Storage</dt><dd>This browser only · No account</dd></div></dl>
         <div className="setup-warning"><ShieldAlert size={19}/><p>{hasStoredMatch(game)?'A saved match already exists. Starting will replace its question bank, scores and progress after confirmation. Save important questions first.':'No saved match will be replaced.'} Your saved question packs will not be deleted.</p></div>
       </>}
       {error&&<div role="alert" className="setup-error">{error}</div>}
       <div className="setup-actions">
         {step===0?<a className="dash-action" href="?page=dashboard"><ArrowLeft size={16}/> Dashboard</a>:<button className="dash-action" onClick={()=>{setStep(v=>v-1);setError('');}}><ArrowLeft size={16}/> Back</button>}
-        {step===3?<button disabled={busy} className="dash-action dash-action-primary" onClick={launch}><MonitorPlay size={17}/> Launch host controls</button>:<button className="dash-action dash-action-primary" onClick={next}>Continue <ArrowRight size={16}/></button>}
+        {step===3?<div className="setup-launch-buttons"><button className="dash-action" onClick={rehearse}><Gamepad2 size={17}/> Practice without affecting live game</button><button disabled={busy} className="dash-action dash-action-primary" onClick={launch}><MonitorPlay size={17}/> Launch host controls</button></div>:<button className="dash-action dash-action-primary" onClick={next}>Continue <ArrowRight size={16}/></button>}
       </div>
     </section>
     <p className="setup-footnote"><BookOpen size={15}/> Want to prepare custom questions first? Save them from My games in the dashboard, then choose them here.</p>
