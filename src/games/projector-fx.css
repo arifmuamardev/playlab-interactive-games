@@ -1,0 +1,212 @@
+/* PlayLab Showtime v1 — audience/projector only. Host preview dimensions remain unchanged. */
+.stage--full{
+  background:
+    radial-gradient(circle at 12% 16%,#60459b 0,transparent 25%),
+    radial-gradient(circle at 89% 72%,#174d94 0,transparent 28%),
+    radial-gradient(ellipse at 50% 18%,#37266c 0,#111632 61%,#09142b 100%);
+}
+.stage--full:before{
+  background:
+    radial-gradient(ellipse at 50% -20%,#ab72e52a 0,transparent 63%),
+    repeating-linear-gradient(118deg,transparent 0,transparent 160px,#ffffff08 161px,#ffffff08 163px);
+}
+.stage--full:after{border-color:#e4ae78a8}
+.stage--full .stage-glow-left{background:#ff688e;opacity:.23}
+.stage--full .stage-glow-right{background:#7c72fc;opacity:.32}
+.stage--full .stage-headline{font-weight:1000;text-shadow:0 4px 0 #0007,0 0 45px #ce87ff50}
+.stage--full .stage-headline em{color:#ffc56c;text-shadow:0 2px 16px #fc7d7e55}
+.stage--full .stage-question{animation:pf-round-enter .55s cubic-bezier(.2,.8,.15,1) both}
+.stage--full .stage-question h1{text-shadow:0 4px 22px #0b052f70}
+.stage--full .stage-answer-grid{animation:pf-board-enter .48s ease-out both}
+.stage--full .stage-answer{border-radius:clamp(5px,.65vw,15px)}
+.stage--full .stage-answer.is-revealed{
+  animation:pf-card-flip .53s cubic-bezier(.16,.85,.3,1) both;
+  box-shadow:0 0 16px #ffda9e42,0 3px 0 #dca97835;
+}
+.stage--full .stage-answer.is-revealed .answer-value{animation:pf-value-pop .55s ease-out both}
+.stage--full .score-ribbon .is-winner{animation:pf-score-glow 1.5s ease-in-out infinite alternate}
+.stage--full .display-tool{border:1px solid #f4d7ff77;border-radius:999px;background:#251a56ed;color:#fff;font-weight:850}
+.stage--full .display-tool:hover{background:#513797}
+.stage--full .display-tool[aria-pressed='true']{background:#225f57;border-color:#83e1b5}
+.stage--full .round-pill{border-color:#e8c07c99;background:#5b429b63}
+.stage--full .phase-indicator{color:#ffe6b1}
+.stage--full .stage-bottom-brand span{color:#ffd06e}
+
+/* Quickfire uses the same stage palette, but preserves its question/option layout. */
+.quick-board:not(.quick-board--preview){
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 12% 19%,#5e3083 0,transparent 31%),
+    radial-gradient(circle at 91% 66%,#194f8a 0,transparent 34%),
+    linear-gradient(152deg,#151537 0,#271858 45%,#071c3b 100%);
+  isolation:isolate;
+}
+.quick-board:not(.quick-board--preview):before{
+  content:'';
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  background-image:radial-gradient(#ffffff35 1.4px,transparent 1.4px);
+  background-size:35px 35px;
+  mask-image:linear-gradient(110deg,#0005,transparent 65%);
+}
+.quick-board:not(.quick-board--preview):after{
+  content:'✦';
+  position:absolute;
+  bottom:5%;
+  right:4%;
+  color:#ffe6a217;
+  font-size:min(19vw,250px);
+  z-index:-1;
+  transform:rotate(19deg);
+}
+.quick-board:not(.quick-board--preview) .quick-stars{font-weight:900;color:#ffd98d;text-shadow:0 2px 20px #f691c566}
+.quick-board:not(.quick-board--preview) .quick-head h1{font-weight:1000;text-shadow:0 4px 0 #0b072b,0 0 32px #6f5af670}
+.quick-board:not(.quick-board--preview) .quick-head h1 em{font-style:normal;font-family:inherit;color:#ffc869}
+.quick-board:not(.quick-board--preview) .quick-counter{
+  display:inline-block;
+  background:#ffffff16;
+  border:1px solid #d9baff8a;
+  border-radius:999px;
+  padding:9px 16px;
+  color:#f8e6ff;
+  font-size:clamp(12px,1.05vw,16px);
+  font-weight:850;
+}
+.quick-board:not(.quick-board--preview) .quick-scores>div{
+  background:#503d96b3;
+  border:2px solid #c4a8ff9c;
+  border-radius:16px;
+  min-width:min(17vw,240px);
+  box-shadow:0 4px 0 #110b3770;
+}
+.quick-board:not(.quick-board--preview) .quick-scores>div:nth-child(2){background:#36538fb3;border-color:#86c2e6ab}
+.quick-board:not(.quick-board--preview) .quick-scores strong{font-size:clamp(27px,3vw,50px);font-weight:1000}
+.quick-board:not(.quick-board--preview) .quick-question{
+  max-width:1100px;
+  font-size:clamp(27px,2.6vw,52px);
+  letter-spacing:-.025em;
+  text-shadow:0 4px 18px #0006;
+  animation:pf-round-enter .55s cubic-bezier(.2,.8,.15,1) both;
+}
+.quick-board:not(.quick-board--preview) .quick-option{
+  background:#f7f0ffcF;
+  color:#30234e;
+  border:3px solid #ecdcff;
+  border-radius:16px;
+  min-height:clamp(70px,12vh,130px);
+  padding:clamp(12px,1.5vw,21px);
+  font-weight:850;
+  box-shadow:0 4px 0 #0b082c66;
+  animation:pf-option-enter .42s ease-out both;
+}
+.quick-board:not(.quick-board--preview) .quick-option:nth-child(2){animation-delay:55ms}
+.quick-board:not(.quick-board--preview) .quick-option:nth-child(3){animation-delay:105ms}
+.quick-board:not(.quick-board--preview) .quick-option:nth-child(4){animation-delay:155ms}
+.quick-board:not(.quick-board--preview) .quick-option span{
+  border:2px solid #49327c;
+  background:#ffe6a5;
+  color:#30214d;
+  border-radius:11px;
+  font-size:clamp(18px,1.5vw,26px);
+}
+.quick-board:not(.quick-board--preview) .quick-option.correct{
+  background:#b8f5d5;
+  color:#184c40;
+  border-color:#2beaa5;
+  box-shadow:0 0 40px #52ffac92,0 4px 0 #12845d;
+  animation:pf-correct-reveal .57s cubic-bezier(.18,.95,.36,1) both;
+}
+.quick-board:not(.quick-board--preview) .quick-option.correct span{background:#e5fff1;border-color:#2b795e;color:#12583d}
+.quick-board:not(.quick-board--preview) .quick-option.muted{opacity:.44;filter:saturate(.65)}
+.quick-board:not(.quick-board--preview) .quick-explanation{
+  color:#ffe8a6;
+  display:inline-block;
+  border:1px solid #ffe6a36b;
+  background:#36265c99;
+  padding:8px 16px;
+  border-radius:13px;
+  animation:pf-round-enter .4s ease-out both;
+}
+.quick-display .quick-full-actions{display:flex;gap:8px;z-index:40}
+.quick-display .quick-full-actions button{
+  font-size:12px;
+  border:1px solid #ead6ffad;
+  border-radius:99px;
+  background:#281a59ec;
+  color:#fff;
+  font-weight:800;
+  padding:10px 13px;
+}
+.quick-display .quick-full-actions button[aria-pressed='true']{background:#237563;border-color:#a0f1cb}
+.quick-display .quick-full-actions button:hover{background:#5f459a}
+.quick-score-celebration{
+  position:absolute;inset:0;z-index:25;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  pointer-events:none;text-align:center;gap:clamp(10px,2vh,21px);
+  color:#fff4c7;background:#1c1359de;
+  backdrop-filter:blur(6px);
+  animation:pf-celebration-enter .3s ease-out both;
+}
+.quick-score-celebration svg{color:#ffd56f;filter:drop-shadow(0 0 22px #ffb951ab)}
+.quick-score-celebration>span{font-size:clamp(15px,1.8vw,24px);letter-spacing:.14em;font-weight:1000}
+.quick-score-celebration>strong{font-size:clamp(32px,5vw,78px);line-height:1.05;max-width:80vw;overflow-wrap:anywhere}
+.quick-score-celebration>b{font-size:clamp(48px,7vw,110px);color:#ffe08b;text-shadow:0 5px 0 #623c70}
+
+/* Confetti is intentionally CSS-only, fast, non-interactive, and inexpensive to render. */
+.projector-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.projector-confetti i{position:absolute;top:-10%;width:12px;height:21px;background:#ffca66;border-radius:3px;opacity:0;animation:pf-confetti-fall 1.65s ease-out forwards}
+.projector-confetti i:nth-child(4n){background:#c4a2ff}
+.projector-confetti i:nth-child(4n+1){background:#ff89a7}
+.projector-confetti i:nth-child(4n+2){background:#74eab2}
+.projector-confetti i:nth-child(1){left:8%;animation-delay:.05s}
+.projector-confetti i:nth-child(2){left:17%;animation-delay:.21s}
+.projector-confetti i:nth-child(3){left:24%;animation-delay:.10s}
+.projector-confetti i:nth-child(4){left:34%;animation-delay:.29s}
+.projector-confetti i:nth-child(5){left:42%;animation-delay:.09s}
+.projector-confetti i:nth-child(6){left:49%;animation-delay:.32s}
+.projector-confetti i:nth-child(7){left:56%;animation-delay:.03s}
+.projector-confetti i:nth-child(8){left:64%;animation-delay:.24s}
+.projector-confetti i:nth-child(9){left:71%;animation-delay:.14s}
+.projector-confetti i:nth-child(10){left:79%;animation-delay:.32s}
+.projector-confetti i:nth-child(11){left:85%;animation-delay:.08s}
+.projector-confetti i:nth-child(12){left:94%;animation-delay:.27s}
+.projector-confetti i:nth-child(13){left:28%;animation-delay:.34s}
+.projector-confetti i:nth-child(14){left:61%;animation-delay:.19s}
+.award-overlay .award-burst{animation:pf-value-pop .7s ease-out both}
+.award-overlay>svg{animation:pf-trophy-pop .65s cubic-bezier(.14,.86,.29,1.2) both}
+.award-overlay strong{color:#fff0bc;text-shadow:0 3px 20px #ffc86b5b}
+@keyframes pf-card-flip{0%{opacity:.1;transform:perspective(650px) rotateX(72deg) translateY(-12px)}70%{transform:perspective(650px) rotateX(-5deg) translateY(0)}100%{opacity:1;transform:rotateX(0)}}
+@keyframes pf-value-pop{0%{transform:scale(.55);opacity:.2}75%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes pf-round-enter{from{opacity:.2;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes pf-board-enter{from{opacity:.7;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pf-option-enter{from{opacity:.25;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pf-correct-reveal{0%{opacity:.55;transform:scale(.92) rotate(-1deg)}70%{opacity:1;transform:scale(1.035)}100%{opacity:1;transform:scale(1)}}
+@keyframes pf-celebration-enter{from{opacity:0;transform:scale(1.025)}to{opacity:1;transform:scale(1)}}
+@keyframes pf-trophy-pop{0%{transform:scale(.6) rotate(-15deg)}75%{transform:scale(1.1) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes pf-score-glow{from{box-shadow:0 0 5px #ffdb6a11}to{box-shadow:0 0 25px #ffd7758a}}
+@keyframes pf-confetti-fall{0%{opacity:0;transform:translateY(-10vh) rotate(0)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateY(100vh) rotate(600deg)}}
+@media(max-height:650px){
+  .quick-board:not(.quick-board--preview){gap:1.4%;padding:2% 3%;min-height:100vh}
+  .quick-board:not(.quick-board--preview) .quick-head h1{font-size:clamp(30px,4vh,50px)}
+  .quick-board:not(.quick-board--preview) .quick-question{font-size:clamp(21px,3.7vh,34px);padding:5px 0}
+  .quick-board:not(.quick-board--preview) .quick-option{min-height:clamp(55px,11vh,80px);padding:8px 12px}
+  .quick-board:not(.quick-board--preview) .quick-scores>div{padding:6px 18px}
+}
+@media(max-width:700px){
+ .quick-board:not(.quick-board--preview){gap:1.3%;padding:3% 3%}
+ .quick-board:not(.quick-board--preview) .quick-options{width:100%;gap:7px}
+ .quick-board:not(.quick-board--preview) .quick-option{min-height:70px;padding:8px;gap:7px;font-size:clamp(12px,3.6vw,17px);border-width:2px}
+ .quick-board:not(.quick-board--preview) .quick-option span{min-width:32px;min-height:32px;font-size:15px}
+ .quick-board:not(.quick-board--preview) .quick-scores>div{min-width:120px;padding:9px 13px}
+ .quick-board:not(.quick-board--preview) .quick-question{font-size:clamp(20px,5vw,31px)}
+ .quick-display .quick-full-actions{top:5px;right:5px;gap:4px}
+ .quick-display .quick-full-actions button{padding:7px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .stage--full :is(.stage-question,.stage-answer-grid,.stage-answer,.answer-value,.score-ribbon .is-winner,.award-overlay,.award-overlay svg,.award-burst),
+ .quick-board:not(.quick-board--preview) :is(.quick-question,.quick-option,.quick-explanation,.quick-score-celebration),
+ .projector-confetti i{
+   animation:none!important;transition:none!important;transform:none!important
+ }
+ .projector-confetti{display:none}
+}
