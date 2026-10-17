@@ -36,7 +36,7 @@ async function exerciseSurvey(context,{forceStorageFallback=false}={}){
   await expect(projector.locator('.team-score--1 .team-number')).toHaveText('34');
   await expect(projector.locator('.stage-answer.is-revealed')).toHaveCount(1);
 
-  await host.getByRole('button',{name:'Next round'}).click();
+  await host.locator('.btn-next').click();
   await expect(projector.locator('.stage-question h1')).toContainText('akhir pekan');
   await expect(projector.locator('.team-score--1 .team-number')).toHaveText('34');
   await host.reload();
