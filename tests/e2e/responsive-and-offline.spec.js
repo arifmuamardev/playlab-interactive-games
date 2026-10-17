@@ -4,8 +4,8 @@ for(const width of [360,390,768,1280]){
   test(`Game catalog has no horizontal viewport overflow at ${width}px`,async({page})=>{
     await page.setViewportSize({width,height:820});
     await page.goto('./');
-    await expect(page.getByRole('heading',{name:/Make every room/i})).toBeVisible();
-    await expect(page.locator('.hub-game-card')).toHaveCount(4);
+    await expect(page.getByRole('heading',{name:/Every room/i})).toBeVisible();
+    await expect(page.locator('.pf-game-card')).toHaveCount(4);
     const dimensions=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth}));
     expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport+1);
   });

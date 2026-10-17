@@ -7,6 +7,7 @@ import {makeInitialState} from '../data.js';
 import {quickfireInitial} from '../games/quickfire/data.js';
 import {SessionSetup} from './SessionSetup.jsx';
 import './dashboard.css';
+import './playful-dashboard.css';
 
 const PLAYABLE=GAME_CATALOG.filter(game=>game.slug);
 const TABS=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'games',label:'My games',icon:Gamepad2},{id:'setup',label:'Game setup',icon:MonitorPlay},{id:'packs',label:'Question packs',icon:Library}];
@@ -16,7 +17,7 @@ function download(filename,value){const url=URL.createObjectURL(new Blob([JSON.s
 function dateLabel(date){return new Date(date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
 function GameCard({item,session,onSavePack,onReset}){
   const ready=Boolean(session);
-  return <article className="dash-game-card">
+  return <article className={"dash-game-card dash-game-card--"+item.slug}>
     <div className="dash-game-top"><span className="dash-game-symbol" aria-hidden="true">{item.icon}</span><span className="dash-chip">Playable</span></div>
     <h3>{item.title}</h3><p className="dash-muted">{item.description}</p>
     <div className="dash-game-session" aria-label={item.title+' saved session'}>
@@ -90,7 +91,7 @@ export function Dashboard(){
     if(saveLibrary([unique,...packs]))feedback('Imported "'+unique.name+'" as an independent saved pack.');
   }catch(err){setError('Import failed: '+err.message);}}
   const active=PLAYABLE.filter(item=>sessions[item.slug]);
-  return <div className="dash-shell">
+  return <div className="dash-shell dash-playful">
     <aside className="dash-sidebar"><a className="dash-brand" href="./" aria-label="PlayLab home"><PlayLabBrand/></a>
       <div className="dash-sidebar-eyebrow">YOUR WORKSPACE</div>
       <nav className="dash-nav" aria-label="Dashboard navigation">{TABS.map(item=><button type="button" key={item.id} className={'dash-nav-button '+(tab===item.id?'active':'')} aria-label={item.label} aria-current={tab===item.id?'page':undefined} onClick={()=>navigate(item.id)}><item.icon size={18}/><span>{item.label}</span>{item.id==='packs'&&<small>{packs.length}</small>}</button>)}</nav>
@@ -101,7 +102,7 @@ export function Dashboard(){
       {error&&<div role="alert" className="dash-error">{error}</div>}
       {notice&&<div role="status" className="dash-notice"><Check size={17}/>{notice}</div>}
       {tab==='overview'&&<>
-        <section className="dash-intro"><div><span className="dash-kicker">MAKE IT YOURS</span><h2>Plan the game.<br/><em>Enjoy the moment.</em></h2><p>Set up your games, keep question packs ready, and return to an ongoing match—all in one place.</p><button className="dash-action dash-action-primary" onClick={()=>navigate('setup')}>Prepare a game <ArrowRight size={16}/></button><button className="dash-text-link" onClick={()=>navigate('games')}>Manage existing games <ArrowRight size={16}/></button></div><div className="dash-intro-mark" aria-hidden="true">✦</div></section>
+        <section className="dash-intro"><div><span className="dash-kicker">YOUR PLAY SPACE ✦</span><h2>Ready, set,<br/><em>let’s play!</em></h2><p>Your games, saved questions, and next big moment—all in one happy place.</p><button className="dash-action dash-action-primary" onClick={()=>navigate('setup')}>Prepare a game <ArrowRight size={16}/></button><button className="dash-text-link" onClick={()=>navigate('games')}>Manage existing games <ArrowRight size={16}/></button></div><div className="dash-intro-mark" aria-hidden="true"><span>LET’S<br/>GO!</span><i>✳</i></div></section>
         <section aria-label="Workspace summary" className="dash-stats"><div><span>Playable games</span><strong>{PLAYABLE.length}</strong><small>Available game formats</small></div><div><span>Question packs</span><strong>{packs.length}</strong><small>Saved on this browser</small></div><div><span>Saved matches</span><strong>{active.length}</strong><small>With stored session data</small></div></section>
         <section className="dash-section"><div className="dash-section-title"><div><span className="dash-kicker">PICK UP WHERE YOU LEFT OFF</span><h2>Your games</h2></div><button className="dash-text-link" onClick={()=>navigate('games')}>View all <ChevronRight size={16}/></button></div><div className="dash-game-grid">{PLAYABLE.map(item=><GameCard item={item} key={item.slug} session={sessions[item.slug]} onSavePack={openSave} onReset={freshMatch}/>)}</div></section>
         <section className="dash-section"><div className="dash-section-title"><div><span className="dash-kicker">REUSABLE CONTENT</span><h2>Your question library</h2></div><button className="dash-text-link" onClick={()=>navigate('packs')}>Open library <ChevronRight size={16}/></button></div>{packs.length?<p className="dash-muted">{packs.length} saved packs are ready to load into their compatible games.</p>:<div className="dash-empty"><FolderOpen size={25}/><strong>No saved question packs yet</strong><p>Open a game, prepare its questions, then save a reusable copy from My games.</p><button className="dash-action" onClick={()=>navigate('games')}>Go to my games <ArrowRight size={15}/></button></div>}</section>
