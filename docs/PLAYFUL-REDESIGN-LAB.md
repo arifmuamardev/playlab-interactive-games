@@ -34,3 +34,9 @@ Before replacing production appearance, request feedback on catalog and dashboar
 - The design lab has its own Chromium navigation and 360/390/768/1280 px overflow tests.
 - Existing host, catalog and working dashboard routes remain independently verified.
 - No new dependencies, backend tables or third-party media.
+
+## Approved and promoted to production (October 17, 2026)
+
+The user approved the playful visual direction. The production public catalog now renders the same illustration-led design. The **functional** dashboard has been restyled to match while retaining real saved-match data, pack import/export, reset confirmations, and session setup. The original preview routes remain available for visual comparison; they are no longer the only place where the playful appearance exists. The game host and projector routes remain unchanged by this promotion. The older, less-playful `GameHub` is replaced by a thin route wrapper, not exposed as a separate home design.
+
+Production migration validated by desktop/mobile catalog and dashboard tests, working content-pack operations, and full regression suite. The service worker cache version is updated so users receive the new entry-page assets.
