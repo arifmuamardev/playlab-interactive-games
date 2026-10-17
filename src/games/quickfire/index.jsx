@@ -6,6 +6,8 @@ import {QuickfireQuestionEditor} from './QuestionEditor.jsx';
 import {PlayLabBrand,ControlCard} from '../../components/shared.jsx';
 import {QUICKFIRE_KEY,QUICKFIRE_CHANNEL,quickfireInitial,normalizeQuickfireQuestions,awardQuickfirePoints,undoQuickfireAward} from './data.js';
 import '../gameplay-polish.css';
+import '../projector-fx.css';
+import {makeStageEvent,useProjectorAudio,useStageMoment} from '../stageEffects.js';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
@@ -18,22 +20,40 @@ const QUICKFIRE_SESSION={storageKey:IS_REHEARSAL?REHEARSAL_KEYS.quickfire:QUICKF
 function useQuickfire(){return useSyncedSession(QUICKFIRE_SESSION);}
 function QuickfireBoard({game,preview=false}){
   const q=game.questions[game.questionIndex],visible=game.revealed[q.id]||false;
+  const moment=useStageMoment(game.lastEvent,['score'],1850);
   return <div className={'quick-board '+(preview?'quick-board--preview':'')}>
     <div className="quick-stars">✦ <span>PLAYLAB · QUICKFIRE QUIZ</span> ✦</div>
     <div className="quick-head"><h1>QUICKFIRE <em>QUIZ</em></h1><div className="quick-counter">QUESTION {String(game.questionIndex+1).padStart(2,'0')} / {game.questions.length}</div></div>
     <div className="quick-scores">{[0,1].map(i=><div key={i}><span>{game.teamNames[i]}</span><strong>{game.scores[i]}</strong></div>)}</div>
-    <div className="quick-question">{q.question}</div>
-    <div className="quick-options">{q.options.map((choice,i)=><div key={i} className={'quick-option '+(visible?(i===q.answer?'correct':'muted'):'')}><span>{'ABCD'[i]}</span><strong>{choice}</strong>{visible&&i===q.answer&&<Check size={27}/>}</div>)}</div>
+    <div className="quick-question" key={q.id}>{q.question}</div>
+    <div className="quick-options" key={q.id}>{q.options.map((choice,i)=><div key={q.id+'-'+i+(visible?'-revealed':'-hidden')} className={'quick-option '+(visible?(i===q.answer?'correct':'muted'):'')}><span>{'ABCD'[i]}</span><strong>{choice}</strong>{visible&&i===q.answer&&<Check size={27}/>}</div>)}</div>
     <div className="quick-footer">{visible?<span className="quick-explanation">{q.explanation||'Correct answer highlighted.'}</span>:<span>Discuss with your team. The host will reveal the answer.</span>}</div>
+    {!preview&&moment&&<div className="quick-score-celebration" role="status" key={moment.nonce}>
+      <div className="projector-confetti" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i}/>)}</div>
+      <Trophy size={52} aria-hidden="true"/><span>POINTS FOR</span>
+      <strong>{game.teamNames[moment.team]||'TEAM'}</strong><b>+{moment.points}</b>
+    </div>}
   </div>;
 }
 function QuickfireHost({game,change}){
   const q=game.questions[game.questionIndex],visible=game.revealed[q.id]||false;
   const [editor,setEditor]=useState(false);
-  const setQuestion=n=>change(old=>({...old,questionIndex:Math.max(0,Math.min(old.questions.length-1,n))}));
-  const reveal=()=>change(old=>{const question=old.questions[old.questionIndex];return {...old,revealed:{...old.revealed,[question.id]:!old.revealed[question.id]}};});
-  const award=(team,points)=>change(old=>awardQuickfirePoints(old,team,points));
-  const undoScore=()=>change(old=>undoQuickfireAward(old));
+  const setQuestion=n=>change(old=>{
+    const index=Math.max(0,Math.min(old.questions.length-1,n));
+    return index===old.questionIndex?old:{...old,questionIndex:index,lastEvent:makeStageEvent('next')};
+  });
+  const reveal=()=>change(old=>{
+    const question=old.questions[old.questionIndex],nowVisible=!old.revealed[question.id];
+    return {...old,revealed:{...old.revealed,[question.id]:nowVisible},lastEvent:makeStageEvent(nowVisible?'reveal':'undo')};
+  });
+  const award=(team,points)=>change(old=>{
+    const next=awardQuickfirePoints(old,team,points);
+    return next===old?old:{...next,lastEvent:makeStageEvent(points>0?'score':'subtract',{team,points:next.scores[team]-old.scores[team]})};
+  });
+  const undoScore=()=>change(old=>{
+    const next=undoQuickfireAward(old);
+    return next===old?old:{...next,lastEvent:makeStageEvent('undo')};
+  });
   useEffect(()=>{
     const keydown=event=>{
       if(editor||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.isComposing)return;
@@ -74,9 +94,23 @@ function QuickfireHost({game,change}){
     }}/>} 
   </div>;
 }
+function QuickfireDisplay({game}){
+  const ref=useRef(null);
+  const [soundEnabled,toggleSound]=useProjectorAudio(game.lastEvent);
+  const fullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else ref.current?.requestFullscreen?.().catch?.(()=>{});};
+  return <main className="display-view quick-display" ref={ref}>
+    <div className="quick-full-actions">
+      <button type="button" aria-pressed={soundEnabled} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} onClick={toggleSound}>
+        {soundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>} {soundEnabled?'Sound on':'Enable sound'}
+      </button>
+      <button type="button" onClick={fullscreen}><Maximize size={16}/> Fullscreen</button>
+    </div>
+    <QuickfireBoard game={game}/>
+  </main>;
+}
 export function QuickfireApp(){
-  const [game,change]=useQuickfire();const ref=useRef(null);
+  const [game,change]=useQuickfire();
   const display=new URLSearchParams(location.search).get('view')==='display';
-  if(display)return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Separate from the real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<main className="display-view" ref={ref}><div className="quick-full-actions"><button onClick={()=>document.fullscreenElement?document.exitFullscreen():ref.current?.requestFullscreen?.()}><Maximize size={16}/> Fullscreen</button></div><QuickfireBoard game={game}/></main></>;
+  if(display)return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Separate from the real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<QuickfireDisplay game={game}/></>;
   return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<QuickfireHost game={game} change={change}/></>;
 }
