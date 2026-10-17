@@ -2,6 +2,7 @@ import React, {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
 import {QuestionBuilder,useQuestionDraft} from '../../components/QuestionBuilder.jsx';
+import '../gameplay-polish.css';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -158,10 +159,11 @@ function HostApp({game,change}){
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
   const openDisplay=()=>window.open(displayUrl.toString(),'playlab-survey-display');
   const copyDisplay=async()=>{try{await navigator.clipboard.writeText(displayUrl.toString());setCopyOkay(true);setTimeout(()=>setCopyOkay(false),1500)}catch{window.prompt('Copy the display link:',displayUrl.toString())}};
-  return <div className="host-shell">
+  return <div className="host-shell gameplay-polished gameplay-survey">
     <header className="host-header"><PlayLabBrand/><div className="host-header-right"><a className="home-link" href="./">← Game library</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">How to play</IconButton><button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> Open projector view <ArrowUpRight size={15}/></button></div></header>
     <main className="host-main">
-      <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>Let’s play <em>Survey Showdown.</em></h1><p>Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.</p></div><div className="intro-status"><span className="live-dot"/> READY FOR THE STAGE</div></div>
+      <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>Let’s play <em>Survey Showdown.</em></h1><p>Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.</p></div><div className="gameplay-progress-pill"><span>✦</span> ROUND {game.roundIndex+1} OF {game.questions.length}</div></div>
+      <div className="gameplay-status-strip" aria-label="Current game status"><div><span>ROUND STATE</span><strong>{locked?'Round finished':p.phase==='steal'?'Steal opportunity':'Answers in play'}</strong></div><div><span>REVEALED / BANK</span><strong>{p.revealed.length} of {q.answers.length} · {locked?p.awardedAmount:bank} points</strong></div><div><span>QUICK KEYS</span><strong>1–8 reveal · X strike · Z undo strike</strong></div></div>
       <div className="host-grid">
         <div className="host-primary">
           <section className="preview-section"><div className="section-head"><div><h2>Live game preview</h2><p>What your audience sees on the projector</p></div><div className="head-buttons"><IconButton icon={Copy} onClick={copyDisplay} variant="btn-soft">{copyOkay?'Copied':'Copy display URL'}</IconButton><IconButton icon={Expand} onClick={openDisplay} variant="btn-soft">Pop out</IconButton></div></div><div className="preview-frame"><Stage game={game} preview/></div></section>
@@ -178,14 +180,15 @@ function HostApp({game,change}){
             <div className="round-select-row"><button className="square-btn" disabled={game.roundIndex===0} onClick={()=>goRound(game.roundIndex-1)} aria-label="Previous round"><ChevronLeft/></button><select aria-label="Select round" value={game.roundIndex} onChange={e=>goRound(Number(e.target.value))}>{game.questions.map((v,i)=><option key={v.id} value={i}>Round {i+1} · {v.multiplier}× points</option>)}</select><button className="square-btn" disabled={game.roundIndex===game.questions.length-1} onClick={()=>goRound(game.roundIndex+1)} aria-label="Next round"><ChevronRight/></button></div>
             <div className="current-phase"><div><span>ROUND STATUS</span><strong>{locked?'Finished':p.phase==='steal'?'Steal opportunity':'Playing'}</strong></div><div><span>POINTS IN BANK</span><strong>{locked?p.awardedAmount:bank}</strong></div></div>
             <div className="active-team-label">WHICH TEAM IS PLAYING?</div>
-            <div className="active-team-selector">{[0,1].map(team=><button disabled={locked} key={team} className={'select-team select-team--'+team+(p.activeTeam===team?' selected':'')} onClick={()=>chooseTeam(team)}>{p.activeTeam===team&&<Check size={16}/>} {game.teamNames[team]}</button>)}</div>
+            <div className="active-team-selector">{[0,1].map(team=><button disabled={locked} key={team} className={'select-team select-team--'+team+(p.activeTeam===team?' selected':'')} aria-pressed={p.activeTeam===team} onClick={()=>chooseTeam(team)}>{p.activeTeam===team&&<Check size={16}/>} {game.teamNames[team]}</button>)}</div>
             <div className="divider-line"/>
             <div className="active-team-label">WRONG ANSWERS</div>
             <div className="strike-control"><div className="strike-preview">{[0,1,2].map(i=><b key={i} className={i<p.strikes?'live-strike':''}>×</b>)}</div><div className="strike-buttons"><button disabled={locked||p.strikes===0} className="square-btn" onClick={()=>strike(-1)} title="Undo strike (Z)"><Minus size={18}/></button><button disabled={locked||p.strikes===3} className="btn btn-danger" onClick={()=>strike()}><X size={17}/> Strike <span> (X)</span></button></div></div>
             {p.phase==='steal'&&!locked&&<div className="steal-message"><ShieldAlert size={17}/> Three strikes! The opposing team has one chance to steal. The MC decides who gets the bank.</div>}
             <div className="divider-line"/>
             <div className="active-team-label">AWARD ROUND POINTS</div>
-            <div className="award-buttons">{[0,1].map(team=><button key={team} className={'award-btn award-btn--'+team} disabled={locked} onClick={()=>award(team)}><Trophy size={18}/><span>Award to<br/><strong>{game.teamNames[team]}</strong></span><ArrowRight size={17}/></button>)}</div>
+            {bank===0&&!locked&&<div className="gameplay-guidance" role="status">Reveal at least one answer before awarding points to a team.</div>}
+            <div className="award-buttons">{[0,1].map(team=><button key={team} className={'award-btn award-btn--'+team} disabled={locked||bank===0} title={bank===0?'Reveal an answer before awarding points':undefined} onClick={()=>award(team)}><Trophy size={18}/><span>Award to<br/><strong>{game.teamNames[team]}</strong></span><ArrowRight size={17}/></button>)}</div>
             {locked&&<div className="awarded-note"><CheckCheck size={18}/> {game.teamNames[p.awardedTeam]} received {p.awardedAmount} points. <button onClick={undoAward}>Undo award</button></div>}
             <div className="divider-line"/>
             <button className="btn btn-plain-wide" onClick={revealAll}><Eye size={17}/> Reveal all remaining answers</button>
@@ -198,7 +201,7 @@ function HostApp({game,change}){
           <div className="setup-tip"><Sparkles size={18}/><p><strong>Pro tip</strong><br/>Use two browser windows on the same laptop. Put the display window on the projector and keep this control room on your laptop screen.</p></div>
         </aside>
       </div>
-      <footer className="host-footer"><span>PlayLab · Independent interactive games collection · v0.2</span><span>Runs entirely in your browser · No participant accounts</span></footer>
+      <footer className="host-footer"><span>PlayLab · Survey Showdown</span><span>Runs entirely in your browser · No participant accounts</span></footer>
     </main>
     {notice&&<div role="status" className="toast">{notice}</div>}
     {editing&&<QuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...old,questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
