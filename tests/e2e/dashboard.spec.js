@@ -13,11 +13,11 @@ test('Public landing offers a dashboard and real empty-workspace state',async({p
 
 test('Dashboard saves, exports, deletes and imports compatible question packs',async({page})=>{
   await page.goto('?page=dashboard');
-  await page.getByRole('button',{name:'My games'}).click();
+  await page.getByRole('button',{name:'My games',exact:true}).click();
   await page.locator('.dash-game-card').first().getByRole('button',{name:'Save questions'}).click();
   const dialog=page.getByRole('dialog',{name:'Save question pack'});
   await dialog.getByRole('textbox',{name:'Pack name'}).fill('Classroom survey');
-  await dialog.getByRole('button',{name:'Save pack'}).click();
+  await dialog.getByRole('button',{name:'Save pack',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Question packs'})).toBeVisible();
   await expect(page.locator('.dash-pack-card')).toHaveCount(1);
   await expect(page.locator('.dash-pack-card').first()).toContainText('6 questions');
@@ -48,7 +48,7 @@ test('Dashboard pack load prompts before clearing a live game and updates host i
   await expect(dash.locator('.dash-game-card').last()).toContainText('10');
   await dash.locator('.dash-game-card').last().getByRole('button',{name:'Save questions'}).click();
   await dash.getByRole('textbox',{name:'Pack name'}).fill('My quiz');
-  await dash.getByRole('button',{name:'Save pack'}).click();
+  await dash.getByRole('button',{name:'Save pack',exact:true}).click();
   await expect(dash.locator('.dash-pack-card')).toHaveCount(1);
   dash.once('dialog',d=>d.dismiss());
   await dash.getByRole('button',{name:'Load into game'}).click();
