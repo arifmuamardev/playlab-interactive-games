@@ -67,6 +67,12 @@ Read [the product plan](docs/PRODUCT-PLAN.md) for architecture goals, honest fea
 
 Changes to source are verified by `npm test` and `npm run build` in GitHub Actions. Cross-device multiplayer is not implemented; the shared session hook only syncs windows in the same browser profile.
 
+## Classroom and event starter templates + safe rehearsal
+
+The dashboard setup wizard now includes two built-in Survey templates and two Quickfire templates. Choose **Ready-to-use classroom & event templates** in the Questions step. Every Survey point value is **fictional demonstration data**; it must not be presented as collected survey research.
+
+On the Review step, **Practice without affecting live game** opens a separate browser tab in rehearsal mode. Its localStorage keys and BroadcastChannel identifiers are independent from the real host and projector; rehearsal scores, reveals, edits and reset commands do not change the live session or saved question packs. The rehearsal tab can open its own audience projector window. A new rehearsal for the same game replaces the earlier rehearsal state. The normal **Launch host controls** action still asks before replacing a saved match. This is a software rehearsal and **does not replace physical HDMI/projector and sound validation**.
+
 ## Guided game setup (dashboard)
 
 From **My Dashboard → Game setup** (or a game's **Set up** link), choose Survey Showdown or Quickfire Quiz, select demo questions, existing match questions, or a compatible saved question pack, name both teams, review the planned reset and launch the host controls. The wizard changes nothing until **Launch host controls**; if a saved match exists, it asks for confirmation before clearing scores and progress. Your question library is not deleted. Open the projector from the host screen. Setup is local to this browser profile, not cross-device sync.
