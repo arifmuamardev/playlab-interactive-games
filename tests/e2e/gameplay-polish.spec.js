@@ -32,11 +32,12 @@ test('Quickfire: keyboard controls operate the game but never intercept typing o
   await expect(page.getByRole('button',{name:'Reveal correct answer'})).toHaveAttribute('aria-pressed','false');
   await page.keyboard.press('p');
   await expect(page.locator('.quick-nav>span')).toHaveText('1 / 6');
+  await expect(page.getByRole('button',{name:'Hide answer'})).toHaveAttribute('aria-pressed','true');
   await page.getByRole('textbox',{name:'Team 1 name'}).focus();
   await page.keyboard.press('n');
   await page.keyboard.press('r');
   await expect(page.locator('.quick-nav>span')).toHaveText('1 / 6');
-  await expect(page.getByRole('button',{name:'Reveal correct answer'})).toHaveAttribute('aria-pressed','false');
+  await expect(page.getByRole('button',{name:'Hide answer'})).toHaveAttribute('aria-pressed','true');
   await page.getByRole('button',{name:'Edit question bank'}).click();
   await expect(page.getByRole('dialog',{name:'Edit trivia questions'})).toBeVisible();
   await page.keyboard.press('n');
