@@ -27,3 +27,17 @@ export function changeQuickfireScore(scores,team,delta){
   if(!Array.isArray(scores)||scores.length!==2 || ![0,1].includes(team) || !Number.isFinite(delta))throw Error('Invalid score update.');
   return scores.map((points,i)=>i===team?Math.max(0,points+delta):points);
 }
+
+/** A single-step scoring safety net. Records the exact pre-change totals so subtracting
+ * at zero or later changing the question can never produce an incorrect rollback. */
+export function awardQuickfirePoints(game,team,delta){
+  const scores=changeQuickfireScore(game.scores,team,delta);
+  if(scores[team]===game.scores[team])return game;
+  return {...game,scores,lastAward:{team,delta,previousScores:[...game.scores],questionId:game.questions[game.questionIndex]?.id||null}};
+}
+export function undoQuickfireAward(game){
+  if(!game.lastAward||!Array.isArray(game.lastAward.previousScores)||game.lastAward.previousScores.length!==2)return game;
+  const {previousScores}=game.lastAward;
+  if(previousScores.some(score=>!Number.isFinite(score)||score<0))return game;
+  return {...game,scores:[...previousScores],lastAward:null};
+}
