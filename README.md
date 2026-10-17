@@ -67,6 +67,10 @@ Read [the product plan](docs/PRODUCT-PLAN.md) for architecture goals, honest fea
 
 Changes to source are verified by `npm test` and `npm run build` in GitHub Actions. Cross-device multiplayer is not implemented; the shared session hook only syncs windows in the same browser profile.
 
+## Guided game setup (dashboard)
+
+From **My Dashboard → Game setup** (or a game's **Set up** link), choose Survey Showdown or Quickfire Quiz, select demo questions, existing match questions, or a compatible saved question pack, name both teams, review the planned reset and launch the host controls. The wizard changes nothing until **Launch host controls**; if a saved match exists, it asks for confirmation before clearing scores and progress. Your question library is not deleted. Open the projector from the host screen. Setup is local to this browser profile, not cross-device sync.
+
 ## My Dashboard (local-first workspace)
 
 Open `?page=dashboard` from the game catalog. The Overview and My Games tabs show current browser-local game sessions; Question packs lets you save, import, export and load versioned game content. Pack operations require confirmation before replacing an active game. No account or database is required. Data does not sync to other devices; export important packs as a backup.
