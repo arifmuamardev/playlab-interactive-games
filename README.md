@@ -100,3 +100,7 @@ Both existing games now have livelier audience screens. Survey Showdown adds mor
 ## Live playful design
 
 The approved illustrated **playful game catalog** is now the default PlayLab homepage; the old editorial-style catalog is retired. The working **My Dashboard** also uses the same bright visual identity while retaining all real session, question-pack, import/export, and setup operations. The earlier Design Lab preview is still available at `?page=design-lab` for comparison. This design promotion does not alter game scoring, projectors, saved data, or local-storage keys.
+
+## Playful Game Setup
+
+The functional four-step **Game Setup** wizard now uses the same playful illustration-led design as the live PlayLab catalog and dashboard. All four steps (game choice, question source, team names, and match review) are styled, including practice mode and the safe live-launch confirmation. It remains local-first; no game logic, question-pack storage keys or synchronization semantics were changed. The previous minimalist wizard styling is retired.

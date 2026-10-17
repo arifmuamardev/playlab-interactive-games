@@ -1,65 +1,302 @@
-/* PlayLab guided match preparation — scoped to the dashboard workspace. */
-.dash-setup{display:grid;gap:19px;max-width:990px}
-.setup-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 0}
-.setup-intro h2{font-family:Georgia,serif;font-size:clamp(28px,3.5vw,43px);letter-spacing:-.04em;color:#203f4c;margin:9px 0}
-.setup-intro p{max-width:650px;font-size:13px;line-height:1.65;color:#6a7f84}
-.setup-intro>svg{color:#a5c4b5;flex:none}
-.setup-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));list-style:none;gap:8px;padding:0;margin:0}
-.setup-progress li{display:flex;align-items:center;gap:9px;color:#84969c;font-size:12px;font-weight:800;border-bottom:2px solid #e3e9e6;padding:11px 5px 13px}
-.setup-progress li span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#e8edeb;font-size:12px;color:#789096;flex:none}
-.setup-progress li.current{color:#245362;border-color:#245362}
-.setup-progress li.current span{color:white;background:#245362}
-.setup-progress li.complete{color:#377b71;border-color:#c1dbce}
-.setup-progress li.complete span{background:#e3f1e8;color:#387864}
-.setup-card{min-width:0;background:#fff;border:1px solid #e4eae6;border-radius:14px;box-shadow:0 4px 20px #162e3809;padding:clamp(18px,3.2vw,32px)}
-.setup-card h3{font-family:Georgia,serif;color:#263f4b;font-size:29px;margin:0 0 8px}
-.setup-support{font-size:13px;line-height:1.65;color:#6e8389;max-width:690px;margin:0 0 22px}
-.setup-game-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-.setup-game-option{min-width:0;text-align:left;display:flex;align-items:flex-start;flex-direction:column;gap:10px;padding:22px;background:#f9faf8;border:1.5px solid #dbe7e2;border-radius:12px;color:#2b4b57}
-.setup-game-option:hover{border-color:#6dafa7}
-.setup-game-option.selected{background:#edf6f2;border-color:#2e7c79;box-shadow:0 0 0 2px #e0ece7}
-.setup-game-option strong{font:700 23px/1.1 Georgia,serif}
-.setup-game-option small{font-size:12px;line-height:1.55;color:#6a7e84}
-.setup-game-icon{width:48px;height:48px;border-radius:11px;background:#e4eee7;display:grid;place-items:center;font-size:29px;color:#346d6f}
-.setup-game-check{font-size:11px;font-weight:850;color:#2b706a;margin-top:auto;padding-top:6px}
-.setup-source-list{display:grid;gap:11px}
-.setup-source{display:flex;gap:13px;align-items:center;border:1px solid #dce7e2;border-radius:10px;padding:16px;cursor:pointer;background:#fcfdfb}
-.setup-source.selected{border-color:#40817b;background:#f0f8f2}
-.setup-source:has(input:disabled){opacity:.53;cursor:not-allowed}
-.setup-source input[type=radio]{accent-color:#216775;width:18px;height:18px;flex:none}
-.setup-source span{display:grid;gap:5px}
-.setup-source strong{color:#2c515b;font-size:13px}
-.setup-source small{font-size:11px;line-height:1.6;color:#7a8c8e}
-.setup-field{display:grid;gap:8px;margin-top:18px;min-width:0}
-.setup-field label{font-size:12px;color:#3a5d65;font-weight:800}
-.setup-field input,.setup-field select{width:100%;min-width:0;max-width:100%;padding:13px;border-radius:9px;border:1px solid #c8dad7;background:#fff;color:#29434c;font-size:14px}
-.setup-team-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.setup-hint{font-size:11px;color:#7d8d91;margin-top:12px}
-.setup-review{border:1px solid #e2eae5;border-radius:11px;overflow:hidden;margin:0 0 20px}
-.setup-review div{display:grid;grid-template-columns:145px minmax(0,1fr);gap:14px;padding:14px 17px;border-bottom:1px solid #e8eeea}
-.setup-review div:last-child{border:0}
-.setup-review dt{font-size:12px;color:#74898c}
-.setup-review dd{margin:0;font-size:13px;font-weight:750;overflow-wrap:anywhere}
-.setup-warning{background:#fff9ec;color:#79623e;border:1px solid #efdfba;border-radius:9px;padding:12px 14px;font-size:12px;line-height:1.6;display:flex;align-items:flex-start;gap:10px}
-.setup-warning p{margin:0}
-.setup-warning svg{flex:none}
-.setup-error{background:#fff0ee;border:1px solid #eabfb8;border-radius:9px;color:#9d3b36;padding:12px 14px;font-size:12px;margin-top:14px}
-.setup-actions{display:flex;align-items:center;justify-content:space-between;gap:13px;margin-top:26px;padding-top:22px;border-top:1px solid #e4ebe7}
-.setup-actions .dash-action{padding:13px 17px}
-.setup-footnote{display:flex;gap:8px;align-items:center;font-size:12px;color:#778b8e;line-height:1.6}
-.setup-footnote svg{flex:none}
-@media(max-width:700px){
- .setup-progress{gap:2px}
- .setup-progress li{font-size:10px;gap:5px;flex-direction:column;text-align:center}
- .setup-progress li span{width:25px;height:25px}
- .setup-intro>svg{display:none}
- .setup-game-options,.setup-team-fields{grid-template-columns:1fr}
- .setup-game-option{padding:17px}
- .setup-review div{grid-template-columns:100px minmax(0,1fr);gap:10px}
- .setup-actions{flex-wrap:wrap}
+/* PlayLab Game Setup — same playful visual system as production catalog and dashboard.
+   Scoped deliberately: game mechanics, local sessions, question packs and projector UI are unchanged. */
+.dash-playful .dash-setup{
+  --setup-ink:#302553;--setup-line:#392a5a;--setup-purple:#4e328c;
+  --setup-violet:#e9ddff;--setup-yellow:#ffe6a5;--setup-coral:#ffe0d6;
+  display:grid;gap:25px;max-width:1050px;min-width:0;color:var(--setup-ink)
 }
-@media(max-width:370px){.setup-card{padding:15px}.setup-actions .dash-action{padding:11px 10px;font-size:11px}}
-
-.setup-launch-buttons{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;min-width:0}
-.setup-launch-buttons .dash-action{white-space:normal;text-align:center}
-@media(max-width:700px){.setup-launch-buttons{width:100%;justify-content:stretch}.setup-launch-buttons .dash-action{flex:1 1 180px}}
+.dash-playful .setup-intro{
+  display:grid;grid-template-columns:minmax(0,1fr) 235px;align-items:center;gap:25px;
+  background:#e8dfff;border:2px solid var(--setup-line);border-radius:23px;
+  box-shadow:6px 7px 0 var(--setup-line);padding:clamp(22px,3.6vw,47px);
+  min-width:0;overflow:hidden;isolation:isolate
+}
+.dash-playful .setup-intro-copy{position:relative;z-index:1;min-width:0}
+.dash-playful .setup-intro .dash-kicker{
+  display:inline-flex;align-items:center;gap:7px;color:#6441a0;font-weight:1000;
+  letter-spacing:.08em;font-size:11px
+}
+.dash-playful .setup-intro h2{
+  font:1000 clamp(36px,4.1vw,58px)/1.08 ui-rounded,'Trebuchet MS',Inter,system-ui,sans-serif;
+  letter-spacing:-.075em;color:#342453;margin:17px 0 16px;max-width:680px
+}
+.dash-playful .setup-intro h2::after{content:'✦';color:#fb7197;font-size:.45em;vertical-align:top;margin-left:7px}
+.dash-playful .setup-intro p{
+  font-size:14px;line-height:1.65;color:#584d75;font-weight:650;max-width:605px
+}
+.dash-playful .setup-intro-caption{
+  margin-top:20px;display:inline-flex;gap:7px;align-items:center;
+  padding:8px 12px;background:#fffdf5;border:1.5px solid #a890c7;
+  border-radius:999px;font-size:11px;font-weight:900;color:#654a89
+}
+.dash-playful .setup-intro-caption svg{color:#188d66;flex:none}
+.dash-playful .setup-intro-art{
+  position:relative;height:225px;display:grid;place-items:center;isolation:isolate
+}
+.dash-playful .setup-intro-art::before{
+  content:'';position:absolute;width:100%;aspect-ratio:1;max-width:225px;
+  border:2px dashed #947ec6;border-radius:50%;z-index:-1
+}
+.dash-playful .setup-intro-sticker{
+  width:190px;height:190px;background:#ffde7a;color:#39245b;border:4px solid #39265a;
+  border-radius:24px;box-shadow:10px 10px 0 #39265a;transform:rotate(9deg);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:3px;font-weight:1000;text-shadow:2px 2px #fff
+}
+.dash-playful .setup-intro-sticker span{font-size:24px;letter-spacing:-.07em}
+.dash-playful .setup-intro-sticker strong{font-size:51px;letter-spacing:-.095em;line-height:1}
+.dash-playful .setup-intro-sticker svg{color:#eb6287;margin-top:4px}
+.dash-playful .setup-art-star{position:absolute;font-size:39px;color:#f16c9b;font-weight:1000}
+.dash-playful .setup-art-star--one{top:-2px;right:0;transform:rotate(15deg)}
+.dash-playful .setup-art-star--two{bottom:6px;left:-7px;color:#7c54c8}
+.dash-playful .setup-progress{
+  list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;padding:0;margin:6px 0 0;min-width:0
+}
+.dash-playful .setup-progress li{
+  display:flex;align-items:center;gap:9px;padding:13px 14px;min-width:0;
+  border:1.5px solid #dcd1e8;background:#fff;border-radius:13px;
+  color:#7c6e91;font-size:12px;font-weight:900;line-height:1.25
+}
+.dash-playful .setup-progress li span{
+  display:grid;place-items:center;width:31px;height:31px;flex:none;
+  border-radius:9px;background:#f2edfa;color:#776591;font-size:12px
+}
+.dash-playful .setup-progress li.complete{
+  color:#35725a;background:#e9f8ed;border-color:#aad6be
+}
+.dash-playful .setup-progress li.complete span{color:#1c825b;background:#d5f4df}
+.dash-playful .setup-progress li.current{
+  background:#ffeca9;border:2px solid var(--setup-line);
+  color:#392659;box-shadow:3px 4px 0 var(--setup-line)
+}
+.dash-playful .setup-progress li.current span{color:white;background:#4c338c}
+.dash-playful .setup-card{
+  background:#fff;border:2px solid var(--setup-line);border-radius:23px;
+  box-shadow:6px 7px 0 var(--setup-line);min-width:0;
+  padding:clamp(22px,3.3vw,35px)
+}
+.dash-playful .setup-card-eyebrow{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  margin-bottom:14px;color:#6b50a0;letter-spacing:.08em;font-size:10px;font-weight:1000
+}
+.dash-playful .setup-card-eyebrow span:first-child{background:#efe7ff;border-radius:999px;padding:8px 12px}
+.dash-playful .setup-card-eyebrow span:last-child{color:#c07585}
+.dash-playful .setup-card h3{
+  margin:0 0 9px;font:1000 clamp(27px,3vw,38px)/1.13 ui-rounded,'Trebuchet MS',Inter,system-ui,sans-serif;
+  letter-spacing:-.065em;color:#312454
+}
+.dash-playful .setup-support{
+  color:#706381;font-size:13px;line-height:1.7;margin:0 0 25px;max-width:720px
+}
+.dash-playful .setup-game-options{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px;min-width:0
+}
+.dash-playful .setup-game-option{
+  padding:0 22px 21px;display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;min-width:0;gap:10px;overflow:hidden;
+  background:#fff9f5;border:2px solid var(--setup-line);
+  border-radius:18px;box-shadow:4px 5px 0 #392a5a;cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease;
+  color:var(--setup-ink)
+}
+.dash-playful .setup-game-option--quickfire{background:#f8f3ff}
+.dash-playful .setup-game-option:hover{transform:translateY(-3px);box-shadow:5px 8px 0 #392a5a}
+.dash-playful .setup-game-option.selected{
+  outline:4px solid #a9e8cb;outline-offset:2px;
+  background:#effbf2
+}
+.dash-playful .setup-game-art{
+  align-self:stretch;display:grid;place-items:center;position:relative;
+  height:130px;margin:0 -22px 12px;background:#ffc7b5;
+  border-bottom:2px solid var(--setup-line)
+}
+.dash-playful .setup-game-option--quickfire .setup-game-art{background:#d8c2ff}
+.dash-playful .setup-game-icon{
+  font-size:65px;line-height:1;display:grid;place-items:center;
+  width:105px;height:105px;border:3px solid #392754;border-radius:22px;
+  background:#fff5d5;box-shadow:6px 7px 0 #4b326c;transform:rotate(-8deg)
+}
+.dash-playful .setup-game-option--quickfire .setup-game-icon{
+  background:#eaffd5;transform:rotate(8deg)
+}
+.dash-playful .setup-game-spark{position:absolute;right:18%;top:17%;font-size:37px;color:#fff8d3;text-shadow:2px 2px #4a3573}
+.dash-playful .setup-game-meta{font-size:10px;font-weight:1000;letter-spacing:.075em;color:#78638c}
+.dash-playful .setup-game-option strong{
+  font:1000 clamp(21px,2.5vw,28px)/1.13 ui-rounded,'Trebuchet MS',Inter,system-ui,sans-serif;
+  letter-spacing:-.05em;color:#332554
+}
+.dash-playful .setup-game-option small{font-size:12px;line-height:1.55;color:#635975;font-weight:650}
+.dash-playful .setup-game-check{
+  margin-top:auto;padding-top:13px;color:#503688;font-weight:1000;font-size:12px;
+  display:inline-flex;align-items:center;gap:7px
+}
+.dash-playful .setup-game-option.selected .setup-game-check{color:#25845e}
+.dash-playful .setup-source-list{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px
+}
+.dash-playful .setup-source{
+  display:grid;grid-template-columns:44px minmax(0,1fr) 20px;align-items:center;gap:13px;
+  padding:18px 16px;min-width:0;min-height:125px;cursor:pointer;
+  border:2px solid #d8cce9;border-radius:14px;background:#fff;
+  transition:background .16s ease,border-color .16s ease
+}
+.dash-playful .setup-source:nth-child(1){background:#fff8e2}
+.dash-playful .setup-source:nth-child(2){background:#f4eafa}
+.dash-playful .setup-source:nth-child(3){background:#f0f8ed}
+.dash-playful .setup-source:nth-child(4){background:#fff0eb}
+.dash-playful .setup-source.selected{
+  background:#e7faef;border-color:#357e65;box-shadow:0 0 0 3px #c3ebcf
+}
+.dash-playful .setup-source:hover:not(:has(input:disabled)){border-color:#7050b1}
+.dash-playful .setup-source:has(input:disabled){opacity:.52;cursor:not-allowed;filter:saturate(.55)}
+.dash-playful .setup-source input[type=radio]{
+  order:3;grid-column:3;grid-row:1;
+  accent-color:#5939a5;width:18px;height:18px;margin:0;cursor:inherit
+}
+.dash-playful .setup-source-icon{
+  grid-column:1;grid-row:1;display:grid;place-items:center;width:43px;height:43px;
+  color:#53398a;background:#fff;border:1.5px solid #d5c5eb;border-radius:12px
+}
+.dash-playful .setup-source-copy{grid-column:2;grid-row:1;display:grid;gap:7px;min-width:0}
+.dash-playful .setup-source-copy strong{
+  font-size:13px;color:#302553;font-weight:1000;line-height:1.3
+}
+.dash-playful .setup-source-copy small{
+  font-size:11px;line-height:1.6;color:#756780;font-weight:650
+}
+.dash-playful .setup-field{display:grid;gap:9px;margin-top:17px;min-width:0}
+.dash-playful .setup-field label{
+  color:#49316f;font-weight:1000;font-size:12px;letter-spacing:.01em
+}
+.dash-playful .setup-field input,.dash-playful .setup-field select{
+  width:100%;min-width:0;max-width:100%;border:2px solid #cbbbdc;border-radius:11px;
+  background:#fff;color:#34275c;padding:14px 15px;font-size:15px;line-height:1.3
+}
+.dash-playful .setup-field :is(input,select):focus-visible,
+.dash-playful .setup-game-option:focus-visible,
+.dash-playful .setup-source:focus-within{
+  outline:3px solid #6d4fc2;outline-offset:3px
+}
+.dash-playful .setup-team-fields{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px
+}
+.dash-playful .setup-team-field{
+  margin:0;padding:21px;border:2px solid var(--setup-line);
+  border-radius:16px;background:#ffe2d9;box-shadow:4px 5px 0 var(--setup-line)
+}
+.dash-playful .setup-team-field--1{background:#e8dfff}
+.dash-playful .setup-team-icon{
+  display:grid;place-items:center;width:56px;height:56px;margin-bottom:8px;
+  border:2px solid #392754;border-radius:13px;background:#fff8db;color:#e36d82;
+  box-shadow:3px 4px 0 #392754
+}
+.dash-playful .setup-team-field--1 .setup-team-icon{color:#6445b6;background:#d9f6e4}
+.dash-playful .setup-hint{font-size:11px;line-height:1.6;color:#736682;margin-top:14px}
+.dash-playful .setup-review-celebration{
+  display:flex;align-items:center;justify-content:center;gap:13px;
+  padding:18px;margin-bottom:19px;background:#f8eac0;
+  border:2px solid #392a5a;border-radius:14px;color:#463064
+}
+.dash-playful .setup-review-celebration svg{color:#b07916}
+.dash-playful .setup-review-celebration span:nth-child(2){
+  font-size:clamp(15px,2.3vw,23px);font-weight:1000;letter-spacing:.03em
+}
+.dash-playful .setup-review-celebration span:last-child{color:#ef7590;font-size:18px}
+.dash-playful .setup-review{
+  overflow:hidden;display:grid;margin:0 0 21px;
+  border:2px solid #d8cce6;border-radius:14px;background:#fff
+}
+.dash-playful .setup-review div{
+  display:grid;grid-template-columns:minmax(92px,145px) minmax(0,1fr);
+  align-items:center;gap:14px;padding:15px 18px;border-bottom:1.5px solid #ede6f5
+}
+.dash-playful .setup-review div:nth-child(even){background:#faf7ff}
+.dash-playful .setup-review div:last-child{border:0}
+.dash-playful .setup-review dt{font-size:12px;color:#76628b;font-weight:850}
+.dash-playful .setup-review dd{
+  margin:0;color:#332553;font-size:13px;font-weight:900;overflow-wrap:anywhere
+}
+.dash-playful .setup-warning{
+  background:#fff5df;color:#705a38;border:1.5px solid #edcf8d;
+  border-radius:12px;padding:15px 16px;font-size:12px;line-height:1.6;
+  display:flex;gap:11px;align-items:flex-start
+}
+.dash-playful .setup-warning p{margin:0}
+.dash-playful .setup-warning svg{flex:none;color:#98673b}
+.dash-playful .setup-error{
+  margin-top:16px;padding:13px 16px;font-size:12px;line-height:1.55;
+  background:#fff0ef;color:#a43f43;border:1.5px solid #f2b9bc;border-radius:11px
+}
+.dash-playful .setup-actions{
+  margin-top:27px;padding-top:23px;border-top:2px dashed #e1d5ec;
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.dash-playful .setup-actions .dash-action{
+  padding:13px 18px;font-size:13px;white-space:normal;text-align:center
+}
+.dash-playful .setup-actions .dash-action-primary{
+  background:#4a328a;border-color:#382459;font-weight:1000
+}
+.dash-playful .setup-launch-buttons{
+  display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+  gap:10px;min-width:0
+}
+.dash-playful .setup-footnote{
+  display:flex;align-items:center;gap:10px;
+  color:#6d5d81;background:#f1e8ff;border:1.5px solid #dacbed;
+  border-radius:13px;padding:13px 16px;font-size:12px;line-height:1.55
+}
+.dash-playful .setup-footnote svg{flex:none;color:#7650ae}
+@media(max-width:1050px){
+  .dash-playful .setup-intro{grid-template-columns:minmax(0,1fr) 165px}
+  .dash-playful .setup-intro-art{height:165px}
+  .dash-playful .setup-intro-sticker{height:140px;width:140px}
+  .dash-playful .setup-intro-sticker span{font-size:18px}
+  .dash-playful .setup-intro-sticker strong{font-size:36px}
+  .dash-playful .setup-intro-sticker svg{height:25px}
+}
+@media(max-width:900px){
+  .dash-playful .setup-game-options,.dash-playful .setup-source-list{grid-template-columns:1fr}
+  .dash-playful .setup-source{min-height:96px}
+  .dash-playful .setup-game-art{height:110px}
+  .dash-playful .setup-game-icon{height:87px;width:87px;font-size:52px}
+}
+@media(max-width:700px){
+  .dash-playful .dash-setup{gap:20px}
+  .dash-playful .setup-intro{display:block;padding:23px 22px;box-shadow:4px 5px 0 #392a5a}
+  .dash-playful .setup-intro h2{font-size:clamp(35px,8vw,50px)}
+  .dash-playful .setup-intro-art{display:none}
+  .dash-playful .setup-intro-caption{font-size:10px;margin-top:13px}
+  .dash-playful .setup-progress{gap:5px;margin-top:1px}
+  .dash-playful .setup-progress li{
+    flex-direction:column;text-align:center;gap:6px;
+    padding:9px 2px;font-size:10px;border-radius:10px
+  }
+  .dash-playful .setup-progress li span{width:29px;height:29px}
+  .dash-playful .setup-card{padding:20px 16px;box-shadow:4px 5px 0 #392a5a}
+  .dash-playful .setup-card h3{font-size:clamp(27px,7vw,34px)}
+  .dash-playful .setup-game-options,.dash-playful .setup-source-list{gap:12px}
+  .dash-playful .setup-team-fields{grid-template-columns:1fr;gap:14px}
+  .dash-playful .setup-team-field{padding:16px}
+  .dash-playful .setup-review div{grid-template-columns:95px minmax(0,1fr);gap:10px;padding:12px 13px}
+  .dash-playful .setup-actions{flex-wrap:wrap}
+  .dash-playful .setup-launch-buttons{width:100%;justify-content:stretch}
+  .dash-playful .setup-launch-buttons .dash-action{flex:1 1 190px}
+}
+@media(max-width:380px){
+  .dash-playful .setup-intro{padding:20px 17px}
+  .dash-playful .setup-card{padding:19px 13px}
+  .dash-playful .setup-progress{gap:4px}
+  .dash-playful .setup-progress li{font-size:9px}
+  .dash-playful .setup-progress li span{width:25px;height:25px}
+  .dash-playful .setup-source{grid-template-columns:33px minmax(0,1fr) 17px;gap:9px;padding:13px 10px}
+  .dash-playful .setup-source-icon{height:33px;width:33px}
+  .dash-playful .setup-source-icon svg{width:19px;height:19px}
+  .dash-playful .setup-review-celebration span:last-child{display:none}
+  .dash-playful .setup-actions .dash-action{font-size:11px;padding:11px 12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .dash-playful .setup-game-option,.dash-playful .setup-source{transition:none!important}
+  .dash-playful .setup-game-option:hover{transform:none}
+}
