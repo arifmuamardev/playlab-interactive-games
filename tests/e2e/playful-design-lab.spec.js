@@ -41,14 +41,15 @@ for(const width of [360,390,768,1280]){
     }
   });
 }
-test('Existing homepage, host and dashboard continue to render independently',async({page})=>{
+test('Approved playful homepage, host and functional dashboard render independently',async({page})=>{
   await page.goto('./');
-  await expect(page.locator('.hub-hero')).toBeVisible();
-  await expect(page.locator('.playful-lab')).toHaveCount(0);
+  await expect(page.locator('.pf-production .pf-hero')).toBeVisible();
+  await expect(page.locator('.pf-lab-ribbon')).toHaveCount(0);
   await page.goto('?game=survey');
   await expect(page.locator('.host-shell')).toBeVisible();
   await expect(page.locator('.playful-lab')).toHaveCount(0);
   await page.goto('?page=dashboard');
   await expect(page.locator('.dash-shell')).toBeVisible();
+  await expect(page.locator('.dash-shell.dash-playful')).toBeVisible();
   await expect(page.locator('.playful-lab')).toHaveCount(0);
 });
