@@ -12,3 +12,6 @@
 
 /* Public catalog entry point to local dashboard. */
 .hub-dashboard-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#264f61;font-weight:800;font-size:12px;background:#fff;border:1px solid #dce3e4;border-radius:9px;padding:11px 14px}.hub-dashboard-link:hover{background:#f0f4f4}@media(max-width:600px){.hub-dashboard-link{font-size:11px;padding:9px;gap:5px}}
+
+/* Dashboard navigation should wrap beneath the catalog logo on narrow screens. */
+@media(max-width:600px){.hub-header{height:auto;min-height:86px;flex-wrap:wrap;row-gap:12px;padding:17px 22px}.hub-header .brand{min-width:0}.hub-dashboard-link{max-width:100%;white-space:nowrap}}
