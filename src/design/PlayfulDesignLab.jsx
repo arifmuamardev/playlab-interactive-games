@@ -7,7 +7,7 @@ import './playful.css';
 const GAMES=GAME_CATALOG.filter(game=>game.slug);
 const labUrl=screen=>'?page=design-lab'+(screen==='catalog'?'':'&screen='+screen);
 const gameColors={survey:'coral',quickfire:'violet'};
-function PlayLabLogo(){return <span className="pf-logo"><span className="pf-logo-symbol" aria-hidden="true">P<span>✦</span></span><span className="pf-logo-title">play<span>lab</span><small>MAKE SPACE FOR PLAY</small></span></span>;}
+function PlayLabLogo(){return <span className="pf-logo"><span className="pf-logo-symbol" aria-hidden="true">P<span>✦</span></span><span className="pf-logo-title"><span className="pf-logo-word">play<b>lab</b></span><small>MAKE SPACE FOR PLAY</small></span></span>;}
 function Spark({className='',character='✦'}){return <span aria-hidden="true" className={'pf-spark '+className}>{character}</span>;}
 function SurveyArt(){return <div className="pf-art-board" aria-hidden="true"><div className="pf-art-title"><span>★ SURVEY SHOWDOWN ★</span><strong>TOP ANSWERS!</strong></div><div className="pf-art-scores"><span>TEAM A <b>120</b></span><span>TEAM B <b>85</b></span></div><div className="pf-art-answers">{['34','26','20'].map((v,i)=><span key={i}><b>{i+1}</b><span className="pf-art-answer-line"/><strong>{v}</strong></span>)}</div><div className="pf-art-stars">✦ ✧ ✦</div></div>}
 function QuickfireArt(){return <div className="pf-quiz-art" aria-hidden="true"><div className="pf-quiz-bubble">01 / 10 <span>✦</span></div><div className="pf-quiz-question">READY FOR A<br/>QUICK QUESTION?</div><div className="pf-quiz-options">{['A','B','C','D'].map((x,i)=><span key={x} className={i===1?'highlight':''}>{x}<b>{['★','✓','?','✦'][i]}</b></span>)}</div></div>}
