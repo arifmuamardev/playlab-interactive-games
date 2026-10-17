@@ -1,0 +1,192 @@
+/* Live PlayLab dashboard: the functional workspace now uses the approved playful
+   design language. CSS stays inside .dash-playful; all data and game logic are unchanged. */
+.dash-playful{
+  --dash-ink:#30264f;--dash-outline:#3b2c63;--dash-violet:#493386;
+  --dash-rose:#ff91a0;--dash-mint:#c7f4dd;--dash-yellow:#ffe59b;
+  background:#fffcf5;color:var(--dash-ink);
+  font-family:ui-rounded,'Trebuchet MS',Inter,system-ui,sans-serif;
+}
+.dash-playful .dash-sidebar{
+  background:#fff;border-right:2px solid #e0d6ec;padding-top:28px;
+}
+.dash-playful .dash-brand{border-bottom:2px dashed #eadff2}
+.dash-playful .dash-brand .brand-mark{
+  background:#ffe086;color:#39295b;border:2px solid #36254f;
+  border-radius:13px;box-shadow:3px 4px 0 #36254f;transform:rotate(-5deg);
+}
+.dash-playful .dash-brand .brand strong{font-weight:950;letter-spacing:-.045em;color:#372a59}
+.dash-playful .dash-sidebar-eyebrow,.dash-playful .dash-kicker{
+  color:#6b4bb2;font-weight:1000;letter-spacing:.075em
+}
+.dash-playful .dash-sidebar-eyebrow{color:#a073ba}
+.dash-playful .dash-nav-button{
+  color:#55496f;font-weight:850;font-size:13px;border:1.5px solid transparent;
+  border-radius:11px;gap:11px
+}
+.dash-playful .dash-nav-button:hover{background:#f7f1ff;border-color:#e4d5f9}
+.dash-playful .dash-nav-button.active{
+  background:#eadfff;color:#463086;border-color:#a997de;
+  box-shadow:3px 3px 0 #d0beef
+}
+.dash-playful .dash-nav-button small{color:#644f98;background:#fff6d5}
+.dash-playful .dash-sidebar-note{
+  background:#fff1c6;border:1.5px solid #eedca4;border-radius:14px;
+  color:#55426a;gap:7px
+}
+.dash-playful .dash-sidebar-note strong{color:#483773}
+.dash-playful .dash-sidebar-note svg{color:#754ca7}
+.dash-playful .dash-sidebar-note p{color:#756889}
+.dash-playful .dash-return{color:#60429d!important;font-weight:850}
+.dash-playful .dash-main{max-width:1250px}
+.dash-playful .dash-topbar{margin-bottom:24px}
+.dash-playful .dash-topbar h1{
+  font-family:inherit;font-size:clamp(30px,3.2vw,43px);
+  font-weight:1000;letter-spacing:-.065em;color:#302453;line-height:1.15
+}
+.dash-playful .dash-top-link{
+  border:2px solid #352753;border-radius:12px;background:#fff;
+  box-shadow:3px 3px 0 #352753;color:#38255f!important;font-weight:900
+}
+.dash-playful :is(.dash-top-link,.dash-action,.dash-icon-button,.dash-text-link):focus-visible,
+.dash-playful :is(.dash-nav-button,.dash-dialog input):focus-visible{
+  outline:3px solid #6651d5;outline-offset:3px
+}
+.dash-playful .dash-intro{
+  min-height:320px;overflow:hidden;border:2px solid #352753;
+  border-radius:23px;background:#ffedb7;
+  box-shadow:6px 7px 0 #352753;
+  padding:clamp(27px,4vw,53px);margin-bottom:32px;
+}
+.dash-playful .dash-intro>div:first-child{min-width:0;position:relative;z-index:2}
+.dash-playful .dash-intro .dash-kicker{color:#765093;font-size:11px}
+.dash-playful .dash-intro h2{
+  font-family:inherit;font-size:clamp(40px,4.8vw,67px);
+  font-weight:1000;letter-spacing:-.08em;line-height:1.04;
+  color:#342555;margin:14px 0
+}
+.dash-playful .dash-intro h2 em{
+  font-family:inherit;font-style:normal;font-weight:1000;color:#ee6484
+}
+.dash-playful .dash-intro p{font-size:14px;color:#54486d;font-weight:650;max-width:510px}
+.dash-playful .dash-intro-mark{
+  font-size:unset;line-height:.86;opacity:1;
+  transform:rotate(12deg);width:205px;height:205px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff3cf;background:#ff8f99;border:4px solid #352753;
+  border-radius:50%;box-shadow:7px 9px 0 #352753;
+  text-align:center;position:relative;pointer-events:none
+}
+.dash-playful .dash-intro-mark span{
+  font-size:clamp(42px,5vw,62px);letter-spacing:-.09em;
+  font-weight:1000;text-shadow:3px 3px 0 #352753
+}
+.dash-playful .dash-intro-mark i{
+  font-style:normal;position:absolute;font-size:54px;top:-32px;right:-20px;
+  color:#7446b0;text-shadow:2px 2px 0 #fff1bc
+}
+.dash-playful .dash-action{
+  background:#fff;color:#4a356b;border:1.5px solid #d6c9e8;
+  border-radius:11px;font-weight:850;padding:11px 14px
+}
+.dash-playful .dash-action-primary{
+  color:white!important;background:#44317f;border:2px solid #342753;
+  box-shadow:3px 4px 0 #342753
+}
+.dash-playful .dash-action-primary:hover{
+  background:#6247b4;filter:none;transform:translateY(-1px)
+}
+.dash-playful .dash-text-link{
+  color:#6040a3;font-weight:950;text-decoration:underline;text-underline-offset:3px
+}
+.dash-playful .dash-stats{gap:14px;margin:20px 0 43px}
+.dash-playful .dash-stats>div{
+  border:2px solid #392b5a;border-radius:15px;box-shadow:4px 5px 0 #392b5a;
+  background:#fff;padding:21px;gap:9px
+}
+.dash-playful .dash-stats>div:nth-child(1){background:#f5e7ff}
+.dash-playful .dash-stats>div:nth-child(2){background:#d7f7e7}
+.dash-playful .dash-stats>div:nth-child(3){background:#fff0c1}
+.dash-playful .dash-stats span{color:#67587f;font-weight:900}
+.dash-playful .dash-stats strong{
+  font-family:inherit;color:#3c286f;font-size:clamp(32px,3.3vw,48px);
+  font-weight:1000;letter-spacing:-.06em
+}
+.dash-playful .dash-stats small{color:#685d78;font-weight:700}
+.dash-playful .dash-section{margin-bottom:43px}
+.dash-playful .dash-section-title h2,.dash-playful .dash-future h2{
+  font-family:inherit;color:#302553;font-size:clamp(25px,2.6vw,35px);
+  font-weight:1000;letter-spacing:-.065em
+}
+.dash-playful .dash-game-card,.dash-playful .dash-pack-card{
+  border:2px solid #352753;box-shadow:5px 6px 0 #352753;
+  border-radius:20px;min-width:0;background:#fff;
+  padding:24px;gap:2px;transition:transform .18s ease,box-shadow .18s ease
+}
+.dash-playful .dash-game-card:hover,.dash-playful .dash-pack-card:hover{
+  transform:translateY(-2px);box-shadow:6px 9px 0 #352753
+}
+.dash-playful .dash-game-card--survey{background:#ffe8dc}
+.dash-playful .dash-game-card--quickfire{background:#e9dfff}
+.dash-playful .dash-game-symbol{
+  width:70px;height:70px;border:2px solid #362752;border-radius:16px;
+  background:#fff;color:#5136a4;font-size:44px;box-shadow:3px 4px 0 #362752;
+  transform:rotate(-4deg)
+}
+.dash-playful .dash-game-card--quickfire .dash-game-symbol{background:#fff1ba;transform:rotate(5deg)}
+.dash-playful .dash-chip{
+  background:#fff;border:1.5px solid #39285a;color:#47366e;
+  font-weight:1000;letter-spacing:.02em
+}
+.dash-playful .dash-game-card h3,.dash-playful .dash-pack-card h3{
+  font-family:inherit;font-size:clamp(23px,2.2vw,30px);
+  font-weight:1000;color:#302553;letter-spacing:-.055em
+}
+.dash-playful .dash-muted{color:#695c77}
+.dash-playful .dash-game-session{
+  background:#ffffffb5;border:1px dashed #b9a2d2;
+  border-radius:11px;padding:14px
+}
+.dash-playful .dash-game-session strong{color:#403066;font-weight:850}
+.dash-playful .dash-pack-card{background:#fffdf7}
+.dash-playful .dash-pack-icon{
+  background:#ffebae;color:#7951ad;border:1.5px solid #cfb3dc
+}
+.dash-playful .dash-empty{
+  border:2px dashed #b8a9d4;background:#fff;border-radius:17px
+}
+.dash-playful .dash-empty svg{color:#8b67c5}
+.dash-playful .dash-empty strong{color:#3c2d62}
+.dash-playful .dash-future{
+  border:1.5px dashed #bca7d5;background:#f0e5ff;border-radius:15px
+}
+.dash-playful .dash-dialog{
+  border:2px solid #382850;box-shadow:6px 7px 0 #382850;
+  border-radius:18px
+}
+.dash-playful .dash-dialog-head h2{
+  font-family:inherit;font-weight:1000;color:#392656;letter-spacing:-.04em
+}
+.dash-playful .dash-icon-button{background:#fff;border:1.5px solid #cec3de}
+.dash-playful .dash-notice{background:#e1f7e7;color:#35664b}
+.dash-playful .dash-lead>p{color:#665976}
+.dash-playful .dash-footer{border-color:#ded5e7;color:#75688c}
+@media(max-width:1050px){
+ .dash-playful .dash-intro-mark{width:145px;height:145px}
+ .dash-playful .dash-intro-mark span{font-size:42px}
+}
+@media(max-width:700px){
+ .dash-playful .dash-sidebar{padding-top:13px;border-right:0;border-bottom:2px solid #e0d6ec}
+ .dash-playful .dash-brand{border:0}
+ .dash-playful .dash-nav{scroll-padding-inline:10px}
+ .dash-playful .dash-main{padding:22px 16px}
+ .dash-playful .dash-intro{min-height:0;padding:24px 22px;box-shadow:4px 5px 0 #352753}
+ .dash-playful .dash-intro-mark{display:none}
+ .dash-playful .dash-intro h2{font-size:clamp(39px,8vw,56px)}
+ .dash-playful .dash-stats{gap:8px}
+ .dash-playful .dash-stats>div{padding:11px;border-width:1.5px;box-shadow:3px 3px 0 #392b5a}
+ .dash-playful .dash-stats strong{font-size:clamp(27px,7vw,42px)}
+ .dash-playful .dash-game-card,.dash-playful .dash-pack-card{padding:19px;box-shadow:4px 5px 0 #352753}
+}
+@media(prefers-reduced-motion:reduce){
+ .dash-playful :is(.dash-game-card,.dash-pack-card,.dash-action){transition:none!important}
+}
