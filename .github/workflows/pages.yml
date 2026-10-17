@@ -27,7 +27,7 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Run prototype regression checks
+      - name: Run source-level regression checks
         run: npm test
       - name: Build from source
         run: npm run build
@@ -44,10 +44,40 @@ jobs:
           path: dist/
           include-hidden-files: true
 
+  browser:
+    name: Browser regression (host, projector, responsive)
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build release for browser tests
+        run: npm run build
+      - name: Run browser regressions
+        run: npm run test:e2e
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   deploy:
     name: Deploy verified site to GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: verify
+    needs: [verify, browser]
     runs-on: ubuntu-latest
     permissions:
       contents: read
