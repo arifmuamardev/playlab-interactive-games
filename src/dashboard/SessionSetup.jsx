@@ -1,10 +1,13 @@
 import React,{useState} from 'react';
-import {ArrowLeft,ArrowRight,BookOpen,Check,FolderOpen,Gamepad2,Library,MonitorPlay,ShieldAlert,Sparkles,Trophy,Users,Zap} from 'lucide-react';
+import {ArrowLeft,ArrowRight,BookOpen,Check,FolderOpen,Gamepad2,Library,MonitorPlay,Search,ShieldAlert,Sparkles,Trophy,Users,Zap} from 'lucide-react';
 import {GAME_CATALOG} from '../core/gameRegistry.js';
-import {gameTitle,readGameSession,readPackLibrary} from './storage.js';
+import {gameTitle,readGameSession,readPackLibrary,createPack,writePackLibrary,PACK_LIMIT} from './storage.js';
 import {buildConfiguredMatch,hasStoredMatch,writeConfiguredMatch,writeRehearsalMatch} from './setup.js';
 import {starterTemplatesFor} from './starterTemplates.js';
 import {GameRules} from '../games/GameRules.jsx';
+import {SurveyQuestionEditor} from '../games/survey/index.jsx';
+import {QuickfireQuestionEditor} from '../games/quickfire/QuestionEditor.jsx';
+import {useLanguage} from '../i18n/language.jsx';
 import './setup.css';
 
 const PLAYABLE=GAME_CATALOG.filter(item=>item.slug);
@@ -18,7 +21,12 @@ function savedNames(game){
   catch{return game==='survey'?['Tim Merah','Tim Biru']:['Team A','Team B'];}
 }
 export function SessionSetup(){
+  const {lang,t}=useLanguage();
   const [game,setGame]=useState(initialGame);
+  const [search,setSearch]=useState('');
+  const [showAnswers,setShowAnswers]=useState(false);
+  const [workingCopy,setWorkingCopy]=useState(null);
+  const [notice,setNotice]=useState('');
   const [step,setStep]=useState(0);
   const [source,setSource]=useState('demo');
   const [packId,setPackId]=useState('');
@@ -26,7 +34,7 @@ export function SessionSetup(){
   const [teams,setTeams]=useState(()=>savedNames(initialGame()||'quickfire'));
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
-  const [library]=useState(()=>{
+  const [library,setLibrary]=useState(()=>{
     try{return {packs:readPackLibrary(),error:''};}
     catch(err){return {packs:[],error:err.message};}
   });
@@ -34,13 +42,25 @@ export function SessionSetup(){
   const available=library.packs.filter(item=>item.game===game);
   const starters=starterTemplatesFor(game);
   const starter=starters.find(item=>item.id===templateId);
+  const visibleStarters=starters.filter(item=>(item.title+' '+item.category+' '+item.description+' '+item.audience).toLocaleLowerCase().includes(search.toLocaleLowerCase().trim()));
   const chosen=available.find(item=>item.id===packId);
   const questions=source==='pack'?chosen?.questions:source==='starter'?starter?.questions:source==='current'?existing[game]?.questions:null;
   const displayedCount=questions?.length||(source==='demo'?6:0);
   const invalidTeam=teams.some(name=>!name.trim()||name.trim().length>45)||teams[0].trim().toLocaleLowerCase()===teams[1].trim().toLocaleLowerCase();
   const selectedGame=PLAYABLE.find(item=>item.slug===game);
   function chooseGame(slug){
-    setGame(slug);setSource('demo');setPackId('');setTemplateId('');setTeams(savedNames(slug));setError('');
+    setGame(slug);setSource('demo');setPackId('');setTemplateId('');setSearch('');setShowAnswers(false);setTeams(savedNames(slug));setError('');
+  }
+  function editCopy(item){setWorkingCopy({title:item.title,questions:structuredClone(item.questions)});setError('');setNotice('');}
+  function saveCopy(questions){
+    try{
+      if(library.error)throw Error(library.error);
+      const fresh=readPackLibrary();
+      if(fresh.length>=PACK_LIMIT)throw Error('Question library is full (40 packs). Export or remove an old pack first.');
+      const pack=createPack(game,(workingCopy.title+' - My copy').slice(0,70),questions);
+      const saved=writePackLibrary([pack,...fresh]);
+      setLibrary({packs:saved,error:''});setSource('pack');setPackId(pack.id);setWorkingCopy(null);setNotice(lang==='id'?'Salinan dapat diedit tersimpan di pustaka Anda. Permainan langsung tidak berubah.':'Editable copy saved to your question library. Your live match was not changed.');
+    }catch(err){setError('Could not save copy: '+err.message);setWorkingCopy(null);}
   }
   function next(){
     setError('');
@@ -76,7 +96,7 @@ export function SessionSetup(){
       if(!popup)setError('Practice window was blocked by your browser. Allow popups for PlayLab and try again.');
     }catch(err){setError(err.message||'Could not start practice mode.');}
   }
-  return <div className="dash-setup">
+  return <div className="dash-setup" lang={lang}>
     <div className="setup-intro">
       <div className="setup-intro-copy"><span className="dash-kicker"><Sparkles size={15} aria-hidden="true"/> THE PLAYLAB GAME BUILDER</span><h2>Get your game ready.</h2><p>Choose your content, name the teams and review everything before starting. Nothing changes in your saved match until launch.</p><span className="setup-intro-caption"><Check size={16} aria-hidden="true"/> Four easy steps. One unforgettable game.</span></div>
       <div className="setup-intro-art" aria-hidden="true"><span className="setup-art-star setup-art-star--one">✳</span><span className="setup-art-star setup-art-star--two">✦</span><span className="setup-intro-sticker"><span>LET'S</span><strong>PLAY!</strong><Zap size={36}/></span></div>
@@ -102,23 +122,35 @@ export function SessionSetup(){
         </div>
         {source==='starter'&&<>
           <div className="setup-field"><label htmlFor="setup-template">Ready-to-play set</label><select id="setup-template" value={templateId} onChange={e=>{setTemplateId(e.target.value);setError('');}}><option value="">Choose a set</option>{starters.map(item=><option key={item.id} value={item.id}>{item.title} · {item.questions.length} questions</option>)}</select></div>
+          <div className="setup-template-filter"><label htmlFor="setup-template-search"><Search size={17}/> {lang==='id'?'Cari set siap dimainkan':'Search ready-to-play sets'}</label><input id="setup-template-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==='id'?'Cari judul, kategori, atau audiens':'Search title, category or audience'} /></div>
           <div className="setup-template-grid" aria-label="Ready-to-play sets">
-            {starters.map(item=><button type="button" key={item.id}
+            {visibleStarters.map(item=><button type="button" key={item.id}
               aria-pressed={templateId===item.id} className={'setup-template-card '+(templateId===item.id?'selected':'')}
-              onClick={()=>{setTemplateId(item.id);setError('');}}>
+              onClick={()=>{setTemplateId(item.id);setShowAnswers(false);setError('');}}>
               <span className="setup-template-card-meta">{item.category} · {item.questions.length} {game==='survey'?'rounds':'questions'}</span>
               <strong>{item.title}</strong><small>{item.description}</small>
-              <span className="setup-template-card-footer">{item.minutes||'10–30 min'} · {item.audience||'Mixed groups'} · {templateId===item.id?'✓ Selected':'Choose this set'}</span>
+              <span className="setup-template-card-footer">{item.minutes||'10–30 min'} · {item.audience||'Mixed groups'} · {templateId===item.id?'✓ '+t('Selected'):t('Choose this set')}</span>
             </button>)}
           </div>
+          {!visibleStarters.length&&<p className="setup-support" role="status">{lang==='id'?'Tidak ada set yang cocok. Coba kata kunci lain.':'No matching sets. Try another keyword.'}</p>}
           {starter&&<div className="setup-template-preview" role="status">
-            <strong>✦ Ready to play: {starter.title}</strong>
-            <p>{starter.questions.length} curated {game==='survey'?'rounds':'questions'}. Review the content in rehearsal before using it with your audience.</p>
+            <strong>✦ {lang==='id'?'Siap dimainkan':'Ready to play'}: {starter.title}</strong>
+            <p>{starter.questions.length} {lang==='id'?'pertanyaan pilihan. Tinjau konten dan latih sebelum bermain.':'curated'} {lang==='id'?'':' '+(game==='survey'?'rounds':'questions')+'. Review the content in rehearsal before using it with your audience.'}</p>
             <ul>{starter.questions.slice(0,3).map(item=><li key={item.id}>{item.question}</li>)}</ul>
-            {game==='survey'&&<p>Answer rankings and points are fictional, illustrative game values—not real survey data.</p>}
+            <details className="setup-template-full-preview">
+              <summary>{t('Preview all questions')} ({starter.questions.length})</summary>
+              <label className="setup-preview-answers"><input type="checkbox" checked={showAnswers} onChange={e=>setShowAnswers(e.target.checked)}/> {t('Show answers')}</label>
+              <ol>{starter.questions.map(q=><li key={q.id}><strong>{q.question}</strong>
+                {showAnswers&&(game==='survey'?<ul>{q.answers.map((a,i)=><li key={i}>{a.text} · {a.points} {lang==='id'?'poin':'points'}</li>)}</ul>:<div className="setup-quiz-answers"><p>{q.options.map((answer,i)=><span key={i}>{'ABCD'[i]}: {answer}{' · '}</span>)}</p><p><b>{lang==='id'?'Jawaban benar':'Correct answer'}: {'ABCD'[q.answer]}</b> · {q.explanation}</p></div>)}
+              </li>)}</ol>
+            </details>
+            {game==='survey'&&<p>{lang==='id'?'Peringkat jawaban dan poin adalah contoh fiktif, bukan hasil survei.':'Answer rankings and points are fictional, illustrative game values—not real survey data.'}</p>}
+            <button type="button" className="dash-action setup-copy-button" onClick={()=>editCopy(starter)}><BookOpen size={17}/> {t('Customize this set')}</button>
+            <p className="setup-copy-hint">{lang==='id'?'Editor menyimpan salinan baru ke pustaka, tanpa mengubah permainan langsung atau set bawaan.':'The editor saves a separate reusable pack. Built-in sets and live scores stay unchanged.'}</p>
           </div>}
         </>}
         {source==='pack'&&<div className="setup-field"><label htmlFor="setup-pack">Saved question pack</label><select id="setup-pack" value={packId} onChange={e=>{setPackId(e.target.value);setError('');}}><option value="">Choose a pack</option>{available.map(pack=><option key={pack.id} value={pack.id}>{pack.name} · {pack.questions.length} questions</option>)}</select></div>}
+        {source==='pack'&&chosen&&<button type="button" className="dash-action setup-copy-button" onClick={()=>editCopy(chosen)}><BookOpen size={16}/>{t('Edit a copy')} · {chosen.name}</button>}
         {library.error&&<p className="setup-warning" role="status">Your saved question library could not be read: {library.error}. Sample questions remain available.</p>}
       </>}
       {step===2&&<>
@@ -132,12 +164,16 @@ export function SessionSetup(){
         <dl className="setup-review"><div><dt>Game</dt><dd>{selectedGame?.title}</dd></div><div><dt>Questions</dt><dd>{source==='demo'?'Sample questions':source==='current'?'Current saved questions':source==='starter'?starter?.title:chosen?.name} · {displayedCount} questions</dd></div><div><dt>Teams</dt><dd>{teams[0].trim()} vs {teams[1].trim()}</dd></div><div><dt>Start condition</dt><dd>Question 1 · Scores 0–0</dd></div><div><dt>Storage</dt><dd>This browser only · No account</dd></div></dl>
         <div className="setup-warning"><ShieldAlert size={19}/><p>{hasStoredMatch(game)?'A saved match already exists. Starting will replace its question bank, scores and progress after confirmation. Save important questions first.':'No saved match will be replaced.'} Your saved question packs will not be deleted.</p></div>
       </>}
+      {notice&&<div role="status" className="setup-copy-notice">{notice}</div>}
       {error&&<div role="alert" className="setup-error">{error}</div>}
       <div className="setup-actions">
         {step===0?<a className="dash-action" href="?page=dashboard"><ArrowLeft size={16}/> Dashboard</a>:<button className="dash-action" onClick={()=>{setStep(v=>v-1);setError('');}}><ArrowLeft size={16}/> Back</button>}
         {step===3?<div className="setup-launch-buttons"><button className="dash-action" onClick={rehearse}><Gamepad2 size={17}/> Practice without affecting live game</button><button disabled={busy} className="dash-action dash-action-primary" onClick={launch}><MonitorPlay size={17}/> Launch host controls</button></div>:<button className="dash-action dash-action-primary" onClick={next}>Continue <ArrowRight size={16}/></button>}
       </div>
     </section>
+    {workingCopy&&(game==='survey'?
+      <SurveyQuestionEditor questions={workingCopy.questions} onClose={()=>setWorkingCopy(null)} onSave={saveCopy} saveNote="Saving creates an independent question pack; the active game is not reset."/>:
+      <QuickfireQuestionEditor questions={workingCopy.questions} onClose={()=>setWorkingCopy(null)} onSave={saveCopy} saveNote="Saving creates an independent question pack; the active game is not reset."/>)}
     <p className="setup-footnote"><BookOpen size={18}/> Want to prepare custom questions first? Save them from My games in the dashboard, then choose them here.</p>
   </div>;
 }
