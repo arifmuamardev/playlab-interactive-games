@@ -11,6 +11,8 @@ import {makeStageEvent,useProjectorAudio,useStageMoment} from '../stageEffects.j
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {GameRules} from '../GameRules.jsx';
+import {CountdownBadge,CountdownControls} from '../Countdown.jsx';
+import {clearCountdown} from '../countdown.js';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
@@ -35,7 +37,7 @@ function QuickfireBoard({game,preview=false}){
   },[q.id,preview]);
   return <div className={'quick-board '+(preview?'quick-board--preview':'')}>
     <div className="quick-stars">✦ <span>PLAYLAB · QUICKFIRE QUIZ</span> ✦</div>
-    <div className="quick-head"><h1>QUICKFIRE <em>QUIZ</em></h1><div className="quick-counter">QUESTION {String(game.questionIndex+1).padStart(2,'0')} / {game.questions.length}</div></div>
+    <div className="quick-head"><h1>QUICKFIRE <em>QUIZ</em></h1><div className="quick-counter">QUESTION {String(game.questionIndex+1).padStart(2,'0')} / {game.questions.length}</div><CountdownBadge game={game} contextId={q.id}/></div>
     <div className="quick-scores">{[0,1].map(i=><div key={i}><span>{game.teamNames[i]}</span><strong>{game.scores[i]}</strong></div>)}</div>
     <div className="quick-question" ref={questionRef}>{q.question}</div>
     <div className="quick-options" ref={optionsRef}>{q.options.map((choice,i)=><div key={i} className={'quick-option '+(visible?(i===q.answer?'correct':'muted'):'')}><span>{'ABCD'[i]}</span><strong>{choice}</strong>{visible&&i===q.answer&&<Check size={27}/>}</div>)}</div>
@@ -52,11 +54,11 @@ function QuickfireHost({game,change}){
   const [editor,setEditor]=useState(false);
   const setQuestion=n=>change(old=>{
     const index=Math.max(0,Math.min(old.questions.length-1,n));
-    return index===old.questionIndex?old:{...old,questionIndex:index,lastEvent:makeStageEvent('next')};
+    return index===old.questionIndex?old:{...clearCountdown(old),questionIndex:index,lastEvent:makeStageEvent('next')};
   });
   const reveal=()=>change(old=>{
     const question=old.questions[old.questionIndex],nowVisible=!old.revealed[question.id];
-    return {...old,revealed:{...old.revealed,[question.id]:nowVisible},lastEvent:makeStageEvent(nowVisible?'reveal':'undo')};
+    return {...(nowVisible?clearCountdown(old):old),revealed:{...old.revealed,[question.id]:nowVisible},lastEvent:makeStageEvent(nowVisible?'reveal':'undo')};
   });
   const award=(team,points)=>change(old=>{
     const next=awardQuickfirePoints(old,team,points);
@@ -83,12 +85,12 @@ function QuickfireHost({game,change}){
   },[editor,game.questionIndex,game.questions.length,game.lastAward,visible,q.id]);
   const finishMatch=()=>{
     if(!window.confirm('Finish this match and show final results? Scores and questions stay saved. You can resume to correct anything.'))return;
-    change(old=>old.finished?old:{...old,finished:true,lastEvent:makeStageEvent('finish')});
+    change(old=>old.finished?old:{...clearCountdown(old),finished:true,lastEvent:makeStageEvent('finish')});
   };
   const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:makeStageEvent('next')}));
   const resetFinishedMatch=()=>{
     if(!window.confirm('Reset and play again? ALL points and revealed answers will be cleared. Questions and team names stay saved.'))return;
-    change(old=>({...old,finished:false,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,lastEvent:makeStageEvent('next')}));
+    change(old=>({...clearCountdown(old),finished:false,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,lastEvent:makeStageEvent('next')}));
   };
   const openEditor=()=>setEditor(true);
   const exportQuestions=()=>{
@@ -119,19 +121,20 @@ function QuickfireHost({game,change}){
       <div className="host-rules-reference"><GameRules game="quickfire"/></div>
       <div className="quick-layout"><section className="preview-section"><div className="section-head"><div><h2>Audience preview</h2><p>The question and options shown on the projector</p></div></div><div className="preview-frame"><QuickfireBoard game={game} preview/></div></section>
       <aside className="quick-controls">
+        <ControlCard title="Countdown timer" description="Choose a duration to show a timer on the projector."><CountdownControls game={game} change={change} contextId={q.id}/></ControlCard>
         <ControlCard title="Question control" description="Host shortcuts: R reveal/hide · N next · P previous. They pause while editing text."><div className="quick-nav"><button className="btn btn-soft" disabled={game.questionIndex===0} onClick={()=>setQuestion(game.questionIndex-1)}><ChevronLeft size={17}/> Previous</button><span>{game.questionIndex+1} / {game.questions.length}</span><button className="btn btn-soft" disabled={game.questionIndex===game.questions.length-1} onClick={()=>setQuestion(game.questionIndex+1)}>Next <ChevronRight size={17}/></button></div><h3 className="quick-control-question">{q.question}</h3><p className="quick-correct-hint">Answer: {'ABCD'[q.answer]} · {q.options[q.answer]}</p><button className="btn btn-primary quick-main-action" aria-pressed={visible} onClick={reveal}>{visible?<EyeOff size={17}/>:<Eye size={17}/>} {visible?'Hide answer':'Reveal correct answer'}</button></ControlCard>
         <ControlCard title="Team points" description="Adjust points manually. Undo the latest change with U or the button below.">{[0,1].map(i=><div className="quick-team-editor" key={i}><input aria-label={`Team ${i+1} name`} maxLength={45} value={game.teamNames[i]} onChange={e=>change(old=>({...old,teamNames:old.teamNames.map((n,j)=>i===j?e.target.value:n)}))}/><strong>{game.scores[i]}</strong><button className="square-btn" disabled={game.scores[i]===0} onClick={()=>award(i,-10)} aria-label={`Subtract ten points from team ${i+1}`}><Minus size={16}/></button><button className="square-btn" onClick={()=>award(i,10)} aria-label={`Add ten points to team ${i+1}`}><Plus size={16}/></button></div>)}<div className="quick-undo-row"><button className="btn btn-soft quick-undo-button" disabled={!game.lastAward} onClick={undoScore}><RotateCcw size={15}/> Undo last score change <kbd>U</kbd></button>{game.lastAward&&<span role="status">Last: {game.lastAward.delta>0?'+':''}{game.lastAward.delta} for {game.teamNames[game.lastAward.team]}</span>}</div></ControlCard>
         <ControlCard title="Match results" description="Announce the final scoreboard on the projector without resetting points.">
           <button className="btn btn-primary results-finish-button" onClick={finishMatch}><Trophy size={18}/> Finish match & show results</button>
           <p className="results-finish-note">You can finish early. Your current score stays saved, and you can resume to correct it.</p>
         </ControlCard>
-        <ControlCard title="Question bank" description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...old,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,finished:false}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
+        <ControlCard title="Question bank" description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...clearCountdown(old),scores:[0,0],questionIndex:0,revealed:{},lastAward:null,finished:false}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
       </aside></div>
       <footer className="host-footer"><span>PlayLab · Quickfire Quiz</span><span>Local-only state · Use the same browser profile for host and projector</span></footer>
     </main>
     {editor&&<QuickfireQuestionEditor questions={game.questions} onClose={()=>setEditor(false)} onSave={questions=>{
       if(!window.confirm('Replace all trivia questions and reset the match?'))return;
-      change(old=>({...old,questions,questionIndex:0,revealed:{},scores:[0,0],lastAward:null,finished:false}));
+      change(old=>({...clearCountdown(old),questions,questionIndex:0,revealed:{},scores:[0,0],lastAward:null,finished:false}));
       setEditor(false);
     }}/>} 
   </div>;
