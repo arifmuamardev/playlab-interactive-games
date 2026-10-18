@@ -1,0 +1,75 @@
+/* Accessible, non-modal rules reference for setup and live hosts. */
+.playlab-rules{
+  border:1.5px solid #bfa8df;border-radius:14px;background:#fff;
+  color:#332752;min-width:0;overflow:hidden;
+  box-shadow:2px 3px 0 #4e37821a;
+}
+.playlab-rules summary{
+  list-style:none;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:16px 18px;cursor:pointer;font-size:13px;line-height:1.5;
+  font-weight:850;color:#39285e;background:#f8f2ff;
+}
+.playlab-rules--survey summary{background:#fff1e7}
+.playlab-rules summary::-webkit-details-marker{display:none}
+.playlab-rules summary:hover{background:#ebe2fc}
+.playlab-rules--survey summary:hover{background:#ffeadc}
+.playlab-rules summary:focus-visible{outline:3px solid #7551bc;outline-offset:-4px}
+.playlab-rules summary>svg{flex:none;transition:transform .15s ease}
+.playlab-rules[open] summary>svg{transform:rotate(180deg)}
+.playlab-rules-label{display:flex;align-items:center;gap:11px;min-width:0}
+.playlab-rules-label>svg{flex:none;color:#7649b5}
+.playlab-rules-label>span{display:grid;gap:3px}
+.playlab-rules-label strong{font-weight:950;font-size:14px}
+.playlab-rules-label small{font-size:11px;color:#746589;font-weight:650}
+.playlab-rules-body{padding:16px 22px 21px;line-height:1.65;font-size:12px;color:#504565}
+.playlab-rules-tagline{font-size:13px;font-weight:850;color:#392656;margin:0 0 11px}
+.playlab-rules-body ol{margin:0 0 16px;padding-left:24px;display:grid;gap:7px}
+.playlab-rules-body li::marker{color:#7247ad;font-weight:900}
+.playlab-rules-facts{border-top:1px dashed #d9cbe9;padding-top:12px;display:grid;gap:8px}
+.playlab-rules-facts p,.playlab-rules-notice,.playlab-rules-optional{margin:0}
+.playlab-rules-facts strong,.playlab-rules-optional strong{color:#3c2a60}
+.playlab-rules-notice{
+  background:#fff5d9;border:1px solid #ecd7a8;padding:12px;
+  display:flex;align-items:flex-start;gap:8px;border-radius:9px;margin-top:14px
+}
+.playlab-rules-notice svg{flex:none;color:#987335;margin-top:1px}
+.playlab-rules-optional{margin-top:12px;color:#756784}
+.setup-rules-title{font-size:17px;letter-spacing:-.02em;font-weight:950;color:#342654;margin:26px 0 9px}
+.setup-rules-explanation{font-size:12px;color:#766987;margin:0 0 12px;line-height:1.5}
+.setup-rules-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.setup-template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:17px 0}
+.setup-template-card{
+  text-align:left;display:grid;align-content:start;gap:7px;min-width:0;
+  background:#fffaf0;border:2px solid #bfaada;border-radius:14px;
+  padding:14px 16px;color:#3c2d60;cursor:pointer;
+  transition:background .16s ease,transform .16s ease
+}
+.setup-template-card:nth-child(even){background:#f4edff}
+.setup-template-card:hover{background:#ffefd5;transform:translateY(-1px)}
+.setup-template-card.selected{border-color:#4c3086;background:#e9f9ec;box-shadow:3px 4px 0 #3c2b60}
+.setup-template-card:focus-visible{outline:3px solid #7652b6;outline-offset:3px}
+.setup-template-card-meta{font-size:10px;letter-spacing:.055em;font-weight:950;color:#775d8c;text-transform:uppercase}
+.setup-template-card strong{font-size:15px;line-height:1.3;overflow-wrap:anywhere;color:#312354}
+.setup-template-card small{font-size:11px;font-weight:650;line-height:1.5;color:#6c6279}
+.setup-template-card-footer{font-size:10px;font-weight:850;color:#785baa;margin-top:4px}
+.setup-template-card.selected .setup-template-card-footer{color:#2b805c}
+.setup-template-preview{
+  border:1.5px solid #cdbce5;border-radius:11px;background:#faf6ff;
+  padding:12px 15px;display:grid;gap:7px;color:#4e3c6d;line-height:1.5
+}
+.setup-template-preview strong{font-size:12px;font-weight:950}
+.setup-template-preview p{font-size:11px;color:#6a5e7f;margin:0}
+.setup-template-preview ul{margin:0;padding-left:20px;font-size:12px}
+.setup-template-preview li+li{margin-top:3px}
+@media(max-width:850px){
+ .setup-rules-list,.setup-template-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ .playlab-rules summary{padding:13px 14px}
+ .playlab-rules-body{padding:14px 15px}
+ .setup-template-card{padding:13px 14px}
+}
+@media(prefers-reduced-motion:reduce){
+ .setup-template-card,.playlab-rules summary>svg{transition:none!important}
+ .setup-template-card:hover{transform:none}
+}
