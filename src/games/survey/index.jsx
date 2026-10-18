@@ -7,6 +7,7 @@ import '../projector-fx.css';
 import {useProjectorAudio} from '../stageEffects.js';
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
+import {GameRules} from '../GameRules.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -181,6 +182,7 @@ function HostApp({game,change}){
             {p.strikes>0&&<HostActionButton muted onClick={()=>strike(-1)}><Minus size={16}/> Undo strike</HostActionButton>}
           </>}
       </HostActionBar>
+      <div className="host-rules-reference"><GameRules game="survey"/></div>
       <div className="host-grid">
         <div className="host-primary">
           <section className="preview-section"><div className="section-head"><div><h2>Live game preview</h2><p>What your audience sees on the projector</p></div><div className="head-buttons"><IconButton icon={Copy} onClick={copyDisplay} variant="btn-soft">{copyOkay?'Copied':'Copy display URL'}</IconButton><IconButton icon={Expand} onClick={openDisplay} variant="btn-soft">Pop out</IconButton></div></div><div className="preview-frame"><Stage game={game} preview/></div></section>

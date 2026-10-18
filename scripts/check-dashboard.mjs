@@ -3,8 +3,8 @@ import {buildConfiguredMatch,writeConfiguredMatch,hasStoredMatch,writeRehearsalM
 import {STARTER_TEMPLATES,starterTemplatesFor} from '../src/dashboard/starterTemplates.js';
 import {REHEARSAL_KEYS} from '../src/core/rehearsal.js';
 import {LIBRARY_KEY,PACK_SCHEMA,PACK_LIMIT,createPack,normalizePack,readPackLibrary,writePackLibrary,readGameSession,resetGameSession,applyPackToSession} from '../src/dashboard/storage.js';
-import {makeInitialState,STORAGE_KEY} from '../src/data.js';
-import {quickfireInitial,QUICKFIRE_KEY} from '../src/games/quickfire/data.js';
+import {makeInitialState,STORAGE_KEY,normalizeQuestions} from '../src/data.js';
+import {quickfireInitial,QUICKFIRE_KEY,normalizeQuickfireQuestions} from '../src/games/quickfire/data.js';
 
 function fakeStorage(){const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};}
 const storage=fakeStorage();
@@ -83,9 +83,33 @@ const surveyReady=writeConfiguredMatch({game:'survey',source:'demo',teamNames:['
 assert.equal(surveyReady.questions.length,6);
 assert.deepEqual(surveyReady.progress,{});
 // Built-in starter packs are valid, independently reusable, and not saved as user-owned packs.
-assert.equal(STARTER_TEMPLATES.length,4);
+assert.equal(STARTER_TEMPLATES.length,10,'The catalog must have five complete sets per game');
+const starterIds=STARTER_TEMPLATES.map(t=>t.id);
+assert.equal(new Set(starterIds).size,10,'Every starter set must have a stable unique ID');
+for(const game of ['survey','quickfire'])assert.equal(starterTemplatesFor(game).length,5);
+const surveyQuestions=new Set(),quickfireQuestions=new Set();
 for(const template of STARTER_TEMPLATES){
-  assert.ok(template.questions.length>0);
+  assert.equal(template.questions.length,8,template.id+' should support a complete mini-game');
+  assert.ok(template.title&&template.description&&template.category&&template.minutes&&template.audience);
+  const normalized=template.game==='survey'?normalizeQuestions(template.questions):normalizeQuickfireQuestions(template.questions);
+  assert.equal(normalized.length,8);
+  for(const question of template.questions){
+    assert.ok(question.question.length>=10&&question.question.length<250,template.id+': usable question wording');
+    assert.ok(!question.question.includes('TODO'),template.id+': no placeholder questions');
+    if(template.game==='survey'){
+      assert.ok(!surveyQuestions.has(question.id),'Duplicated Survey answer ID '+question.id);
+      surveyQuestions.add(question.id);
+      assert.equal(question.answers.length,5);
+      assert.ok([1,2,3].includes(question.multiplier));
+      assert.equal(new Set(question.answers.map(a=>a.text.toLowerCase())).size,5);
+    }else{
+      assert.ok(!quickfireQuestions.has(question.id),'Duplicated quiz ID '+question.id);
+      quickfireQuestions.add(question.id);
+      assert.equal(question.options.length,4);
+      assert.equal(new Set(question.options.map(a=>a.toLowerCase())).size,4);
+      assert.ok(question.explanation.length>=12,'Every quiz answer needs an explanation');
+    }
+  }
   const built=buildConfiguredMatch({game:template.game,source:'starter',templateId:template.id,teamNames:['First','Second']},prepareStorage);
   assert.equal(built.questions.length,template.questions.length);
   if(template.game==='survey'){
@@ -93,14 +117,14 @@ for(const template of STARTER_TEMPLATES){
     for(const q of template.questions)assert.equal(q.answers.reduce((sum,a)=>sum+a.points,0),100);
   }
 }
-assert.equal(starterTemplatesFor('quickfire').length,2);
+assert.equal(starterTemplatesFor('quickfire').length,5);
 assert.throws(()=>buildConfiguredMatch({game:'survey',source:'starter',templateId:'quickfire-computing-v1',teamNames:['A','B']},prepareStorage),/another game/);
 assert.throws(()=>buildConfiguredMatch({game:'survey',source:'starter',templateId:'unknown',teamNames:['A','B']},prepareStorage),/not found/);
 const liveSurveyBefore=prepareStorage.getItem(STORAGE_KEY),liveQuizBefore=prepareStorage.getItem(QUICKFIRE_KEY),libraryBefore=prepareStorage.getItem(LIBRARY_KEY);
 const practiceSurvey=writeRehearsalMatch({game:'survey',source:'starter',templateId:'survey-community-v1',teamNames:['MC A','MC B']},prepareStorage);
 const practiceQuiz=writeRehearsalMatch({game:'quickfire',source:'starter',templateId:'quickfire-general-v1',teamNames:['MC A','MC B']},prepareStorage);
-assert.equal(practiceSurvey.questions.length,3);
-assert.equal(practiceQuiz.questions.length,4);
+assert.equal(practiceSurvey.questions.length,8);
+assert.equal(practiceQuiz.questions.length,8);
 assert.ok(prepareStorage.getItem(REHEARSAL_KEYS.survey));
 assert.ok(prepareStorage.getItem(REHEARSAL_KEYS.quickfire));
 assert.equal(prepareStorage.getItem(STORAGE_KEY),liveSurveyBefore);

@@ -1,8 +1,9 @@
+import {TEMPLATE_ADDITIONS,NEW_SETS} from './readyToPlaySets.js';
 /** Curated learning/event templates are built into PlayLab. They are NOT user-owned packs,
  * and all Survey counts are illustrative examples rather than actual survey data.
  * Creating a session from a template never modifies the saved question library.
  */
-export const STARTER_TEMPLATES=[
+const CORE_TEMPLATES=[
   {id:'survey-classroom-v1',game:'survey',title:'Classroom Icebreakers',category:'Education',description:'Illustrative warm-up prompts for a class; not real survey results.',questions:[
     {id:'sc1',question:'Name something students often bring to class!',multiplier:1,answers:[{text:'Notebook',points:35},{text:'Pen',points:25},{text:'Laptop',points:20},{text:'Water bottle',points:12},{text:'Backpack',points:8}]},
     {id:'sc2',question:'Name an activity people enjoy during a study break!',multiplier:2,answers:[{text:'Talking with friends',points:30},{text:'Listening to music',points:25},{text:'Eating snacks',points:20},{text:'Walking',points:15},{text:'Checking messages',points:10}]},
@@ -26,6 +27,19 @@ export const STARTER_TEMPLATES=[
     {id:'qe4',question:'Which ocean lies between Africa and Australia?',options:['Arctic Ocean','Atlantic Ocean','Indian Ocean','Southern Ocean'],answer:2,explanation:'The Indian Ocean lies between Africa and Australia.'}
   ]}
 ];
+/** Keep stable IDs while turning each built-in starter into a complete mini-game.
+ * These immutable bundled sets never enter a user's saved pack library unless
+ * the user intentionally exports/saves one. */
+export const STARTER_TEMPLATES=[
+  ...CORE_TEMPLATES.map(item=>({
+    ...item,
+    audience:item.game==='survey'?'Mixed groups':'Teens & adults',
+    minutes:item.game==='survey'?'20–30 min':'10–20 min',
+    questions:[...item.questions,...(TEMPLATE_ADDITIONS[item.id]||[])]
+  })),
+  ...NEW_SETS
+];
+
 export function starterTemplatesFor(game){
   return STARTER_TEMPLATES.filter(item=>item.game===game);
 }

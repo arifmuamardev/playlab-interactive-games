@@ -10,6 +10,7 @@ import '../projector-fx.css';
 import {makeStageEvent,useProjectorAudio,useStageMoment} from '../stageEffects.js';
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
+import {GameRules} from '../GameRules.jsx';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
@@ -115,6 +116,7 @@ function QuickfireHost({game,change}){
             {game.lastAward&&<HostActionButton muted onClick={undoScore}><RotateCcw size={16}/> Undo score change</HostActionButton>}
           </>}
       </HostActionBar>
+      <div className="host-rules-reference"><GameRules game="quickfire"/></div>
       <div className="quick-layout"><section className="preview-section"><div className="section-head"><div><h2>Audience preview</h2><p>The question and options shown on the projector</p></div></div><div className="preview-frame"><QuickfireBoard game={game} preview/></div></section>
       <aside className="quick-controls">
         <ControlCard title="Question control" description="Host shortcuts: R reveal/hide · N next · P previous. They pause while editing text."><div className="quick-nav"><button className="btn btn-soft" disabled={game.questionIndex===0} onClick={()=>setQuestion(game.questionIndex-1)}><ChevronLeft size={17}/> Previous</button><span>{game.questionIndex+1} / {game.questions.length}</span><button className="btn btn-soft" disabled={game.questionIndex===game.questions.length-1} onClick={()=>setQuestion(game.questionIndex+1)}>Next <ChevronRight size={17}/></button></div><h3 className="quick-control-question">{q.question}</h3><p className="quick-correct-hint">Answer: {'ABCD'[q.answer]} · {q.options[q.answer]}</p><button className="btn btn-primary quick-main-action" aria-pressed={visible} onClick={reveal}>{visible?<EyeOff size={17}/>:<Eye size={17}/>} {visible?'Hide answer':'Reveal correct answer'}</button></ControlCard>
