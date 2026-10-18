@@ -5,6 +5,7 @@ import {QuestionBuilder,useQuestionDraft} from '../../components/QuestionBuilder
 import '../gameplay-polish.css';
 import '../projector-fx.css';
 import {useProjectorAudio} from '../stageEffects.js';
+import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -115,9 +116,18 @@ function HostApp({game,change}){
     if(!window.confirm('Reset current round? Revealed answers, strikes and its awarded score will be lost.'))return;
     change(old=>{const id=old.questions[old.roundIndex].id;const progress={...old.progress};delete progress[id];return {...old,progress,lastEvent:dispatchEvent('next')}});
   };
+  const finishMatch=()=>{
+    if(!window.confirm('Finish this match and show final results? Scores and questions stay saved. You can resume if you need to correct anything.'))return;
+    change(old=>old.finished?old:{...old,finished:true,lastEvent:dispatchEvent('finish')});
+  };
+  const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:dispatchEvent('next')}));
+  const resetFinishedMatch=()=>{
+    if(!window.confirm('Reset and play again? ALL round awards, strikes, and revealed answers will be cleared. Questions and team names stay saved.'))return;
+    change(old=>({...old,finished:false,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));
+  };
   const resetMatch=()=>{
     if(!window.confirm('Reset the ENTIRE match? All team scores and round progress will be cleared. Questions and team names are kept.'))return;
-    change(old=>({...old,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
+    change(old=>({...old,roundIndex:0,progress:{},finished:false,lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
   };
   const revealAll=()=>change(old=>{const qq=old.questions[old.roundIndex],pp=progressFor(old,qq.id);return updateProgress(old,{revealed:qq.answers.map((_,i)=>i)},'reveal')});
   const exportData=()=>{
@@ -145,6 +155,7 @@ function HostApp({game,change}){
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
   const openDisplay=()=>window.open(displayUrl.toString(),'playlab-survey-display');
   const copyDisplay=async()=>{try{await navigator.clipboard.writeText(displayUrl.toString());setCopyOkay(true);setTimeout(()=>setCopyOkay(false),1500)}catch{window.prompt('Copy the display link:',displayUrl.toString())}};
+  if(game.finished)return <ResultsHost game={game} kind="survey" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={openDisplay}/>;
   return <div className="host-shell gameplay-polished gameplay-survey">
     <header className="host-header"><PlayLabBrand/><div className="host-header-right"><a className="home-link" href="./">← Game library</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">How to play</IconButton><button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> Open projector view <ArrowUpRight size={15}/></button></div></header>
     <main className="host-main">
@@ -180,6 +191,8 @@ function HostApp({game,change}){
             <button className="btn btn-plain-wide" onClick={revealAll}><Eye size={17}/> Reveal all remaining answers</button>
             <button className="btn btn-plain-wide" onClick={resetRound}><RotateCcw size={17}/> Reset this round</button>
             <button className="btn btn-next" disabled={game.roundIndex===game.questions.length-1} onClick={()=>goRound(game.roundIndex+1)}>Next round <ArrowRight size={18}/></button>
+            <button className="btn btn-primary results-finish-button" onClick={finishMatch}><Trophy size={18}/> Finish match & show results</button>
+            <p className="results-finish-note">You can finish early. No points are deleted, and you can resume later to correct results.</p>
           </ControlCard>
           <ControlCard title="Question bank" description={`${game.questions.length} editable rounds · JSON import/export`}>
             <div className="tool-grid"><button className="btn btn-tool" onClick={()=>setEditing(true)}><Edit3 size={17}/> Edit questions</button><button className="btn btn-tool" onClick={exportData}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>fileRef.current?.click()}><FileUp size={17}/> Import JSON</button><button className="btn btn-tool" onClick={resetMatch}><RotateCcw size={17}/> Reset match</button></div><input type="file" hidden ref={fileRef} accept="application/json,.json" onChange={importData}/>
@@ -238,7 +251,7 @@ function QuestionEditor({questions,onSave,onClose}){
 function DisplayApp({game}){
   const ref=useRef(null);const [soundEnabled,toggleSound]=useProjectorAudio(game.lastEvent);
   const full=()=>{const el=ref.current;if(!document.fullscreenElement){el?.requestFullscreen?.().catch(()=>{})}else{document.exitFullscreen?.()}};
-  return <main className="display-view" ref={ref}><Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/></main>
+  return <main className="display-view" ref={ref}>{game.finished?<><div className="results-display-actions"><button type="button" onClick={toggleSound} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} aria-pressed={soundEnabled}>{soundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>} {soundEnabled?'Sound on':'Enable sound'}</button><button type="button" onClick={full}><Maximize size={16}/> Fullscreen</button></div><ResultsBoard game={game} kind="survey"/></>:<Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/>}</main>
 }
 
 export function SurveyGame(){const [game,change]=useGame();return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=survey">Back to setup</a></aside>}{IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>}</>;}
