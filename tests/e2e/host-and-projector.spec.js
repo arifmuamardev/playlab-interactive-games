@@ -27,7 +27,7 @@ async function exerciseSurvey(context,{forceStorageFallback=false}={}){
   await host.getByRole('button',{name:/^Strike\b/}).click({force:true});
   await host.getByRole('button',{name:/^Strike\b/}).click({force:true});
   await expect(projector.locator('.strike.is-strike')).toHaveCount(3);
-  await expect(projector.locator('.phase-indicator')).toContainText('KESEMPATAN');
+  await expect(projector.locator('.phase-indicator')).toContainText('STEAL OPPORTUNITY');
 
   await host.locator('.award-btn--1').click();
   await expect(projector.locator('.team-score--1 .team-number')).toHaveText('34');
