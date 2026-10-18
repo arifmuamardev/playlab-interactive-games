@@ -39,7 +39,7 @@ sessions are ephemeral and do not sync your local saved question-pack library.
 
 ### Operational safety
 
-- Room state changes are accepted only from a valid controller token, validated
+- Room creation is rate-limited to 24 requests per IP per hour by the relay.\n- Room state changes are accepted only from a valid controller token, validated
   and serialized server-side. Conflicting/outdated updates are rejected.
 - The audience token is never authorized for writes.
 - Disconnection shows a status screen, **not a fake offline demo board**.
