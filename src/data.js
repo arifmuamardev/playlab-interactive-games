@@ -18,6 +18,7 @@ export function makeInitialState() {
     roundIndex:0,
     teamNames:['Tim Merah','Tim Biru'],
     progress:{},
+    finished:false,
     lastEvent:null
   };
 }
@@ -67,6 +68,7 @@ export function readSavedState() {
         roundIndex:Math.min(Math.max(0,Number(saved.roundIndex)||0),questions.length-1),
         teamNames:Array.isArray(saved.teamNames) && saved.teamNames.length===2 ? saved.teamNames.map((s,i)=>String(s||`Tim ${i+1}`).slice(0,45)) : ['Tim Merah','Tim Biru'],
         progress: typeof saved.progress==='object' && saved.progress && !Array.isArray(saved.progress) ? saved.progress : {},
+        finished:saved.finished===true,
         lastEvent:saved.lastEvent||null
       };
     }
