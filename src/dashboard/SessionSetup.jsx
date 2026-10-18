@@ -4,6 +4,7 @@ import {GAME_CATALOG} from '../core/gameRegistry.js';
 import {gameTitle,readGameSession,readPackLibrary} from './storage.js';
 import {buildConfiguredMatch,hasStoredMatch,writeConfiguredMatch,writeRehearsalMatch} from './setup.js';
 import {starterTemplatesFor} from './starterTemplates.js';
+import {GameRules} from '../games/GameRules.jsx';
 import './setup.css';
 
 const PLAYABLE=GAME_CATALOG.filter(item=>item.slug);
@@ -87,6 +88,9 @@ export function SessionSetup(){
       {step===0&&<>
         <h3>Choose a game</h3><p className="setup-support">Start with a template. Both games work with a single laptop and an audience display.</p>
         <div className="setup-game-options">{PLAYABLE.map(item=><button type="button" className={'setup-game-option setup-game-option--'+item.slug+' '+(game===item.slug?'selected':'')} aria-pressed={game===item.slug} key={item.slug} onClick={()=>chooseGame(item.slug)}><span className="setup-game-art" aria-hidden="true"><span className="setup-game-icon">{item.icon}</span><span className="setup-game-spark">✦</span></span><span className="setup-game-meta">GAME {item.number} · READY TO PLAY</span><strong>{item.title}</strong><small>{item.description}</small><span className="setup-game-check">{game===item.slug?<><Check size={16}/> Selected</>:<>Choose game <ArrowRight size={16}/></>}</span></button>)}</div>
+        <h4 className="setup-rules-title">How do the games work?</h4>
+        <p className="setup-rules-explanation">Read the built-in rules before choosing a game. Suggested house rules are clearly marked and not automatically enforced.</p>
+        <div className="setup-rules-list"><GameRules game="survey"/><GameRules game="quickfire"/></div>
       </>}
       {step===1&&<>
         <h3>Choose your questions</h3><p className="setup-support">Question content is separate from scores. Preparing a new match will always start at zero.</p>
@@ -96,7 +100,24 @@ export function SessionSetup(){
           <label className={'setup-source '+(source==='pack'?'selected':'')}><input type="radio" name="question-source" value="pack" disabled={!available.length||Boolean(library.error)} checked={source==='pack'} onChange={()=>{setSource('pack');setError('');}}/><span className="setup-source-icon" aria-hidden="true"><Library size={22}/></span><span className="setup-source-copy"><strong>Use a saved question pack</strong><small>{available.length?`${available.length} compatible packs in your local library`:'No compatible saved packs yet'}</small></span></label>
           <label className={'setup-source '+(source==='starter'?'selected':'')}><input type="radio" name="question-source" value="starter" checked={source==='starter'} onChange={()=>{setSource('starter');setTemplateId('');setError('');}}/><span className="setup-source-icon" aria-hidden="true"><Sparkles size={22}/></span><span className="setup-source-copy"><strong>Ready-to-use classroom & event templates</strong><small>{starters.length} curated options. Survey point values are fictional, not collected responses.</small></span></label>
         </div>
-        {source==='starter'&&<div className="setup-field"><label htmlFor="setup-template">Starter template</label><select id="setup-template" value={templateId} onChange={e=>{setTemplateId(e.target.value);setError('');}}><option value="">Choose a template</option>{starters.map(item=><option key={item.id} value={item.id}>{item.title} · {item.questions.length} questions</option>)}</select>{starter&&<p className="setup-hint">{starter.description}</p>}</div>}
+        {source==='starter'&&<>
+          <div className="setup-field"><label htmlFor="setup-template">Ready-to-play set</label><select id="setup-template" value={templateId} onChange={e=>{setTemplateId(e.target.value);setError('');}}><option value="">Choose a set</option>{starters.map(item=><option key={item.id} value={item.id}>{item.title} · {item.questions.length} questions</option>)}</select></div>
+          <div className="setup-template-grid" aria-label="Ready-to-play sets">
+            {starters.map(item=><button type="button" key={item.id}
+              aria-pressed={templateId===item.id} className={'setup-template-card '+(templateId===item.id?'selected':'')}
+              onClick={()=>{setTemplateId(item.id);setError('');}}>
+              <span className="setup-template-card-meta">{item.category} · {item.questions.length} {game==='survey'?'rounds':'questions'}</span>
+              <strong>{item.title}</strong><small>{item.description}</small>
+              <span className="setup-template-card-footer">{item.minutes||'10–30 min'} · {item.audience||'Mixed groups'} · {templateId===item.id?'✓ Selected':'Choose this set'}</span>
+            </button>)}
+          </div>
+          {starter&&<div className="setup-template-preview" role="status">
+            <strong>✦ Ready to play: {starter.title}</strong>
+            <p>{starter.questions.length} curated {game==='survey'?'rounds':'questions'}. Review the content in rehearsal before using it with your audience.</p>
+            <ul>{starter.questions.slice(0,3).map(item=><li key={item.id}>{item.question}</li>)}</ul>
+            {game==='survey'&&<p>Answer rankings and points are fictional, illustrative game values—not real survey data.</p>}
+          </div>}
+        </>}
         {source==='pack'&&<div className="setup-field"><label htmlFor="setup-pack">Saved question pack</label><select id="setup-pack" value={packId} onChange={e=>{setPackId(e.target.value);setError('');}}><option value="">Choose a pack</option>{available.map(pack=><option key={pack.id} value={pack.id}>{pack.name} · {pack.questions.length} questions</option>)}</select></div>}
         {library.error&&<p className="setup-warning" role="status">Your saved question library could not be read: {library.error}. Sample questions remain available.</p>}
       </>}
