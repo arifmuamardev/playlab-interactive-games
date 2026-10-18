@@ -1,0 +1,6 @@
+.playlab-remote-unavailable{min-height:100vh;min-height:100dvh;padding:32px 20px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:#160f30;color:#fff;font:700 16px/1.6 Inter,system-ui,sans-serif}
+.playlab-remote-unavailable h1{font-size:clamp(26px,5vw,42px);max-width:700px;line-height:1.2;margin:18px 0}
+.playlab-remote-unavailable p{max-width:640px;color:#f4dca9}
+.playlab-remote-unavailable a{color:#fff;font-size:14px;margin-top:18px}
+.playlab-remote-connected{position:fixed;z-index:950;bottom:12px;left:12px;display:flex;align-items:center;gap:7px;pointer-events:none;font-size:12px;font-weight:800;color:#185238;background:#e4f8ee;border:1px solid #8dc5a6;padding:7px 11px;border-radius:999px;box-shadow:0 2px 7px #301b4230}
+.playlab-remote-connected span{font-size:8px;color:#268859}
