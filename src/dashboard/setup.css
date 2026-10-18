@@ -319,3 +319,15 @@
 .dash-playful .setup-copy-hint{font-size:12px;line-height:1.5}
 .dash-playful .setup-copy-notice{padding:14px 17px;border-radius:12px;border:1.5px solid #8bc5a1;background:#e7f8ee;color:#1e6545;font-size:14px;font-weight:800}
 @media(max-width:500px){.dash-playful .setup-template-full-preview{padding:12px}.dash-playful .setup-copy-button{width:100%;justify-content:center}}
+
+
+/* Two device modes are chosen only after all content and team checks. */
+.dash-playful .setup-device-choice{margin:22px 0;padding:16px;border:1.5px solid #d3c1e7;border-radius:18px;background:#faf7ff}
+.dash-playful .setup-device-choice h4{font-size:18px;font-weight:950;color:#3c2a63;margin:2px 0 14px}
+.dash-playful .setup-device-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dash-playful .setup-device-options label{display:grid;align-content:start;gap:9px;padding:17px;min-width:0;border:2px solid #d9cdea;border-radius:14px;background:#fff;cursor:pointer;font-size:14px}
+.dash-playful .setup-device-options label.selected{background:#f2e9ff;border-color:#5d4095}
+.dash-playful .setup-device-options input{width:19px;height:19px;accent-color:#6441a1}
+.dash-playful .setup-device-options strong{color:#3a2d5a;font-weight:950;line-height:1.35}
+.dash-playful .setup-device-options small{color:#625b77;line-height:1.5;font-size:12px}
+@media(max-width:590px){.dash-playful .setup-device-options{grid-template-columns:1fr}}
