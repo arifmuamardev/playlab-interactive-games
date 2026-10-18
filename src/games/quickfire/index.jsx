@@ -1,6 +1,7 @@
 import React, {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {RemoteConnectionGate} from '../../remote/RemoteConnectionGate.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {QuickfireQuestionEditor} from './QuestionEditor.jsx';
 import {PlayLabBrand,ControlCard} from '../../components/shared.jsx';
@@ -158,8 +159,10 @@ function QuickfireDisplay({game}){
   </main>;
 }
 export function QuickfireApp(){
-  const [game,change]=useQuickfire();
+  const [game,change,connection]=useQuickfire();
   const display=new URLSearchParams(location.search).get('view')==='display';
-  if(display)return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Separate from the real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<QuickfireDisplay game={game}/></>;
-  return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}<QuickfireHost game={game} change={change}/></>;
+  return <RemoteConnectionGate connection={connection} host={!display}>
+    {IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=quickfire">Back to setup</a></aside>}
+    {display?<QuickfireDisplay game={game}/>:<QuickfireHost game={game} change={change}/>}
+  </RemoteConnectionGate>;
 }
