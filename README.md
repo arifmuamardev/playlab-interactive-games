@@ -104,3 +104,9 @@ The approved illustrated **playful game catalog** is now the default PlayLab hom
 ## Playful Game Setup
 
 The functional four-step **Game Setup** wizard now uses the same playful illustration-led design as the live PlayLab catalog and dashboard. All four steps (game choice, question source, team names, and match review) are styled, including practice mode and the safe live-launch confirmation. It remains local-first; no game logic, question-pack storage keys or synchronization semantics were changed. The previous minimalist wizard styling is retired.
+
+## Game finish and final results (Gameplay Experience v2)
+
+Both Survey Showdown and Quickfire Quiz hosts now offer **Finish match & show results**. The host confirms before finishing, then both the host and synchronized audience/projector view show a full-color final scoreboard. Winners and ties are calculated from the actual persisted scores. Survey totals include awarded round points; Quickfire shows manually awarded points. The result screen also shows completed/total rounds or revealed questions; finishing early is supported without pretending every question was played.
+
+**Finish is not reset.** Scores, answer reveals, teams, progress, and question banks remain intact across refresh. The host can **Resume match** to correct a score, or **Reset & play again** (a separate destructive confirmation) to replay with the same questions and team names. The old localStorage keys, version 1 session formats, and separate rehearsal keys remain compatible; older sessions without `finished` default to playing. The projector remains muted until its **Enable sound** button is clicked, and celebratory motion respects reduced-motion preferences. Test on your actual projector and speakers before a live event.
