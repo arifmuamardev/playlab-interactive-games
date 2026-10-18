@@ -6,6 +6,7 @@ import '../gameplay-polish.css';
 import '../projector-fx.css';
 import {useProjectorAudio} from '../stageEffects.js';
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
+import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -92,7 +93,11 @@ function HostApp({game,change}){
   const [editing,setEditing]=useState(false),[showHelp,setShowHelp]=useState(false),[notice,setNotice]=useState('');
   const fileRef=useRef(null);
   const notify=msg=>{setNotice(msg);setTimeout(()=>setNotice(''),3600)};
-  const goRound=i=>change(old=>({...old,roundIndex:Math.max(0,Math.min(old.questions.length-1,i)),lastEvent:dispatchEvent('next')}));
+  const goRound=i=>change(old=>{
+    const index=Math.max(0,Math.min(old.questions.length-1,i));
+    return old.roundIndex===index?old:{...old,roundIndex:index,lastEvent:dispatchEvent('next')};
+  });
+  const jumpToAnswers=()=>document.getElementById('survey-reveal-controls')?.scrollIntoView({block:'start',behavior:'auto'});
   const reveal=i=>change(old=>{
     const qq=old.questions[old.roundIndex],pp=progressFor(old,qq.id);if(pp.awardedTeam!==null)return old;
     const revealed=pp.revealed.includes(i)?pp.revealed.filter(k=>k!==i):[...pp.revealed,i];return updateProgress(old,{revealed},'reveal');
@@ -161,13 +166,28 @@ function HostApp({game,change}){
     <main className="host-main">
       <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>Let’s play <em>Survey Showdown.</em></h1><p>Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.</p></div><div className="gameplay-progress-pill"><span>✦</span> ROUND {game.roundIndex+1} OF {game.questions.length}</div></div>
       <div className="gameplay-status-strip" aria-label="Current game status"><div><span>ROUND STATE</span><strong>{locked?'Round finished':p.phase==='steal'?'Steal opportunity':'Answers in play'}</strong></div><div><span>REVEALED / BANK</span><strong>{p.revealed.length} of {q.answers.length} · {locked?p.awardedAmount:bank} points</strong></div><div><span>QUICK KEYS</span><strong>1–8 reveal · X strike · Z undo strike</strong></div></div>
+      <HostActionBar eyebrow={`LIVE ROUND ${game.roundIndex+1} / ${game.questions.length}`}
+        title={locked?(game.roundIndex===game.questions.length-1?'Last round awarded':'Round points awarded'):p.phase==='steal'?'Steal opportunity':bank>0?'Points are in the bank':'Ready for answers'}
+        description={locked?`${game.teamNames[p.awardedTeam]} received ${p.awardedAmount} points.`:p.phase==='steal'?'Three strikes! Choose the team that wins the bank.':bank>0?`${bank} points available. Reveal more answers or decide which team wins.`:'Reveal a survey answer to build the bank. Strikes do not award points.'}
+        footnote="These actions also remain in the detailed round controls below. Awards, finish, and resets retain their existing safeguards.">
+        {locked?<>{game.roundIndex<game.questions.length-1?
+          <HostActionButton primary onClick={()=>goRound(game.roundIndex+1)}><ArrowRight size={17}/> Continue to round {game.roundIndex+2}</HostActionButton>:
+          <HostActionButton primary onClick={finishMatch}><Trophy size={17}/> Show final results</HostActionButton>}
+          <HostActionButton muted onClick={undoAward}><RotateCcw size={16}/> Correct award</HostActionButton></>:
+          <>{bank>0?<>{[0,1].map(team=><HostActionButton key={team} primary={team===p.activeTeam} onClick={()=>award(team)}><Trophy size={16}/> Give bank to {game.teamNames[team]}</HostActionButton>)}</>:
+            <HostActionButton primary onClick={jumpToAnswers}><Eye size={17}/> Jump to answer buttons</HostActionButton>}
+            <HostActionButton muted onClick={jumpToAnswers}><ArrowRight size={16}/> Answer list</HostActionButton>
+            {p.strikes<3&&<HostActionButton onClick={()=>strike()}><X size={16}/> Add strike</HostActionButton>}
+            {p.strikes>0&&<HostActionButton muted onClick={()=>strike(-1)}><Minus size={16}/> Undo strike</HostActionButton>}
+          </>}
+      </HostActionBar>
       <div className="host-grid">
         <div className="host-primary">
           <section className="preview-section"><div className="section-head"><div><h2>Live game preview</h2><p>What your audience sees on the projector</p></div><div className="head-buttons"><IconButton icon={Copy} onClick={copyDisplay} variant="btn-soft">{copyOkay?'Copied':'Copy display URL'}</IconButton><IconButton icon={Expand} onClick={openDisplay} variant="btn-soft">Pop out</IconButton></div></div><div className="preview-frame"><Stage game={game} preview/></div></section>
-          <ControlCard title="Reveal answers" description="Click an answer to show it on the big board. Shortcuts: 1–8." extra={<span className="small-count">{p.revealed.length} / {q.answers.length} SHOWN</span>}>
+          <div id="survey-reveal-controls"><ControlCard title="Reveal answers" description="Click an answer to show it on the big board. Shortcuts: 1–8." extra={<span className="small-count">{p.revealed.length} / {q.answers.length} SHOWN</span>}>
             <div className="reveal-grid">{q.answers.map((a,i)=><button key={i} disabled={locked} className={'reveal-button '+(p.revealed.includes(i)?'reveal-button--on':'')} aria-pressed={p.revealed.includes(i)} onClick={()=>reveal(i)} title={`Keyboard: ${i+1}`}><span className="reveal-index">{i+1}</span><span className="reveal-name">{a.text}</span><strong>{a.points*q.multiplier} <small>pts</small></strong>{p.revealed.includes(i)?<Eye size={16}/>:<EyeOff size={16}/>}</button>)}</div>
             <div className="minor-note">Point values are sample survey-style data. Replace them with real survey results before your event.</div>
-          </ControlCard>
+          </ControlCard></div>
           <ControlCard title="Team scoreboard" description="Rename teams to match your players. Score is assigned at the end of each round.">
             <div className="team-editor-row">{[0,1].map(team=><div key={team} className={'team-editor team-editor--'+team}><label htmlFor={'team-name-'+team}>TEAM {team+1}</label><input id={'team-name-'+team} value={game.teamNames[team]} maxLength={45} onChange={e=>change(old=>({...old,teamNames:old.teamNames.map((n,i)=>i===team?e.target.value:n)}))}/><strong>{scores[team]}</strong></div>)}</div>
           </ControlCard>
