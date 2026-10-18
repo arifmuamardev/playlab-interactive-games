@@ -1,6 +1,7 @@
 import React from 'react';
 import {BookOpen,ChevronDown,ShieldCheck} from 'lucide-react';
 import './game-rules.css';
+import {useLanguage} from '../i18n/language.jsx';
 
 /** Official PlayLab rules reflect implemented mechanics, not proposed settings.
  * House rules are suggestions for an MC, not software-enforced constraints. */
@@ -38,16 +39,51 @@ export const GAME_RULES={
     optional:'Optional MC house rule: start a visible 15–30 second countdown and award +10 only once per question. Time limits and single-award restrictions are not enforced.'
   }
 };
+/** Accurate Indonesian wording for the currently implemented (manual) rules. */
+const GAME_RULES_ID={
+  survey:{
+    title:'Survey Showdown',tagline:'Tebak jawaban paling populer, kumpulkan poin, lalu menangkan ronde.',
+    label:'Tebak jawaban · 2 tim',
+    steps:[
+      'Pemandu membacakan pertanyaan dan menerima jawaban lisan dari kedua tim.',
+      'Ketika jawaban sesuai dengan daftar, pemandu membukanya. Setiap jawaban menambah poin sesuai nilai dasar dikalikan pengali ronde (1×, 2×, atau 3×).',
+      'Untuk jawaban salah, pemandu menambah tanda kesalahan (X). Tiga kesalahan menampilkan kesempatan merebut poin. Pemandu tetap menentukan hasil usaha tim lawan.',
+      'Pemandu secara manual memberikan total poin ronde kepada satu tim. Minimal satu jawaban harus dibuka. Poin tidak diberikan secara otomatis.',
+      'Lanjutkan ronde, lalu pilih Akhiri permainan. Tim dengan poin tertinggi menang; poin sama berarti seri.'
+    ],
+    controls:'Tombol 1–8 membuka jawaban · X menambah kesalahan · Z membatalkan kesalahan. Pemandu bisa membatalkan pemberian poin. Penghitung waktu opsional tersedia.',
+    scoring:'Poin ronde = jumlah poin jawaban yang dibuka × pengali ronde. Pemandu memberikan jumlah ini kepada satu tim.',
+    caveat:'Semua peringkat dan angka poin dari set bawaan adalah contoh fiktif, BUKAN hasil survei sungguhan. Ganti dengan data survei apabila diperlukan.',
+    optional:'Bergantian menunjuk tim penjawab pertama dan menggunakan penghitung waktu. Batas waktu, urutan giliran, dan keberhasilan merebut poin tidak dipaksakan oleh sistem.'
+  },
+  quickfire:{
+    title:'Quickfire Quiz',tagline:'Tampilkan jawaban benar, berikan poin, lalu lanjutkan pertanyaan.',
+    label:'Kuis pilihan ganda · 2 tim',
+    steps:[
+      'Pemandu menampilkan pertanyaan dengan empat pilihan A, B, C, dan D.',
+      'Tim diberi kesempatan berdiskusi atau menjawab secara lisan. Pemandu menentukan kapan jawaban dan penjelasan ditampilkan.',
+      'Pemandu memberi +10 poin secara manual untuk jawaban benar. Koreksi −10 dan Undo tersedia. Sistem tidak otomatis memeriksa jawaban atau menambah skor.',
+      'Lanjutkan ke pertanyaan berikutnya. Pemandu dapat kembali dan memperbaiki skor. Penghitung waktu hanya visual; tidak ada batas otomatis, buzzer, atau pembatasan satu pemberian poin.',
+      'Pilih Akhiri permainan untuk menampilkan hasil akhir. Poin tertinggi menang dan poin sama berarti seri.'
+    ],
+    controls:'Tombol R membuka/menutup jawaban · N berikutnya · P sebelumnya · U batalkan skor terakhir. Pintasan tidak aktif ketika mengetik.',
+    scoring:'Default +10 poin tiap pemberian manual. Koreksi −10 tidak membuat poin negatif. Membuka jawaban tidak otomatis menambah poin.',
+    caveat:'Kuis bawaan menggunakan jawaban objektif dan penjelasan. Pemandu dapat menyesuaikan tingkat kesulitan.',
+    optional:'Tampilkan penghitung 15–30 detik dan berikan +10 hanya sekali tiap pertanyaan. Batas waktu maupun aturan satu pemberian poin tidak dipaksakan oleh sistem.'
+  }
+};
+
 export function GameRules({game,open=false}){
-  const rule=GAME_RULES[game];if(!rule)return null;
+  const {lang}=useLanguage();
+  const rule=(lang==='id'?GAME_RULES_ID:GAME_RULES)[game];if(!rule)return null;
   return <details className={'playlab-rules playlab-rules--'+game} open={open||undefined}>
-    <summary><span className="playlab-rules-label"><BookOpen size={19} aria-hidden="true"/><span><strong>{rule.title}: how to play</strong><small>{rule.label}</small></span></span><ChevronDown size={19} aria-hidden="true"/></summary>
+    <summary><span className="playlab-rules-label"><BookOpen size={19} aria-hidden="true"/><span><strong>{rule.title}: {lang==='id'?'cara bermain':'how to play'}</strong><small>{rule.label}</small></span></span><ChevronDown size={19} aria-hidden="true"/></summary>
     <div className="playlab-rules-body">
       <p className="playlab-rules-tagline">{rule.tagline}</p>
       <ol>{rule.steps.map((item,i)=><li key={i}>{item}</li>)}</ol>
-      <div className="playlab-rules-facts"><p><strong>Scoring:</strong> {rule.scoring}</p><p><strong>Host controls:</strong> {rule.controls}</p></div>
+      <div className="playlab-rules-facts"><p><strong>{lang==='id'?'Penilaian:':'Scoring:'}</strong> {rule.scoring}</p><p><strong>{lang==='id'?'Kontrol pemandu:':'Host controls:'}</strong> {rule.controls}</p></div>
       <p className="playlab-rules-notice"><ShieldCheck size={17} aria-hidden="true"/>{rule.caveat}</p>
-      <p className="playlab-rules-optional"><strong>Optional house rule (not enforced):</strong> {rule.optional.replace(/^Optional MC house rule:\s*/,'')}</p>
+      <p className="playlab-rules-optional"><strong>{lang==='id'?'Aturan tambahan opsional (tidak otomatis):':'Optional house rule (not enforced):'}</strong> {rule.optional.replace(/^Optional MC house rule:\s*/,'')}</p>
     </div>
   </details>;
 }
