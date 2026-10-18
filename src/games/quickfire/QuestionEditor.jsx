@@ -6,7 +6,7 @@ import {normalizeQuickfireQuestions} from './data.js';
 /** Local-first question builder for Quickfire.
  * Draft edits never modify the live session until an explicit save/confirmation.
  */
-export function QuickfireQuestionEditor({questions,onSave,onClose}){
+export function QuickfireQuestionEditor({questions,onSave,onClose,saveNote='Saving replaces the live question bank and resets the match after confirmation.'}){
   const {items,setItems,selected,setSelected,error,setError,mutate}=useQuestionDraft(questions);
   const [jsonInput,setJsonInput]=useState('');
   const q=items[selected];
@@ -43,7 +43,7 @@ export function QuickfireQuestionEditor({questions,onSave,onClose}){
     items={items} selected={selected} onSelect={i=>{setSelected(i);setError('');}}
     onAdd={addQuestion} itemBadge={item=>'ABCD'[item.answer]||'A'} maxItems={60}
     className="quick-editor quick-builder" error={error}
-    saveNote="Saving replaces the live question bank and resets the match after confirmation."
+    saveNote={saveNote}
     closeLabel="Close question editor" onSave={save} onClose={onClose}>
     <label htmlFor="quick-builder-question">QUESTION TEXT</label>
     <textarea id="quick-builder-question" rows={3} maxLength={250} value={q.question} placeholder="Enter a question..." onChange={e=>update(d=>{d[selected].question=e.target.value;})}/>
