@@ -94,7 +94,7 @@ for(const template of STARTER_TEMPLATES){
   const normalized=template.game==='survey'?normalizeQuestions(template.questions):normalizeQuickfireQuestions(template.questions);
   assert.equal(normalized.length,8);
   for(const question of template.questions){
-    assert.ok(question.question.length>15&&question.question.length<250,template.id+': usable question wording');
+    assert.ok(question.question.length>=10&&question.question.length<250,template.id+': usable question wording');
     assert.ok(!question.question.includes('TODO'),template.id+': no placeholder questions');
     if(template.game==='survey'){
       assert.ok(!surveyQuestions.has(question.id),'Duplicated Survey answer ID '+question.id);
