@@ -73,3 +73,8 @@
  .setup-template-card,.playlab-rules summary>svg{transition:none!important}
  .setup-template-card:hover{transform:none}
 }
+
+/* The host sees the rules in a small collapsible reference below its action bar. */
+.gameplay-polished .host-rules-reference{margin:-12px 0 24px;max-width:100%}
+.gameplay-polished .host-rules-reference .playlab-rules{background:#fffdf5}
+@media(max-width:630px){.gameplay-polished .host-rules-reference{margin:-4px 0 19px}}
