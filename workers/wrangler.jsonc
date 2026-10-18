@@ -1,0 +1,10 @@
+{
+  "name": "playlab-session-relay",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "durable_objects": {
+    "bindings": [{ "name": "PLAYLAB_ROOMS", "class_name": "PlayLabRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PlayLabRoom"] }],
+  "workers_dev": true
+}

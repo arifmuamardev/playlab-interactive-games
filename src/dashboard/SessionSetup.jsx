@@ -8,6 +8,7 @@ import {GameRules} from '../games/GameRules.jsx';
 import {SurveyQuestionEditor} from '../games/survey/index.jsx';
 import {QuickfireQuestionEditor} from '../games/quickfire/QuestionEditor.jsx';
 import {useLanguage} from '../i18n/language.jsx';
+import {createRemoteRoom,storeOrganizer} from '../remote/session.js';
 import './setup.css';
 
 const PLAYABLE=GAME_CATALOG.filter(item=>item.slug);
@@ -34,6 +35,7 @@ export function SessionSetup(){
   const [teams,setTeams]=useState(()=>savedNames(initialGame()||'quickfire'));
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
+  const [devices,setDevices]=useState(()=>new URLSearchParams(location.search).get('devices')==='remote'?'remote':'local');
   const [library,setLibrary]=useState(()=>{
     try{return {packs:readPackLibrary(),error:''};}
     catch(err){return {packs:[],error:err.message};}
@@ -71,13 +73,20 @@ export function SessionSetup(){
     if(step===2&&invalidTeam){setError('Enter two distinct team names (1–45 characters each).');return;}
     setStep(value=>Math.min(value+1,STEPS.length-1));
   }
-  function launch(){
+  async function launch(){
     if(busy)return;
     setError('');
     const config={game,source,packId,templateId,teamNames:teams};
     try{
       // Validate content, format compatibility, names and IDs before a destructive confirmation.
-      buildConfiguredMatch(config);
+      const candidate=buildConfiguredMatch(config);
+      if(devices==='remote'){
+        setBusy(true);
+        const session=await createRemoteRoom(game,candidate);
+        storeOrganizer(session);
+        window.location.assign('?page=organizer&room='+encodeURIComponent(session.roomId));
+        return;
+      }
       if(hasStoredMatch(game)&&!window.confirm('Start a new '+gameTitle(game)+' match? This will replace the current match, erase its scores and revealed answers, and update any open host/projector windows. Your saved question packs will remain intact.'))return;
       setBusy(true);
       writeConfiguredMatch(config);
@@ -160,15 +169,16 @@ export function SessionSetup(){
       </>}
       {step===3&&<>
         <h3>{t('Review your new match')}</h3><p className="setup-support">{lang==='id'?'Setelah dijalankan, panel pemandu akan terbuka. Buka proyektor dari sana.':'Once you launch, the game opens in its host control room. Open the projector from there.'}</p>
+        <div className="setup-device-choice"><h4>{lang==='id'?'Bagaimana cara menjalankan permainan?':'How will you run the game?'}</h4><div className="setup-device-options"><label className={devices==='local'?'selected':''}><input type="radio" name="device-mode" value="local" checked={devices==='local'} onChange={()=>setDevices('local')}/><strong>💻 {lang==='id'?'Satu laptop + proyektor':'One laptop + projector'}</strong><small>{lang==='id'?'Laptop menjadi panel pemandu; layar proyektor dibuka di jendela terpisah.':'The laptop is the host; open the audience screen in a separate window.'}</small></label><label className={devices==='remote'?'selected':''}><input type="radio" name="device-mode" value="remote" checked={devices==='remote'} onChange={()=>setDevices('remote')}/><strong>📱 {lang==='id'?'Laptop tampilan + perangkat pengontrol':'Display laptop + separate controller'}</strong><small>{lang==='id'?'Ponsel atau laptop kedua menjadi pemandu; kedua perangkat perlu internet.':'A second phone or laptop becomes the controller; both devices need internet.'}</small></label></div></div>
         <div className="setup-review-celebration" aria-hidden="true"><Trophy size={32}/><span>{t('MATCH READY!')}</span><span>✦ ✦ ✦</span></div>
         <dl className="setup-review"><div><dt>Game</dt><dd>{selectedGame?.title}</dd></div><div><dt>Questions</dt><dd>{source==='demo'?'Sample questions':source==='current'?'Current saved questions':source==='starter'?starter?.title:chosen?.name} · {displayedCount} questions</dd></div><div><dt>Teams</dt><dd>{teams[0].trim()} vs {teams[1].trim()}</dd></div><div><dt>Start condition</dt><dd>Question 1 · Scores 0–0</dd></div><div><dt>Storage</dt><dd>This browser only · No account</dd></div></dl>
-        <div className="setup-warning"><ShieldAlert size={19}/><p>{hasStoredMatch(game)?'A saved match already exists. Starting will replace its question bank, scores and progress after confirmation. Save important questions first.':'No saved match will be replaced.'} Your saved question packs will not be deleted.</p></div>
+        <div className="setup-warning"><ShieldAlert size={19}/><p>{devices==='remote'?(lang==='id'?'Mode terhubung membuat sesi daring sementara selama 12 jam dan tidak menimpa game lokal. Tautan pengontrol harus dirahasiakan.':'Paired mode creates a temporary 12-hour online room and does not replace your local match. Keep the controller link private.'):(hasStoredMatch(game)?'A saved match already exists. Starting will replace its question bank, scores and progress after confirmation. Save important questions first.':'No saved match will be replaced.')+' Your saved question packs will not be deleted.'}</p></div>
       </>}
       {notice&&<div role="status" className="setup-copy-notice">{notice}</div>}
       {error&&<div role="alert" className="setup-error">{error}</div>}
       <div className="setup-actions">
         {step===0?<a className="dash-action" href="?page=dashboard"><ArrowLeft size={16}/> {t('Dashboard')}</a>:<button className="dash-action" onClick={()=>{setStep(v=>v-1);setError('');}}><ArrowLeft size={16}/> {t('Back')}</button>}
-        {step===3?<div className="setup-launch-buttons"><button className="dash-action" onClick={rehearse}><Gamepad2 size={17}/> {t('Practice without affecting live game')}</button><button disabled={busy} className="dash-action dash-action-primary" onClick={launch}><MonitorPlay size={17}/> {t('Launch host controls')}</button></div>:<button className="dash-action dash-action-primary" onClick={next}>{t('Continue')} <ArrowRight size={16}/></button>}
+        {step===3?<div className="setup-launch-buttons"><button className="dash-action" onClick={rehearse}><Gamepad2 size={17}/> {t('Practice without affecting live game')}</button><button disabled={busy} className="dash-action dash-action-primary" onClick={launch}><MonitorPlay size={17}/> {busy?(lang==='id'?'Menyiapkan ruang…':'Preparing room…'):devices==='remote'?(lang==='id'?'Buat sesi terhubung':'Create paired session'):t('Launch host controls')}</button></div>:<button className="dash-action dash-action-primary" onClick={next}>{t('Continue')} <ArrowRight size={16}/></button>}
       </div>
     </section>
     {workingCopy&&(game==='survey'?

@@ -1,0 +1,36 @@
+.org-page{min-height:100vh;background:#fffcf5;color:#382952;font-family:Inter,system-ui,Arial,sans-serif}
+.org-header{max-width:1250px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px clamp(16px,4vw,55px);border-bottom:2px solid #e8dded}
+.org-header nav{display:flex;align-items:center;gap:15px}
+.org-header a{color:#392762;text-decoration:none;font-weight:850}
+.org-brand{font-size:27px;font-weight:1000;letter-spacing:-.07em}
+.org-main{width:min(1120px,100%);margin:0 auto;padding:clamp(24px,5vw,60px) 18px}
+.org-eyebrow{display:flex;align-items:center;gap:8px;color:#7257ab;font-size:12px;font-weight:900;letter-spacing:.15em}
+.org-main h1{font-size:clamp(31px,5vw,60px);line-height:1.1;letter-spacing:-.055em;max-width:790px;margin:14px 0;color:#322250}
+.org-lead{font-size:clamp(15px,1.5vw,18px);line-height:1.6;max-width:750px;color:#6a587d}
+.org-mode-grid,.org-connections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:30px 0}
+.org-device-card{background:white;border:2px solid #483069;border-radius:23px;padding:clamp(20px,3vw,32px);box-shadow:5px 6px 0 #dcd0ea;min-width:0}
+.org-card-head{display:flex;align-items:center;gap:12px;font-weight:1000;letter-spacing:.1em;color:#7351a9;font-size:12px}
+.org-card-head svg{color:#df6285;flex-shrink:0}
+.org-device-card h2,.org-checklist h2{font-size:clamp(22px,2.8vw,29px);letter-spacing:-.035em;margin:17px 0 8px;color:#322250}
+.org-device-card p{line-height:1.58;font-size:14px;color:#665679;min-height:65px}
+.org-game-link,.org-primary-link{display:flex;align-items:center;gap:11px;padding:14px 17px;margin-top:12px;background:#54358e;color:white!important;font-weight:850;border:2px solid #3e276b;border-radius:13px;text-decoration:none;min-height:49px;cursor:pointer;max-width:100%;font-size:14px}
+.org-game-link svg:last-child,.org-primary-link svg:last-child{margin-left:auto}
+.org-game-link:hover,.org-primary-link:hover{background:#7149b7}
+.org-device-card label{display:block;margin-top:20px;font-weight:850;font-size:12px;color:#43345f}
+.org-copy-row{display:flex;gap:8px;min-width:0;margin-top:7px}
+.org-copy-row input{min-width:0;flex:1;border:1.5px solid #b6a3cf;border-radius:9px;padding:11px;font-size:13px;background:#fcfaff;color:#4c4064}
+.org-copy-row button{background:#efe6ff;border:1.5px solid #b6a3cf;border-radius:10px;padding:10px;color:#483069;min-width:45px;cursor:pointer}
+.org-session-info{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}
+.org-session-info>*{background:#eee6fc;padding:10px 15px;border-radius:999px;font-size:13px}
+.org-security{display:flex;align-items:flex-start;gap:13px;border:1px solid #e8c77d;background:#fff9e9;padding:15px;border-radius:14px;line-height:1.55}
+.org-security svg{flex:none;color:#936f32}
+.org-security p{margin:0;font-size:13px}
+.org-checklist{margin:29px 0;padding:22px 25px;border-radius:15px;background:#fff;border:1px solid #ded2ed}
+.org-checklist h2{margin-top:0}
+.org-checklist label{display:flex;gap:11px;align-items:center;margin:14px 0;font-size:14px;font-weight:700}
+.org-checklist input{width:19px;height:19px;accent-color:#6544ad}
+.org-good{display:flex;align-items:center;gap:8px;color:#19794f;font-weight:800}
+.org-warning{color:#a14f37;font-weight:750}
+.org-hint{font-size:13px;line-height:1.55;color:#716685}
+.org-back{display:inline-flex;align-items:center;gap:10px;margin:20px 0;color:#47306b;font-weight:800}
+@media(max-width:700px){.org-mode-grid,.org-connections{grid-template-columns:1fr}.org-header nav{gap:8px}.org-header nav>a{font-size:12px}.org-main{padding-inline:14px}.org-device-card p{min-height:0}}

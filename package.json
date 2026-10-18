@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build && node scripts/offline.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node scripts/check-data.mjs && node scripts/check-modules.mjs && node scripts/check-dashboard.mjs",
+    "test": "node scripts/check-data.mjs && node scripts/check-modules.mjs && node scripts/check-dashboard.mjs && node scripts/check-remote-relay.mjs",
     "standalone": "npm run build",
     "serve:standalone": "node serve.cjs",
     "test:e2e": "playwright test"

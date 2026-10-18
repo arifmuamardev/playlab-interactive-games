@@ -4,6 +4,7 @@ import {SurveyGame} from './games/survey/index.jsx';
 import {QuickfireApp} from './games/quickfire/index.jsx';
 import {GameHub} from './GameHub.jsx';
 import {Dashboard} from './dashboard/Dashboard.jsx';
+import {Organizer} from './organizer/Organizer.jsx';
 import {PlayfulDesignLab} from './design/PlayfulDesignLab.jsx';
 import './styles.css';
 
@@ -18,6 +19,7 @@ function App(){
   const selected=new URLSearchParams(location.search).get('game');
   const View=GAME_VIEWS[selected];
   if(View)return <View/>;
+  if(new URLSearchParams(location.search).get('page')==='organizer')return <Organizer/>;
   if(new URLSearchParams(location.search).get('page')==='design-lab')return <PlayfulDesignLab/>;
   return new URLSearchParams(location.search).get('page')==='dashboard'?<Dashboard/>:<GameHub/>;
 }
