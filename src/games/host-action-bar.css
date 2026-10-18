@@ -1,0 +1,73 @@
+/* Context-first controls: visible while the host scrolls a long question or scoreboard.
+ * Scoped to live host pages only; projector and Design Lab are unaffected. */
+.gameplay-polished .host-action-bar{
+  position:sticky;top:10px;z-index:28;
+  display:grid;grid-template-columns:minmax(220px,1fr) minmax(280px,1.25fr);
+  gap:12px 23px;align-items:center;
+  border:2px solid #372655;border-radius:19px;
+  background:#fff8dcf7;box-shadow:5px 6px 0 #372655;
+  padding:17px 22px;margin:0 0 29px;
+  backdrop-filter:blur(14px);max-width:100%;min-width:0
+}
+.gameplay-quickfire .host-action-bar{background:#eae1fff5}
+.gameplay-polished .host-action-copy{min-width:0}
+.gameplay-polished .host-action-kicker{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:1000;color:#7653ad;letter-spacing:.08em}
+.gameplay-polished .host-action-copy h2{
+  font-size:clamp(20px,2.4vw,28px);font-weight:1000;letter-spacing:-.045em;
+  color:#322555;margin:6px 0 4px;line-height:1.14
+}
+.gameplay-polished .host-action-copy p{font-size:11px;font-weight:700;color:#655979;line-height:1.4;margin:0}
+.gameplay-polished .host-action-buttons{
+  display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;min-width:0
+}
+.gameplay-polished .host-action-btn{
+  appearance:none;display:inline-flex;justify-content:center;align-items:center;gap:7px;
+  border:1.5px solid #baa7d9;border-radius:11px;background:#fff;color:#46336e;
+  font-size:12px;font-weight:950;line-height:1.25;padding:12px 13px;min-height:42px;
+  transition:transform .14s ease,background .14s ease;text-align:center;
+}
+.gameplay-polished .host-action-btn:hover:not(:disabled){background:#f7e9ff;transform:translateY(-1px)}
+.gameplay-polished .host-action-btn--primary{background:#46308b;color:#fff;border-color:#342452;box-shadow:2px 3px 0 #342452}
+.gameplay-polished .host-action-btn--primary:hover:not(:disabled){background:#6046b4}
+.gameplay-polished .host-action-btn--muted{background:#fff8f0;color:#745d77;border-color:#d7c2db}
+.gameplay-polished .host-action-btn:disabled{opacity:.45;cursor:not-allowed}
+.gameplay-polished .host-action-btn:focus-visible{outline:3px solid #8567f0;outline-offset:3px}
+.gameplay-polished .host-action-footnote{
+  grid-column:1/-1;font-size:10px;line-height:1.4;color:#756788;margin:0;
+  border-top:1px dashed #ddcde7;padding-top:8px
+}
+.gameplay-polished #survey-reveal-controls{scroll-margin-top:190px}
+@media(max-width:1150px){
+  .gameplay-polished .host-action-bar{grid-template-columns:1fr;gap:11px;padding:14px 17px}
+  .gameplay-polished .host-action-buttons{justify-content:flex-start}
+}
+@media(max-width:630px){
+  .gameplay-polished .host-action-bar{
+    top:4px;border-radius:13px;margin-bottom:19px;padding:12px 12px 10px;
+    gap:10px;box-shadow:3px 4px 0 #372655;
+  }
+  .gameplay-polished .host-action-copy h2{font-size:19px}
+  .gameplay-polished .host-action-copy p{font-size:10px}
+  .gameplay-polished .host-action-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .gameplay-polished .host-action-btn{font-size:10px;min-width:0;padding:10px 8px;min-height:41px}
+  .gameplay-polished .host-action-btn svg{width:15px;height:15px;flex:none}
+  .gameplay-polished .host-action-footnote{display:none}
+  .gameplay-polished #survey-reveal-controls{scroll-margin-top:225px}
+}
+@media(prefers-reduced-motion:reduce){
+ .gameplay-polished .host-action-btn{transition:none!important}
+ .gameplay-polished .host-action-btn:hover:not(:disabled){transform:none}
+}
+
+/* Desktop host controls use a separate right-hand column. Keep the sticky bar
+   within the left column so it never covers strike, award or scoring buttons. */
+@media(min-width:921px){
+ .gameplay-polished .host-action-bar{
+   width:calc((100% - 24px)*.64);
+   margin-right:auto;
+   grid-template-columns:minmax(0,1fr);
+   gap:11px;
+ }
+ .gameplay-polished .host-action-buttons{justify-content:flex-start}
+}
+.gameplay-polished .host-action-btn{overflow-wrap:anywhere}

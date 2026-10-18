@@ -9,6 +9,7 @@ import '../gameplay-polish.css';
 import '../projector-fx.css';
 import {makeStageEvent,useProjectorAudio,useStageMoment} from '../stageEffects.js';
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
+import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
@@ -99,6 +100,21 @@ function QuickfireHost({game,change}){
     <main className="host-main">
       <div className="intro"><div><div className="eyebrow">CLASSROOM & EVENT TOOLKIT / HOST CONTROL ROOM</div><h1>Let’s play <em>Quickfire Quiz.</em></h1><p>Reveal multiple-choice answers, award team points, and take the whole game to a projector.</p></div><div className="gameplay-progress-pill"><span>✦</span> QUESTION {game.questionIndex+1} OF {game.questions.length}</div></div>
       <div className="gameplay-status-strip" aria-label="Current game status"><div><span>ON THE BIG SCREEN</span><strong>{visible?'Answer revealed':'Question waiting'}</strong></div><div><span>TEAMS READY</span><strong>{game.teamNames.join(' vs ')}</strong></div><div><span>QUICK KEYS</span><strong>R reveal · N/P navigate · U undo</strong></div></div>
+      <HostActionBar eyebrow={`LIVE QUESTION ${game.questionIndex+1} / ${game.questions.length}`}
+        title={visible?(game.questionIndex===game.questions.length-1?'Last answer revealed':'Answer revealed — score or continue'):'Give everyone a moment to answer'}
+        description={visible?'Award points explicitly before advancing. There is no automatic scoring.':'Ask the room for their choice, then show the correct answer when ready.'}
+        footnote="Use R to reveal/hide, N/P to navigate and U to undo a score change. All detailed controls stay available below.">
+        {!visible?
+          <><HostActionButton primary onClick={reveal}><Eye size={17}/> Show answer on projector</HostActionButton>
+            {game.questionIndex<game.questions.length-1&&<HostActionButton muted onClick={()=>setQuestion(game.questionIndex+1)}><ArrowRight size={16}/> Skip to question {game.questionIndex+2}</HostActionButton>}
+          </>:
+          <>{[0,1].map(team=><HostActionButton key={team} onClick={()=>award(team,10)}><Plus size={17}/> +10 · {game.teamNames[team]}</HostActionButton>)}
+            {game.questionIndex===game.questions.length-1?
+              <HostActionButton primary onClick={finishMatch}><Trophy size={17}/> Show final results</HostActionButton>:
+              <HostActionButton primary onClick={()=>setQuestion(game.questionIndex+1)}><ArrowRight size={17}/> Continue to question {game.questionIndex+2}</HostActionButton>}
+            {game.lastAward&&<HostActionButton muted onClick={undoScore}><RotateCcw size={16}/> Undo score change</HostActionButton>}
+          </>}
+      </HostActionBar>
       <div className="quick-layout"><section className="preview-section"><div className="section-head"><div><h2>Audience preview</h2><p>The question and options shown on the projector</p></div></div><div className="preview-frame"><QuickfireBoard game={game} preview/></div></section>
       <aside className="quick-controls">
         <ControlCard title="Question control" description="Host shortcuts: R reveal/hide · N next · P previous. They pause while editing text."><div className="quick-nav"><button className="btn btn-soft" disabled={game.questionIndex===0} onClick={()=>setQuestion(game.questionIndex-1)}><ChevronLeft size={17}/> Previous</button><span>{game.questionIndex+1} / {game.questions.length}</span><button className="btn btn-soft" disabled={game.questionIndex===game.questions.length-1} onClick={()=>setQuestion(game.questionIndex+1)}>Next <ChevronRight size={17}/></button></div><h3 className="quick-control-question">{q.question}</h3><p className="quick-correct-hint">Answer: {'ABCD'[q.answer]} · {q.options[q.answer]}</p><button className="btn btn-primary quick-main-action" aria-pressed={visible} onClick={reveal}>{visible?<EyeOff size={17}/>:<Eye size={17}/>} {visible?'Hide answer':'Reveal correct answer'}</button></ControlCard>
