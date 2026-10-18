@@ -228,11 +228,11 @@ function HostApp({game,change}){
       <footer className="host-footer"><span>PlayLab · Survey Showdown</span><span>Runs entirely in your browser · No participant accounts</span></footer>
     </main>
     {notice&&<div role="status" className="toast">{notice}</div>}
-    {editing&&<QuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
+    {editing&&<SurveyQuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
     {showHelp&&<div className="modal-backdrop" onClick={()=>setShowHelp(false)}><div className="modal modal--help" role="dialog" aria-modal="true" aria-label="How to play" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">HOST QUICK START</span><h2>How to play</h2></div><button className="square-btn" onClick={()=>setShowHelp(false)} aria-label="Close"><X/></button></div><ol className="howto"><li><b>Open projector view</b> and move it to the external screen. Fullscreen it, and enable its sound if desired.</li><li><b>Pick the question</b> and designate which team is playing.</li><li><b>Reveal matching answers</b> by clicking answers or pressing keys 1–8. Their weighted points enter the bank.</li><li><b>Use X for wrong answers</b> and Z to undo. At three strikes, give the other team a chance to steal.</li><li><b>Award the bank</b> to whichever team wins. Then advance to the next round.</li><li><b>Replace sample questions</b> with responses from a real survey before the public event.</li></ol><div className="help-foot"><Keyboard size={18}/> Keyboard controls: <kbd>1</kbd>–<kbd>8</kbd> answers · <kbd>X</kbd> strike · <kbd>Z</kbd> undo</div><button className="btn btn-primary" onClick={()=>setShowHelp(false)}>Got it</button></div></div>}
   </div>;
 }
-function QuestionEditor({questions,onSave,onClose}){
+export function SurveyQuestionEditor({questions,onSave,onClose,saveNote='Saving changes clears the current match scores.'}){
   const {items,setItems,selected,setSelected,error,setError,mutate}=useQuestionDraft(questions);
   const q=items[selected];
   const updateQ=(field,value)=>mutate(draft=>{draft[selected][field]=value;});
@@ -254,7 +254,7 @@ function QuestionEditor({questions,onSave,onClose}){
     items={items} selected={selected} onSelect={i=>{setSelected(i);setError('');}}
     onAdd={addRound} addLabel="Add question" kindLabel="ROUND" itemBadge={item=>item.multiplier+'×'}
     className="editor-modal" error={error}
-    saveNote="Saving changes clears the current match scores." onSave={save} onClose={onClose}>
+    saveNote={saveNote} onSave={save} onClose={onClose}>
     <label htmlFor="editor-question">QUESTION</label>
     <textarea id="editor-question" value={q.question} rows={3} maxLength={240} placeholder="Sebutkan..." onChange={e=>updateQ('question',e.target.value)}/>
     <div className="editor-multi"><label htmlFor="editor-multiplier">POINT MULTIPLIER</label>
