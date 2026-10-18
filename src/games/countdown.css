@@ -1,0 +1,30 @@
+/* Shared countdown: high-contrast stage badge and accessible playful presenter controls. */
+.playlab-countdown-badge{
+ display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-width:0;
+ padding:.35em .7em;border:2px solid #ffdb85;border-radius:999px;
+ background:#291e52;color:#fff2d2;font-size:clamp(12px,1.15vw,19px);
+ font-weight:850;letter-spacing:.04em;box-shadow:0 3px 0 #0004;
+}
+.playlab-countdown-badge strong{font-variant-numeric:tabular-nums;font-size:1.4em;color:#fff}
+.playlab-countdown-badge span{font-size:.69em;letter-spacing:.1em}
+.playlab-countdown-badge.is-low{border-color:#ff9a75;background:#793b45}
+.playlab-countdown-badge.is-expired{border-color:#ffe39b;background:#71334c;color:#fff}
+.stage-question>.playlab-countdown-badge{margin:.2em auto .05em;font-size:clamp(10px,1.1vw,17px)}
+.quick-head>.playlab-countdown-badge{margin:12px auto 0}
+.quick-board--preview .playlab-countdown-badge{font-size:clamp(8px,1.2cqw,13px);padding:.22em .5em}
+.playlab-countdown-controls{display:grid;gap:12px;min-width:0}
+.playlab-countdown-status{display:flex;align-items:center;gap:9px;background:#f5f0ff;border-radius:12px;border:1px solid #dfd4ff;padding:12px;flex-wrap:wrap}
+.playlab-countdown-status strong{font-size:24px;font-variant-numeric:tabular-nums;color:#3b2865}
+.playlab-countdown-status span{font-size:12px;font-weight:750;color:#62527e}
+.playlab-countdown-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.playlab-countdown-presets button,.playlab-countdown-actions button{
+ font:inherit;min-height:42px;cursor:pointer;border-radius:10px;border:2px solid #6c4eb2;
+ background:#fff;color:#46316e;font-weight:850;
+}
+.playlab-countdown-presets button:hover,.playlab-countdown-actions button:hover{background:#eee6ff}
+.playlab-countdown-actions{display:flex;gap:8px;flex-wrap:wrap}
+.playlab-countdown-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px}
+.playlab-countdown-controls p{font-size:12px;line-height:1.55;color:#635970;margin:0}
+.playlab-countdown-controls button:focus-visible{outline:3px solid #ffbd55;outline-offset:3px}
+@media(max-width:440px){.playlab-countdown-presets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.playlab-countdown-badge{animation:none!important;transition:none!important}}

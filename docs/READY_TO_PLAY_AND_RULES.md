@@ -17,7 +17,7 @@ PlayLab has **two playable games**, each with **five complete built-in sets of e
 | Quickfire Quiz | World, Travel & Culture | All ages | 10–20 minutes |
 | Quickfire Quiz | Math & Logic Challenge | Teens & adults | 10–20 minutes |
 
-These timings are planning suggestions, **not timers enforced by the application**. The host can finish at any point.
+These timings are planning suggestions. An **optional host-controlled 15/30/60/90-second countdown** is now available in both games, but it never automatically ends a turn or changes scores. The host can finish at any point.
 
 ## Survey Showdown rules
 
@@ -28,6 +28,12 @@ Two teams guess answers to eight survey-style prompts. The host reveals matching
 ## Quickfire Quiz rules
 
 Each question has four choices (A–D), one correct answer, and an explanation. The host reads or displays the question, allows teams to answer, then reveals the correct choice (R). **There is no automatic point award.** The host may award +10 points to a team or subtract 10 as a correction, and can undo the most recent score change (U). N/P move forward/back through questions. Hosts decide timing and which answers merit points; PlayLab does not enforce timers, buzzers, or a maximum of one award per question. Finish explicitly to show the winning team or a tie.
+
+## Optional projector countdown
+
+During a live question or round, use the host's **Countdown timer** card to start a 15, 30, 60, or 90-second countdown. Both screens display the remaining time using a local deadline, so a projector refresh or briefly backgrounded tab catches up without requiring a running network connection. Pause, resume, or clear at any point; selecting a preset restarts the countdown. The timer clears when a Quickfire answer is revealed, when Survey points are awarded, when the question/round changes, and on match finish/reset. It starts **off** for each question/round.
+
+**The timer is a visual aid, not a rule engine.** Expiry never automatically reveals answers, awards points, adds strikes, or judges a steal. The host makes all decisions, even if the timer reaches zero.
 
 ## Playing, practice, and safety
 
