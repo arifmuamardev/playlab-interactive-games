@@ -32,6 +32,10 @@ export default {
    if(raw.length>MAX_JSON)return fail('Question bank is too large.',413);
    let input;try{input=JSON.parse(raw)}catch{return fail('Invalid JSON.')}
    if(!valid(input.game,input.state))return fail('Invalid game or question bank.');
+   const ip=(request.headers.get('CF-Connecting-IP')||'unknown').slice(0,64);
+   const quota=env.PLAYLAB_ROOMS.get(env.PLAYLAB_ROOMS.idFromName('quota-v1:'+ip));
+   const permitted=await quota.fetch('https://room.internal/quota',{method:'POST'});
+   if(!permitted.ok)return json({error:'Room creation limit reached. Try again later.'},429,cors(origin));
    const roomId=random(8),controlKey=random(24),viewKey=random(24);
    const room=env.PLAYLAB_ROOMS.get(env.PLAYLAB_ROOMS.idFromName(roomId));
    const started=await room.fetch('https://room.internal/init',{method:'POST',body:JSON.stringify({
@@ -52,6 +56,15 @@ export class PlayLabRoom {
  constructor(ctx){this.ctx=ctx;}
  async fetch(request){
   const url=new URL(request.url);
+  if(url.pathname==='/quota'&&request.method==='POST'){
+   const now=Date.now(),old=await this.ctx.storage.get('quota');
+   const resetAt=old?.resetAt>now?old.resetAt:now+60*60*1000;
+   const used=resetAt===old?.resetAt?old.count:0;
+   if(used>=24)return fail('Too many rooms. Try again later.',429);
+   await this.ctx.storage.put('quota',{count:used+1,resetAt});
+   await this.ctx.storage.setAlarm(resetAt);
+   return json({ok:true});
+  }
   if(url.pathname==='/init'&&request.method==='POST'){
    if(await this.ctx.storage.get('room'))return fail('Already initialized.',409);
    const room=await request.json();
