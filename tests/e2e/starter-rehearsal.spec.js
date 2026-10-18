@@ -16,7 +16,7 @@ test('Survey starter rehearsal preserves a scored live match and synchronizes it
   await setup.getByLabel('Team 1').fill('Event A');
   await setup.getByLabel('Team 2').fill('Event B');
   await setup.getByRole('button',{name:'Continue'}).click();
-  await expect(setup.getByText(/Community Game Night · 3 questions/)).toBeVisible();
+  await expect(setup.getByText(/Community Game Night · 8 questions/)).toBeVisible();
   const opened=setup.waitForEvent('popup');
   await setup.getByRole('button',{name:/Practice without affecting live game/i}).click();
   const practice=await opened;
