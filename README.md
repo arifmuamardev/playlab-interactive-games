@@ -1,3 +1,12 @@
+## Game organizer: one or two presenter devices
+
+[Open PlayLab Game Organizer](https://arifmuamardev.github.io/playlab-interactive-games/?page=organizer)
+
+- **Mode A — 1 laptop + projector:** Continue to use browser-local host and projector views, including offline support after caching.
+- **Mode B — 1 laptop + projector + separate presenter device:** Create a short-lived paired online room. The laptop displays the audience board; the MC controls the match using a private link on another phone/tablet/laptop. The projector link is read-only. Both devices require internet and the separate Cloudflare session relay.
+- The setup wizard distinguishes the modes without changing game rules, starter packs, offline matches, or rehearsal isolation.
+- [See the full organizer procedures and security notes](docs/GAME_ORGANIZER.md).
+
 # PlayLab — interactive game collection
 
 ![PlayLab game library](docs/screenshots/hub-desktop.png)
