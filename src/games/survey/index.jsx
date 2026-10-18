@@ -144,13 +144,13 @@ function HostApp({game,change}){
   };
   useEffect(()=>{
     const handle=e=>{
-      if(editing || showHelp || /INPUT|TEXTAREA|SELECT/.test(e.target?.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;
+      if(game.finished || editing || showHelp || /INPUT|TEXTAREA|SELECT/.test(e.target?.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;
       if(/^[1-8]$/.test(e.key)){const i=Number(e.key)-1;if(i<q.answers.length){e.preventDefault();reveal(i)}}
       if(e.key.toLowerCase()==='x'){e.preventDefault();strike()}
       if(e.key.toLowerCase()==='z'){e.preventDefault();strike(-1)}
     };
     window.addEventListener('keydown',handle);return ()=>window.removeEventListener('keydown',handle);
-  },[q,editing,showHelp]);
+  },[q,editing,showHelp,game.finished]);
   const [copyOkay,setCopyOkay]=useState(false);
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
   const openDisplay=()=>window.open(displayUrl.toString(),'playlab-survey-display');
