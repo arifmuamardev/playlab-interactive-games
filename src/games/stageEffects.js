@@ -22,6 +22,11 @@ export function playStageCue(kind,context){
   else if(kind==='strike'){tone(220,0,.17,'sawtooth',.032);tone(155,.16,.26,'sawtooth',.028);}
   else if(kind==='award'||kind==='score'){
     tone(392,0,.13);tone(523,.13,.13);tone(659,.26,.15);tone(784,.42,.33,'triangle',.08);
+  }else if(kind==='finish'){
+    // The final fanfare only plays after the projector operator opts into audio.
+    tone(392,0,.13,'triangle',.045);tone(523,.14,.13,'triangle',.053);
+    tone(659,.28,.16,'triangle',.063);tone(784,.47,.17,'triangle',.06);
+    tone(1046,.66,.45,'triangle',.075);
   }else if(kind==='next'){tone(440,0,.09,'triangle',.033);tone(659,.10,.15,'triangle',.04);}
   else if(kind==='undo'||kind==='subtract'){tone(440,0,.11,'triangle',.024);tone(349,.105,.15,'triangle',.023);}
 }
