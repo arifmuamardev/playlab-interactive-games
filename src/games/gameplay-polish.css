@@ -122,3 +122,8 @@
  .gameplay-polished .host-grid,.gameplay-polished .quick-layout,.gameplay-polished .host-primary,.gameplay-polished .host-sidebar,.gameplay-polished .quick-controls{min-width:0}
  .gameplay-polished .control-card,.gameplay-polished .preview-section{min-width:0}
 }
+
+
+/* Keep language choice accessible on narrow live-host control bars. */
+.gameplay-polished .host-header-right>.playlab-language{margin-left:auto}
+@media(max-width:700px){.gameplay-polished .host-header-right{flex-wrap:wrap;gap:7px}.gameplay-polished .host-header-right>.playlab-language{order:1}.gameplay-polished .host-header-right>.btn-primary{order:2}}

@@ -10,6 +10,7 @@ import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {GameRules} from '../GameRules.jsx';
 import {CountdownBadge,CountdownControls} from '../Countdown.jsx';
 import {clearCountdown} from '../countdown.js';
+import {LanguageSwitch,useLanguage} from '../../i18n/language.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -34,6 +35,7 @@ function updateProgress(game, patch, eventKind){
   return {...game,progress:{...game.progress,[q.id]:{...old,...patch}},lastEvent:eventKind?dispatchEvent(eventKind):game.lastEvent};
 }
 function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
+  const {lang,t}=useLanguage();
   const q=game.questions[game.roundIndex];const p=progressFor(game,q?.id);
   const scores=getScores(game);const bank=p.awardedTeam===null?sumBank(q,p):p.awardedAmount;
   const revealed=p.revealed||[];
@@ -65,15 +67,15 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
         <div className="stage-event-label"><span className="stage-mini-star">✦</span><span>PLAYLAB · LIVE GAMES</span></div>
         <div className="stage-headline">SURVEY <em>SHOWDOWN</em><span className="stage-accent">✦</span></div>
         <RoundPill current={game.roundIndex} total={game.questions.length} multiplier={q.multiplier}/>
-        {!preview&&<div className="display-actions"><button className="display-tool" onClick={soundAction} aria-pressed={soundEnabled} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} title={soundEnabled?'Mute game sounds':'Enable game sounds on this screen'}>{soundEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}<span>{soundEnabled?'Sound on':'Enable sound'}</span></button><button className="display-tool" onClick={fullscreenAction} title="Go fullscreen"><Maximize size={18}/><span>Fullscreen</span></button></div>}
+        {!preview&&<div className="display-actions"><LanguageSwitch compact/><button className="display-tool" onClick={soundAction} aria-pressed={soundEnabled} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} title={soundEnabled?'Mute game sounds':'Enable game sounds on this screen'}>{soundEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}<span>{t(soundEnabled?'Sound on':'Enable sound')}</span></button><button className="display-tool" onClick={fullscreenAction} title="Go fullscreen"><Maximize size={18}/><span>{t('Fullscreen')}</span></button></div>}
       </div>
       <div className="score-ribbon">
         {[0,1].map(team=><div className={'team-score team-score--'+team+(p.activeTeam===team&&p.awardedTeam===null?' is-active':'')+(p.awardedTeam===team?' is-winner':'')} key={team}>
-          <div className="team-label"><span className="team-dot"/><span>{game.teamNames[team]}</span>{p.activeTeam===team&&p.awardedTeam===null&&<span className="playing-pill">MAIN</span>}{p.awardedTeam===team&&<Trophy size={17}/>}</div>
+          <div className="team-label"><span className="team-dot"/><span>{game.teamNames[team]}</span>{p.activeTeam===team&&p.awardedTeam===null&&<span className="playing-pill">{t('PLAYING')}</span>}{p.awardedTeam===team&&<Trophy size={17}/>}</div>
           <div className="team-number">{scores[team].toLocaleString('id-ID')}</div>
         </div>)}
       </div>
-      <div className="stage-question" ref={questionRef}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><CountdownBadge game={game} contextId={q.id}/><h1>{q.question}</h1></div>
+      <div className="stage-question" ref={questionRef}><span>{t('QUESTION')} {String(game.roundIndex+1).padStart(2,'0')}</span><CountdownBadge game={game} contextId={q.id}/><h1>{q.question}</h1></div>
       <div ref={answersRef} className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
         {q.answers.map((a,i)=><div key={q.id+'-'+i} className={'stage-answer '+(revealed.includes(i)?'is-revealed':'is-hidden')}>
           <div className="answer-number">{String(i+1).padStart(2,'0')}</div>
@@ -82,16 +84,17 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
         </div>)}
       </div>
       <div className="stage-foot">
-        <div className="strikes"><span className="foot-label">KESALAHAN</span><div className="strikes-set">{[0,1,2].map(i=><div className={'strike '+(i<p.strikes?'is-strike':'')} key={i}>✕</div>)}</div></div>
-        <div className="phase-indicator">{p.awardedTeam!==null?'RONDE SELESAI':p.phase==='steal'?'KESEMPATAN MEREBUT POIN':'TEBAK JAWABAN TERPOPULER'}</div>
-        <div className="bank"><span className="foot-label">{p.awardedTeam===null?'POIN TERKUMPUL':'POIN DIBERIKAN'}</span><div className="bank-number">{bank.toLocaleString('id-ID')}</div></div>
+        <div className="strikes"><span className="foot-label">{t('STRIKES')}</span><div className="strikes-set">{[0,1,2].map(i=><div className={'strike '+(i<p.strikes?'is-strike':'')} key={i}>✕</div>)}</div></div>
+        <div className="phase-indicator">{t(p.awardedTeam!==null?'ROUND FINISHED':p.phase==='steal'?'STEAL OPPORTUNITY':'GUESS THE MOST POPULAR ANSWERS')}</div>
+        <div className="bank"><span className="foot-label">{t(p.awardedTeam===null?'POINTS IN BANK':'POINTS AWARDED')}</span><div className="bank-number">{bank.toLocaleString('id-ID')}</div></div>
       </div>
       <div className="stage-bottom-brand">A GAME BY PLAYLAB <span>✦</span> BUILT FOR CLASSROOMS & LIVE EVENTS</div>
     </div>
-    {!preview&&flair&&<div className="award-overlay" role="status" key={flair.nonce}><div className="projector-confetti" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i}/>)}</div><div className="award-burst">✦ ✦ ✦</div><Trophy size={60}/><span>SELAMAT!</span><strong>{flair.team}</strong><b>+{flair.points} POIN</b></div>}
+    {!preview&&flair&&<div className="award-overlay" role="status" key={flair.nonce}><div className="projector-confetti" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i}/>)}</div><div className="award-burst">✦ ✦ ✦</div><Trophy size={60}/><span>{t('Congratulations!')}</span><strong>{flair.team}</strong><b>+{flair.points} {lang==='id'?'POIN':'POINTS'}</b></div>}
   </div>
 }
 function HostApp({game,change}){
+  const {lang,t}=useLanguage();
   const q=game.questions[game.roundIndex];const p=progressFor(game,q?.id),scores=getScores(game),bank=sumBank(q,p);const locked=p.awardedTeam!==null;
   const [editing,setEditing]=useState(false),[showHelp,setShowHelp]=useState(false),[notice,setNotice]=useState('');
   const fileRef=useRef(null);
@@ -165,40 +168,40 @@ function HostApp({game,change}){
   const copyDisplay=async()=>{try{await navigator.clipboard.writeText(displayUrl.toString());setCopyOkay(true);setTimeout(()=>setCopyOkay(false),1500)}catch{window.prompt('Copy the display link:',displayUrl.toString())}};
   if(game.finished)return <ResultsHost game={game} kind="survey" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={openDisplay}/>;
   return <div className="host-shell gameplay-polished gameplay-survey">
-    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><a className="home-link" href="./">← Game library</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">How to play</IconButton><button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> Open projector view <ArrowUpRight size={15}/></button></div></header>
+    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><LanguageSwitch/><a className="home-link" href="./">← {t('Game library')}</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">{t('How to play')}</IconButton><button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> {t('Open projector view')} <ArrowUpRight size={15}/></button></div></header>
     <main className="host-main">
-      <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>Let’s play <em>Survey Showdown.</em></h1><p>Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.</p></div><div className="gameplay-progress-pill"><span>✦</span> ROUND {game.roundIndex+1} OF {game.questions.length}</div></div>
-      <div className="gameplay-status-strip" aria-label="Current game status"><div><span>ROUND STATE</span><strong>{locked?'Round finished':p.phase==='steal'?'Steal opportunity':'Answers in play'}</strong></div><div><span>REVEALED / BANK</span><strong>{p.revealed.length} of {q.answers.length} · {locked?p.awardedAmount:bank} points</strong></div><div><span>QUICK KEYS</span><strong>1–8 reveal · X strike · Z undo strike</strong></div></div>
-      <HostActionBar eyebrow={`LIVE ROUND ${game.roundIndex+1} / ${game.questions.length}`}
-        title={locked?(game.roundIndex===game.questions.length-1?'Last round awarded':'Round points awarded'):p.phase==='steal'?'Steal opportunity':bank>0?'Points are in the bank':'Ready for answers'}
-        description={locked?`${game.teamNames[p.awardedTeam]} received ${p.awardedAmount} points.`:p.phase==='steal'?'Three strikes! Choose the team that wins the bank.':bank>0?`${bank} points available. Reveal more answers or decide which team wins.`:'Reveal a survey answer to build the bank. Strikes do not award points.'}
-        footnote="These actions also remain in the detailed round controls below. Awards, finish, and resets retain their existing safeguards.">
+      <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>{lang==='id'?'Ayo main':'Let’s play'} <em>Survey Showdown.</em></h1><p>{lang==='id'?'Permainanmu, pertanyaanmu, panggungmu. Kendalikan setiap jawaban dari sini sambil penonton melihat layar besar.':'Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.'}</p></div><div className="gameplay-progress-pill"><span>✦</span> {t('ROUND')} {game.roundIndex+1} {lang==='id'?'DARI':'OF'} {game.questions.length}</div></div>
+      <div className="gameplay-status-strip" aria-label="Current game status"><div><span>{lang==='id'?'STATUS RONDE':'ROUND STATE'}</span><strong>{t(locked?'Round finished':p.phase==='steal'?'Steal opportunity':'Answers in play')}</strong></div><div><span>{lang==='id'?'TERBUKA / POIN':'REVEALED / BANK'}</span><strong>{p.revealed.length} {lang==='id'?'dari':'of'} {q.answers.length} · {locked?p.awardedAmount:bank} {lang==='id'?'poin':'points'}</strong></div><div><span>{lang==='id'?'PINTASAN':'QUICK KEYS'}</span><strong>{lang==='id'?'1–8 buka · X salah · Z batalkan':'1–8 reveal · X strike · Z undo strike'}</strong></div></div>
+      <HostActionBar eyebrow={`${lang==='id'?'RONDE LANGSUNG':'LIVE ROUND'} ${game.roundIndex+1} / ${game.questions.length}`}
+        title={lang==='id'?(locked?(game.roundIndex===game.questions.length-1?'Ronde terakhir selesai':'Poin ronde diberikan'):p.phase==='steal'?'Kesempatan merebut poin':bank>0?'Poin sudah terkumpul':'Siap menebak jawaban'):(locked?(game.roundIndex===game.questions.length-1?'Last round awarded':'Round points awarded'):p.phase==='steal'?'Steal opportunity':bank>0?'Points are in the bank':'Ready for answers')}
+        description={lang==='id'?(locked?`${game.teamNames[p.awardedTeam]} menerima ${p.awardedAmount} poin.`:p.phase==='steal'?'Tiga kesalahan! Tentukan tim penerima poin.':bank>0?`${bank} poin terkumpul. Buka jawaban lain atau tentukan pemenang ronde.`:'Buka jawaban untuk mengumpulkan poin. Kesalahan tidak otomatis menambah skor.'):(locked?`${game.teamNames[p.awardedTeam]} received ${p.awardedAmount} points.`:p.phase==='steal'?'Three strikes! Choose the team that wins the bank.':bank>0?`${bank} points available. Reveal more answers or decide which team wins.`:'Reveal a survey answer to build the bank. Strikes do not award points.')}
+        footnote={lang==='id'?'Semua tindakan juga tersedia pada kontrol detail di bawah. Pemberian poin, penyelesaian, dan reset tetap memiliki pengaman.':'These actions also remain in the detailed round controls below. Awards, finish, and resets retain their existing safeguards.'}>
         {locked?<>{game.roundIndex<game.questions.length-1?
-          <HostActionButton primary onClick={()=>goRound(game.roundIndex+1)}><ArrowRight size={17}/> Continue to round {game.roundIndex+2}</HostActionButton>:
-          <HostActionButton primary onClick={finishMatch}><Trophy size={17}/> Show final results</HostActionButton>}
-          <HostActionButton muted onClick={undoAward}><RotateCcw size={16}/> Correct award</HostActionButton></>:
-          <>{bank>0?<>{[0,1].map(team=><HostActionButton key={team} primary={team===p.activeTeam} onClick={()=>award(team)}><Trophy size={16}/> Give bank to {game.teamNames[team]}</HostActionButton>)}</>:
-            <HostActionButton primary onClick={jumpToAnswers}><Eye size={17}/> Jump to answer buttons</HostActionButton>}
-            <HostActionButton muted onClick={jumpToAnswers}><ArrowRight size={16}/> Answer list</HostActionButton>
-            {p.strikes<3&&<HostActionButton onClick={()=>strike()}><X size={16}/> Add strike</HostActionButton>}
-            {p.strikes>0&&<HostActionButton muted onClick={()=>strike(-1)}><Minus size={16}/> Undo strike</HostActionButton>}
+          <HostActionButton primary onClick={()=>goRound(game.roundIndex+1)}><ArrowRight size={17}/> {t('Continue to round')} {game.roundIndex+2}</HostActionButton>:
+          <HostActionButton primary onClick={finishMatch}><Trophy size={17}/> {t('Show final results')}</HostActionButton>}
+          <HostActionButton muted onClick={undoAward}><RotateCcw size={16}/> {t('Correct award')}</HostActionButton></>:
+          <>{bank>0?<>{[0,1].map(team=><HostActionButton key={team} primary={team===p.activeTeam} onClick={()=>award(team)}><Trophy size={16}/> {lang==='id'?'Beri poin kepada':'Give bank to'} {game.teamNames[team]}</HostActionButton>)}</>:
+            <HostActionButton primary onClick={jumpToAnswers}><Eye size={17}/> {t('Jump to answer buttons')}</HostActionButton>}
+            <HostActionButton muted onClick={jumpToAnswers}><ArrowRight size={16}/> {t('Answer list')}</HostActionButton>
+            {p.strikes<3&&<HostActionButton onClick={()=>strike()}><X size={16}/> {t('Add strike')}</HostActionButton>}
+            {p.strikes>0&&<HostActionButton muted onClick={()=>strike(-1)}><Minus size={16}/> {t('Undo strike')}</HostActionButton>}
           </>}
       </HostActionBar>
       <div className="host-rules-reference"><GameRules game="survey"/></div>
       <div className="host-grid">
         <div className="host-primary">
           <section className="preview-section"><div className="section-head"><div><h2>Live game preview</h2><p>What your audience sees on the projector</p></div><div className="head-buttons"><IconButton icon={Copy} onClick={copyDisplay} variant="btn-soft">{copyOkay?'Copied':'Copy display URL'}</IconButton><IconButton icon={Expand} onClick={openDisplay} variant="btn-soft">Pop out</IconButton></div></div><div className="preview-frame"><Stage game={game} preview/></div></section>
-          <div id="survey-reveal-controls"><ControlCard title="Reveal answers" description="Click an answer to show it on the big board. Shortcuts: 1–8." extra={<span className="small-count">{p.revealed.length} / {q.answers.length} SHOWN</span>}>
+          <div id="survey-reveal-controls"><ControlCard title={t('Reveal answers')} description="Click an answer to show it on the big board. Shortcuts: 1–8." extra={<span className="small-count">{p.revealed.length} / {q.answers.length} SHOWN</span>}>
             <div className="reveal-grid">{q.answers.map((a,i)=><button key={i} disabled={locked} className={'reveal-button '+(p.revealed.includes(i)?'reveal-button--on':'')} aria-pressed={p.revealed.includes(i)} onClick={()=>reveal(i)} title={`Keyboard: ${i+1}`}><span className="reveal-index">{i+1}</span><span className="reveal-name">{a.text}</span><strong>{a.points*q.multiplier} <small>pts</small></strong>{p.revealed.includes(i)?<Eye size={16}/>:<EyeOff size={16}/>}</button>)}</div>
             <div className="minor-note">Point values are sample survey-style data. Replace them with real survey results before your event.</div>
           </ControlCard></div>
-          <ControlCard title="Team scoreboard" description="Rename teams to match your players. Score is assigned at the end of each round.">
+          <ControlCard title={t('Team scoreboard')} description="Rename teams to match your players. Score is assigned at the end of each round.">
             <div className="team-editor-row">{[0,1].map(team=><div key={team} className={'team-editor team-editor--'+team}><label htmlFor={'team-name-'+team}>TEAM {team+1}</label><input id={'team-name-'+team} value={game.teamNames[team]} maxLength={45} onChange={e=>change(old=>({...old,teamNames:old.teamNames.map((n,i)=>i===team?e.target.value:n)}))}/><strong>{scores[team]}</strong></div>)}</div>
           </ControlCard>
         </div>
         <aside className="host-sidebar">
-          <ControlCard title="Countdown timer" description="Optional timer for spoken guesses and steal attempts."><CountdownControls game={game} change={change} contextId={q.id}/></ControlCard>
-          <ControlCard title="Round controls" description="Choose the question and manage the live round.">
+          <ControlCard title={t('Countdown timer')} description="Optional timer for spoken guesses and steal attempts."><CountdownControls game={game} change={change} contextId={q.id}/></ControlCard>
+          <ControlCard title={t('Round controls')} description="Choose the question and manage the live round.">
             <div className="round-select-row"><button className="square-btn" disabled={game.roundIndex===0} onClick={()=>goRound(game.roundIndex-1)} aria-label="Previous round"><ChevronLeft/></button><select aria-label="Select round" value={game.roundIndex} onChange={e=>goRound(Number(e.target.value))}>{game.questions.map((v,i)=><option key={v.id} value={i}>Round {i+1} · {v.multiplier}× points</option>)}</select><button className="square-btn" disabled={game.roundIndex===game.questions.length-1} onClick={()=>goRound(game.roundIndex+1)} aria-label="Next round"><ChevronRight/></button></div>
             <div className="current-phase"><div><span>ROUND STATUS</span><strong>{locked?'Finished':p.phase==='steal'?'Steal opportunity':'Playing'}</strong></div><div><span>POINTS IN BANK</span><strong>{locked?p.awardedAmount:bank}</strong></div></div>
             <div className="active-team-label">WHICH TEAM IS PLAYING?</div>
@@ -219,7 +222,7 @@ function HostApp({game,change}){
             <button className="btn btn-primary results-finish-button" onClick={finishMatch}><Trophy size={18}/> Finish match & show results</button>
             <p className="results-finish-note">You can finish early. No points are deleted, and you can resume later to correct results.</p>
           </ControlCard>
-          <ControlCard title="Question bank" description={`${game.questions.length} editable rounds · JSON import/export`}>
+          <ControlCard title={t('Question bank')} description={`${game.questions.length} editable rounds · JSON import/export`}>
             <div className="tool-grid"><button className="btn btn-tool" onClick={()=>setEditing(true)}><Edit3 size={17}/> Edit questions</button><button className="btn btn-tool" onClick={exportData}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>fileRef.current?.click()}><FileUp size={17}/> Import JSON</button><button className="btn btn-tool" onClick={resetMatch}><RotateCcw size={17}/> Reset match</button></div><input type="file" hidden ref={fileRef} accept="application/json,.json" onChange={importData}/>
           </ControlCard>
           <div className="setup-tip"><Sparkles size={18}/><p><strong>Pro tip</strong><br/>Use two browser windows on the same laptop. Put the display window on the projector and keep this control room on your laptop screen.</p></div>
@@ -228,11 +231,11 @@ function HostApp({game,change}){
       <footer className="host-footer"><span>PlayLab · Survey Showdown</span><span>Runs entirely in your browser · No participant accounts</span></footer>
     </main>
     {notice&&<div role="status" className="toast">{notice}</div>}
-    {editing&&<QuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
+    {editing&&<SurveyQuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
     {showHelp&&<div className="modal-backdrop" onClick={()=>setShowHelp(false)}><div className="modal modal--help" role="dialog" aria-modal="true" aria-label="How to play" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">HOST QUICK START</span><h2>How to play</h2></div><button className="square-btn" onClick={()=>setShowHelp(false)} aria-label="Close"><X/></button></div><ol className="howto"><li><b>Open projector view</b> and move it to the external screen. Fullscreen it, and enable its sound if desired.</li><li><b>Pick the question</b> and designate which team is playing.</li><li><b>Reveal matching answers</b> by clicking answers or pressing keys 1–8. Their weighted points enter the bank.</li><li><b>Use X for wrong answers</b> and Z to undo. At three strikes, give the other team a chance to steal.</li><li><b>Award the bank</b> to whichever team wins. Then advance to the next round.</li><li><b>Replace sample questions</b> with responses from a real survey before the public event.</li></ol><div className="help-foot"><Keyboard size={18}/> Keyboard controls: <kbd>1</kbd>–<kbd>8</kbd> answers · <kbd>X</kbd> strike · <kbd>Z</kbd> undo</div><button className="btn btn-primary" onClick={()=>setShowHelp(false)}>Got it</button></div></div>}
   </div>;
 }
-function QuestionEditor({questions,onSave,onClose}){
+export function SurveyQuestionEditor({questions,onSave,onClose,saveNote='Saving changes clears the current match scores.'}){
   const {items,setItems,selected,setSelected,error,setError,mutate}=useQuestionDraft(questions);
   const q=items[selected];
   const updateQ=(field,value)=>mutate(draft=>{draft[selected][field]=value;});
@@ -254,7 +257,7 @@ function QuestionEditor({questions,onSave,onClose}){
     items={items} selected={selected} onSelect={i=>{setSelected(i);setError('');}}
     onAdd={addRound} addLabel="Add question" kindLabel="ROUND" itemBadge={item=>item.multiplier+'×'}
     className="editor-modal" error={error}
-    saveNote="Saving changes clears the current match scores." onSave={save} onClose={onClose}>
+    saveNote={saveNote} onSave={save} onClose={onClose}>
     <label htmlFor="editor-question">QUESTION</label>
     <textarea id="editor-question" value={q.question} rows={3} maxLength={240} placeholder="Sebutkan..." onChange={e=>updateQ('question',e.target.value)}/>
     <div className="editor-multi"><label htmlFor="editor-multiplier">POINT MULTIPLIER</label>

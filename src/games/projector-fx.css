@@ -210,3 +210,45 @@
  }
  .projector-confetti{display:none}
 }
+
+
+/* Stage reliability: adapt to common 16:9 / 4:3 classroom projectors without
+ * affecting the in-host mini previews or answer-reveal/scoring semantics. */
+.stage--full{--unit:min(1vw,1.32vh);height:100vh;height:100dvh;min-height:0}
+.stage--full .stage-inner{min-height:0;max-height:100%;padding-inline:clamp(24px,3vw,62px)}
+.stage--full .stage-question{max-width:92%;min-height:0}
+.stage--full .stage-question h1{font-size:clamp(19px,2.55vh,40px);line-height:1.16;overflow-wrap:anywhere}
+.stage--full .stage-answer-grid{width:min(84%,1180px);min-height:0}
+.stage--full .stage-answer{padding-block:clamp(3px,.5vh,9px)}
+.stage--full .answer-content{font-size:clamp(14px,2.3vh,33px);overflow-wrap:anywhere}
+.stage--full .stage-headline{font-size:clamp(24px,4.9vh,67px)}
+.stage--full .stage-top{min-height:0}
+.stage--full .score-ribbon{margin-top:0}
+.stage--full .display-actions{gap:5px;align-items:center}
+.stage--full .display-tool{padding:6px 9px}
+.quick-board:not(.quick-board--preview){height:100vh;height:100dvh;min-height:0;padding:clamp(15px,2vh,28px) clamp(16px,3vw,65px);gap:clamp(5px,1vh,15px);justify-content:space-evenly}
+.quick-board:not(.quick-board--preview) .quick-head h1{font-size:clamp(30px,5.4vh,70px)}
+.quick-board:not(.quick-board--preview) .quick-head{flex-shrink:0}
+.quick-board:not(.quick-board--preview) .quick-scores{flex-shrink:0}
+.quick-board:not(.quick-board--preview) .quick-question{font-size:clamp(21px,3.1vh,44px);max-width:94%;padding:4px 0;overflow-wrap:anywhere}
+.quick-board:not(.quick-board--preview) .quick-options{width:min(94%,1250px);min-height:0;gap:clamp(6px,1vh,13px)}
+.quick-board:not(.quick-board--preview) .quick-option{min-height:clamp(58px,10vh,110px);padding:clamp(9px,1.2vh,18px);overflow-wrap:anywhere}
+.quick-board:not(.quick-board--preview) .quick-option strong{min-width:0;line-height:1.22}
+.quick-board:not(.quick-board--preview) .quick-footer{padding-top:4px;line-height:1.3;overflow-wrap:anywhere}
+.quick-display .quick-full-actions{display:flex;align-items:center;gap:6px}
+.quick-display .quick-full-actions .playlab-language{background:#211a49}
+@media(max-width:1000px){
+ .stage--full .display-actions{top:0;right:-1vw}
+ .stage--full .display-tool span{display:none}
+ .quick-display .quick-full-actions button{padding:7px;font-size:10px}
+}
+@media(max-height:690px){
+ .stage--full .stage-inner{gap:clamp(2px,.45vh,5px)}
+ .stage--full .stage-headline{font-size:clamp(23px,4.3vh,54px)}
+ .stage--full .stage-question{padding:1px 0}
+ .stage--full .stage-foot{min-height:0}
+ .stage--full .stage-answer{gap:clamp(5px,1vw,14px)}
+ .quick-board:not(.quick-board--preview){gap:5px;padding-block:10px}
+ .quick-board:not(.quick-board--preview) .quick-option{min-height:54px;padding:7px}
+ .quick-board:not(.quick-board--preview) .quick-head h1{font-size:clamp(25px,4.5vh,50px)}
+}

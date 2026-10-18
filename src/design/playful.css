@@ -234,3 +234,9 @@
  .pf-footer{flex-direction:column}.pf-footer>div:last-child{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){.playful-lab *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* Language preference must remain visible without pushing the catalog off-screen. */
+.pf-header>.playlab-language{margin-left:auto}
+@media(max-width:880px){.pf-header{flex-wrap:wrap;row-gap:12px}.pf-header>.playlab-language{margin-left:0}.pf-header .pf-nav{order:3;flex:1 1 100%;justify-content:center}}
+@media(max-width:540px){.pf-header{gap:10px}.pf-header>.playlab-language{order:2}.pf-existing-link{order:2}.pf-header .pf-nav{order:3}.pf-header .pf-logo-link{max-width:55%}}

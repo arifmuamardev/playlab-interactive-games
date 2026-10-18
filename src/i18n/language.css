@@ -1,0 +1,8 @@
+.playlab-language{display:inline-flex;align-items:center;gap:3px;padding:3px;background:#f6f0ff;border:1.5px solid #d8cbea;border-radius:999px;flex-shrink:0;line-height:1}
+.playlab-language button{border:0;min-width:37px;min-height:33px;padding:6px 8px;border-radius:999px;background:transparent;color:#463661;font-size:12px;font-weight:900;cursor:pointer}
+.playlab-language button[aria-pressed=true]{color:#fff;background:#50358f;box-shadow:0 2px 5px #38226335}
+.playlab-language button:focus-visible{outline:3px solid #ffa54e;outline-offset:2px}
+.playlab-language--compact{padding:2px;background:#211a49;border-color:#997fc4}
+.playlab-language--compact button{min-height:31px;min-width:33px;color:#fff}
+.playlab-language--compact button[aria-pressed=true]{color:#271747;background:#ffe3a0}
+@media(max-width:430px){.playlab-language button{min-width:32px;min-height:31px;padding:5px}}
