@@ -8,6 +8,7 @@ import {QUICKFIRE_KEY,QUICKFIRE_CHANNEL,quickfireInitial,normalizeQuickfireQuest
 import '../gameplay-polish.css';
 import '../projector-fx.css';
 import {makeStageEvent,useProjectorAudio,useStageMoment} from '../stageEffects.js';
+import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
 function readQuickfire(){
@@ -65,7 +66,7 @@ function QuickfireHost({game,change}){
   });
   useEffect(()=>{
     const keydown=event=>{
-      if(editor||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.isComposing)return;
+      if(editor||game.finished||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.isComposing)return;
       if(/INPUT|TEXTAREA|SELECT/.test(event.target?.tagName)||event.target?.isContentEditable||event.target?.closest?.('[role=dialog]'))return;
       const key=event.key.toLowerCase();
       if(!['r','n','p','u'].includes(key))return;
@@ -78,11 +79,21 @@ function QuickfireHost({game,change}){
     window.addEventListener('keydown',keydown);
     return ()=>window.removeEventListener('keydown',keydown);
   },[editor,game.questionIndex,game.questions.length,game.lastAward,visible,q.id]);
+  const finishMatch=()=>{
+    if(!window.confirm('Finish this match and show final results? Scores and questions stay saved. You can resume to correct anything.'))return;
+    change(old=>old.finished?old:{...old,finished:true,lastEvent:makeStageEvent('finish')});
+  };
+  const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:makeStageEvent('next')}));
+  const resetFinishedMatch=()=>{
+    if(!window.confirm('Reset and play again? ALL points and revealed answers will be cleared. Questions and team names stay saved.'))return;
+    change(old=>({...old,finished:false,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,lastEvent:makeStageEvent('next')}));
+  };
   const openEditor=()=>setEditor(true);
   const exportQuestions=()=>{
     const blob=new Blob([JSON.stringify({questions:game.questions},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='playlab-quickfire-questions.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
+  if(game.finished)return <ResultsHost game={game} kind="quickfire" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={()=>window.open(displayUrl.toString(),'playlab-quickfire-display')}/>;
   return <div className="host-shell gameplay-polished gameplay-quickfire">
     <header className="host-header"><PlayLabBrand/><div className="host-header-right"><a className="home-link" href="./">← Game library</a><button className="btn btn-primary" onClick={()=>window.open(displayUrl.toString(),'playlab-quickfire-display')}><MonitorPlay size={17}/> Open projector <ArrowUpRight size={14}/></button></div></header>
     <main className="host-main">
@@ -92,13 +103,17 @@ function QuickfireHost({game,change}){
       <aside className="quick-controls">
         <ControlCard title="Question control" description="Host shortcuts: R reveal/hide · N next · P previous. They pause while editing text."><div className="quick-nav"><button className="btn btn-soft" disabled={game.questionIndex===0} onClick={()=>setQuestion(game.questionIndex-1)}><ChevronLeft size={17}/> Previous</button><span>{game.questionIndex+1} / {game.questions.length}</span><button className="btn btn-soft" disabled={game.questionIndex===game.questions.length-1} onClick={()=>setQuestion(game.questionIndex+1)}>Next <ChevronRight size={17}/></button></div><h3 className="quick-control-question">{q.question}</h3><p className="quick-correct-hint">Answer: {'ABCD'[q.answer]} · {q.options[q.answer]}</p><button className="btn btn-primary quick-main-action" aria-pressed={visible} onClick={reveal}>{visible?<EyeOff size={17}/>:<Eye size={17}/>} {visible?'Hide answer':'Reveal correct answer'}</button></ControlCard>
         <ControlCard title="Team points" description="Adjust points manually. Undo the latest change with U or the button below.">{[0,1].map(i=><div className="quick-team-editor" key={i}><input aria-label={`Team ${i+1} name`} maxLength={45} value={game.teamNames[i]} onChange={e=>change(old=>({...old,teamNames:old.teamNames.map((n,j)=>i===j?e.target.value:n)}))}/><strong>{game.scores[i]}</strong><button className="square-btn" disabled={game.scores[i]===0} onClick={()=>award(i,-10)} aria-label={`Subtract ten points from team ${i+1}`}><Minus size={16}/></button><button className="square-btn" onClick={()=>award(i,10)} aria-label={`Add ten points to team ${i+1}`}><Plus size={16}/></button></div>)}<div className="quick-undo-row"><button className="btn btn-soft quick-undo-button" disabled={!game.lastAward} onClick={undoScore}><RotateCcw size={15}/> Undo last score change <kbd>U</kbd></button>{game.lastAward&&<span role="status">Last: {game.lastAward.delta>0?'+':''}{game.lastAward.delta} for {game.teamNames[game.lastAward.team]}</span>}</div></ControlCard>
-        <ControlCard title="Question bank" description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...old,scores:[0,0],questionIndex:0,revealed:{},lastAward:null}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
+        <ControlCard title="Match results" description="Announce the final scoreboard on the projector without resetting points.">
+          <button className="btn btn-primary results-finish-button" onClick={finishMatch}><Trophy size={18}/> Finish match & show results</button>
+          <p className="results-finish-note">You can finish early. Your current score stays saved, and you can resume to correct it.</p>
+        </ControlCard>
+        <ControlCard title="Question bank" description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...old,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,finished:false}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
       </aside></div>
       <footer className="host-footer"><span>PlayLab · Quickfire Quiz</span><span>Local-only state · Use the same browser profile for host and projector</span></footer>
     </main>
     {editor&&<QuickfireQuestionEditor questions={game.questions} onClose={()=>setEditor(false)} onSave={questions=>{
       if(!window.confirm('Replace all trivia questions and reset the match?'))return;
-      change(old=>({...old,questions,questionIndex:0,revealed:{},scores:[0,0],lastAward:null}));
+      change(old=>({...old,questions,questionIndex:0,revealed:{},scores:[0,0],lastAward:null,finished:false}));
       setEditor(false);
     }}/>} 
   </div>;
@@ -114,7 +129,7 @@ function QuickfireDisplay({game}){
       </button>
       <button type="button" onClick={fullscreen}><Maximize size={16}/> Fullscreen</button>
     </div>
-    <QuickfireBoard game={game}/>
+    {game.finished?<ResultsBoard game={game} kind="quickfire"/>:<QuickfireBoard game={game}/>}
   </main>;
 }
 export function QuickfireApp(){
