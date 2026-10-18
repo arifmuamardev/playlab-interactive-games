@@ -16,10 +16,10 @@ export const GAME_RULES={
       'The host explicitly awards the bank to one team. At least one answer must be revealed before points can be awarded. Scores are never awarded automatically.',
       'Continue through the rounds, then choose Finish match to display the final scores. The highest-scoring team wins; equal scores produce a tie.'
     ],
-    controls:'Keyboard: 1–8 reveal answers · X add strike · Z undo strike. You may undo a round award or correct the scoreboard before finishing.',
+    controls:'Keyboard: 1–8 reveal answers · X add strike · Z undo strike. You may undo a round award or correct the scoreboard before finishing. A host-controlled countdown is available.',
     scoring:'Round bank = sum of revealed answer points × round multiplier. Awarding transfers the current bank to exactly one team.',
     caveat:'All bundled answer rankings and points are fictional game examples—not results from a real survey. Replace them if your event requires collected survey data.',
-    optional:'Optional MC house rule: alternate which team guesses first each round. PlayLab does not enforce turns, a timer, or a particular steal decision.'
+    optional:'Optional MC house rule: alternate which team guesses first each round and optionally show a countdown. PlayLab does not enforce time limits, turns, or a particular steal decision.'
   },
   quickfire:{
     title:'Quickfire Quiz',
@@ -29,13 +29,13 @@ export const GAME_RULES={
       'The host displays a question with four choices: A, B, C and D.',
       'Give teams a chance to discuss or answer aloud. The host chooses when to reveal the correct answer and any explanation.',
       'The host manually awards +10 to a team for a correct response. A −10 correction and one-step Undo are available. No automatic correctness checking or scoring occurs.',
-      'Move to the next question. The host can navigate backward and adjust scores; PlayLab does not enforce a timer, buzzer, or one award per question.',
+      'Move to the next question. The host can navigate backward and adjust scores; A host-controlled countdown can be shown, but PlayLab does not enforce deadlines, buzzers, or one award per question.',
       'Choose Finish match to show the final scoreboard. The highest-scoring team wins; equal scores produce a tie.'
     ],
     controls:'Keyboard: R reveal/hide · N next · P previous · U undo the last score change. Typing in input fields disables shortcuts.',
     scoring:'Current default: +10 points per manual award; −10 corrections stop at zero. A question reveal does not award any points.',
     caveat:'The bundled trivia sets use objective answers and explanations; the MC should adapt the difficulty to participants.',
-    optional:'Optional MC house rule: allow 15–30 seconds to answer and award +10 only once per question. Time limits and single-award restrictions are not enforced.'
+    optional:'Optional MC house rule: start a visible 15–30 second countdown and award +10 only once per question. Time limits and single-award restrictions are not enforced.'
   }
 };
 export function GameRules({game,open=false}){
