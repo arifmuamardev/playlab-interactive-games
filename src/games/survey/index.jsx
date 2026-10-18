@@ -1,6 +1,7 @@
 import React, {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,Check,CheckCheck,ChevronDown,ChevronLeft,ChevronRight,CircleHelp,Copy,Download,Edit3,Expand,Eye,EyeOff,FileUp,Gamepad2,Headphones,Keyboard,Lock,Maximize,Minus,MonitorPlay,Plus,RotateCcw,Save,Settings2,ShieldAlert,SkipForward,Sparkles,Trash2,Trophy,Volume2,VolumeX,X} from 'lucide-react';
 import {useSyncedSession} from '../../core/useSyncedSession.js';
+import {RemoteConnectionGate} from '../../remote/RemoteConnectionGate.jsx';
 import {QuestionBuilder,useQuestionDraft} from '../../components/QuestionBuilder.jsx';
 import '../gameplay-polish.css';
 import '../projector-fx.css';
@@ -282,4 +283,4 @@ function DisplayApp({game}){
   return <main className="display-view" ref={ref}>{game.finished?<><div className="results-display-actions"><button type="button" onClick={toggleSound} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} aria-pressed={soundEnabled}>{soundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>} {soundEnabled?'Sound on':'Enable sound'}</button><button type="button" onClick={full}><Maximize size={16}/> Fullscreen</button></div><ResultsBoard game={game} kind="survey"/></>:<Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/>}</main>
 }
 
-export function SurveyGame(){const [game,change]=useGame();return <>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=survey">Back to setup</a></aside>}{IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>}</>;}
+export function SurveyGame(){const [game,change,connection]=useGame();return <RemoteConnectionGate connection={connection} host={!IS_DISPLAY}>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=survey">Back to setup</a></aside>}{IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>}</RemoteConnectionGate>;}
