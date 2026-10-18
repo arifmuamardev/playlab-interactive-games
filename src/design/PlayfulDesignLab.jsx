@@ -3,6 +3,7 @@ import {ArrowRight,ArrowUpRight,BookOpen,Check,ChevronRight,FolderOpen,Gamepad2,
 import {GAME_CATALOG} from '../core/gameRegistry.js';
 import {readGameSession,readPackLibrary} from '../dashboard/storage.js';
 import './playful.css';
+import {LanguageSwitch,useLanguage} from '../i18n/language.jsx';
 
 const GAMES=GAME_CATALOG.filter(game=>game.slug);
 const labUrl=screen=>'?page=design-lab'+(screen==='catalog'?'':'&screen='+screen);
@@ -15,33 +16,35 @@ function WordArt(){return <div className="pf-word-art" aria-hidden="true"><span>
 function BuzzerArt(){return <div className="pf-buzzer-art" aria-hidden="true"><span className="pf-buzzer-ring"><Zap size={64} strokeWidth={3}/></span><i>BUZZ!</i></div>}
 const Art={survey:SurveyArt,quickfire:QuickfireArt,word:WordArt,buzzer:BuzzerArt};
 function GameCard({game,index}){
+  const {lang,t}=useLanguage();
   const theme=game.slug?gameColors[game.slug]:index===2?'mint':'sunshine';
   const Graphic=game.slug?Art[game.slug]:index===2?WordArt:BuzzerArt;
   const playable=Boolean(game.slug);
   return <article className={'pf-game-card pf-'+theme+(!playable?' is-coming':'')}>
-    <div className="pf-game-card-top"><span>GAME {game.number}</span><span className="pf-status">{playable?'READY TO PLAY':'COMING SOON'}</span></div>
+    <div className="pf-game-card-top"><span>GAME {game.number}</span><span className="pf-status">{t(playable?'READY TO PLAY':'COMING SOON')}</span></div>
     <div className="pf-game-illustration"><Graphic/></div>
     <div className="pf-game-card-content"><p className="pf-category">{game.category}</p><h3>{game.title}</h3><p>{game.description}</p>
-      {playable?<div className="pf-card-actions"><a className="pf-game-action" href={'?page=dashboard&tab=setup&format='+game.slug}>Set up game <ArrowRight size={18}/></a><a className="pf-card-secondary" href={'?game='+game.slug} aria-label={'Open '+game.title+' host controls'}>Host <ArrowUpRight size={16}/></a></div>:<span className="pf-upcoming">We're cooking up something fun <Sparkles size={15}/></span>}
+      {playable?<div className="pf-card-actions"><a className="pf-game-action" href={'?page=dashboard&tab=setup&format='+game.slug}>{t('Set up game')} <ArrowRight size={18}/></a><a className="pf-card-secondary" href={'?game='+game.slug} aria-label={'Open '+game.title+' host controls'}>{t('Host')} <ArrowUpRight size={16}/></a></div>:<span className="pf-upcoming">We're cooking up something fun <Sparkles size={15}/></span>}
     </div>
   </article>;
 }
 function CatalogScreen(){
+  const {lang,t}=useLanguage();
   return <><section className="pf-hero" aria-labelledby="pf-hero-title"><div className="pf-hero-copy">
-    <span className="pf-eyebrow"><span className="pf-online-dot"/> THE LITTLE PLATFORM FOR BIG GAME NIGHTS</span>
-    <h1 id="pf-hero-title">Every room<br/>is a <span className="pf-hero-highlight">playground.<Spark className="pf-hero-star"/></span></h1>
-    <p>Turn an ordinary class, workshop or gathering into something everyone wants to join. Pick a game, bring your teams, and let the fun begin!</p>
-    <div className="pf-hero-actions"><a className="pf-button pf-button-dark" href="#pf-games"><Play size={18} fill="currentColor"/> Find your game <ArrowRight size={17}/></a><a className="pf-button pf-button-light" href="?page=dashboard&tab=setup"><Settings2 size={17}/> Set up a game</a></div>
-    <div className="pf-hero-highlights"><span><span>✦</span> No sign-up</span><span><span>✦</span> Two playable games</span><span><span>✦</span> Projector-ready</span></div>
+    <span className="pf-eyebrow"><span className="pf-online-dot"/> {lang==='id'?'PLATFORM KECIL UNTUK ACARA SERU':'THE LITTLE PLATFORM FOR BIG GAME NIGHTS'}</span>
+    <h1 id="pf-hero-title">{lang==='id'?<>Setiap ruangan<br/>bisa jadi <span className="pf-hero-highlight">arena bermain.<Spark className="pf-hero-star"/></span></>:<>Every room<br/>is a <span className="pf-hero-highlight">playground.<Spark className="pf-hero-star"/></span></>}</h1>
+    <p>{lang==='id'?'Ubah kelas, lokakarya, atau acara menjadi pengalaman seru. Pilih permainan, bentuk tim, dan mulai!':'Turn an ordinary class, workshop or gathering into something everyone wants to join. Pick a game, bring your teams, and let the fun begin!'}</p>
+    <div className="pf-hero-actions"><a className="pf-button pf-button-dark" href="#pf-games"><Play size={18} fill="currentColor"/> {t('Find your game')} <ArrowRight size={17}/></a><a className="pf-button pf-button-light" href="?page=dashboard&tab=setup"><Settings2 size={17}/> {t('Set up a game')}</a></div>
+    <div className="pf-hero-highlights"><span><span>✦</span> {t('No sign-up')}</span><span><span>✦</span> {t('Two playable games')}</span><span><span>✦</span> {t('Projector-ready')}</span></div>
   </div><div className="pf-hero-visual" aria-label="Illustrated game show with quiz and survey mini boards">
     <span className="pf-hero-orbit pf-orbit-one"/><span className="pf-hero-orbit pf-orbit-two"/>
     <div className="pf-hero-ticket"><span>YOU'RE INVITED TO</span><b>GAME<br/>TIME!</b><small>★ YOU BRING THE PEOPLE. WE BRING THE PLAY. ★</small></div>
     <div className="pf-hero-float pf-float-one">🏆<span>POINTS!</span></div><div className="pf-hero-float pf-float-two">⚡<span>YOUR TURN</span></div><Spark className="pf-float-star-one"/><Spark className="pf-float-star-two" character="✳"/>
   </div></section>
-  <section id="pf-games" className="pf-collection" aria-labelledby="pf-collection-title"><div className="pf-section-head"><div><span className="pf-eyebrow">THE GAME SHELF</span><h2 id="pf-collection-title">Pick a game. <span>Make some noise!</span></h2></div><div className="pf-burst-label"><Sparkles size={20}/> GOOD TIMES START HERE</div></div>
+  <section id="pf-games" className="pf-collection" aria-labelledby="pf-collection-title"><div className="pf-section-head"><div><span className="pf-eyebrow">THE GAME SHELF</span><h2 id="pf-collection-title">{lang==='id'?<>Pilih permainan. <span>Bikin suasana meriah!</span></>:<>Pick a game. <span>Make some noise!</span></>}</h2></div><div className="pf-burst-label"><Sparkles size={20}/> GOOD TIMES START HERE</div></div>
     <div className="pf-game-grid">{GAME_CATALOG.map((game,i)=><GameCard key={game.number} game={game} index={i}/>)}</div>
   </section>
-  <section className="pf-how"><div className="pf-how-heading"><span className="pf-eyebrow">SO EASY IT'S ALMOST CHEATING</span><h2>Three steps to<br/><span>all the fun.</span></h2><p>Make the game your own, then use one laptop for your host controls and audience screen.</p></div><div className="pf-how-steps"><div><span>01 <Gamepad2 size={25}/></span><h3>Choose a game</h3><p>Pick the format that suits your class or event.</p></div><div><span>02 <Users size={25}/></span><h3>Set the stage</h3><p>Choose questions, name teams and rehearse safely.</p></div><div><span>03 <Trophy size={25}/></span><h3>Make it memorable</h3><p>Reveal answers, keep score and bring the room together.</p></div></div></section></>;
+  <section className="pf-how"><div className="pf-how-heading"><span className="pf-eyebrow">SO EASY IT'S ALMOST CHEATING</span><h2>{lang==='id'?<>Tiga langkah<br/><span>untuk bersenang-senang.</span></>:<>Three steps to<br/><span>all the fun.</span></>}</h2><p>{lang==='id'?'Sesuaikan permainan, lalu kendalikan dari satu laptop dan layar penonton.':'Make the game your own, then use one laptop for your host controls and audience screen.'}</p></div><div className="pf-how-steps"><div><span>01 <Gamepad2 size={25}/></span><h3>{t('Choose a game')}</h3><p>Pick the format that suits your class or event.</p></div><div><span>02 <Users size={25}/></span><h3>{t('Set the stage')}</h3><p>Choose questions, name teams and rehearse safely.</p></div><div><span>03 <Trophy size={25}/></span><h3>{t('Make it memorable')}</h3><p>Reveal answers, keep score and bring the room together.</p></div></div></section></>;
 }
 function sessionsAndPacks(){
   const saved=GAMES.map(game=>{try{return {game,session:readGameSession(game.slug)};}catch{return {game,session:null};}});
@@ -70,15 +73,17 @@ export function PlayfulDesignLab(){
 export function PlayfulCatalog(){return <PlayfulExperience screen="catalog"/>;}
 
 function PlayfulExperience({screen='catalog',preview=false}){
+  const {lang,t}=useLanguage();
   return <div className={'playful-lab '+(preview?'pf-preview':'pf-production')}>
     {preview&&<div className="pf-lab-ribbon"><span><Sparkles size={16}/> DESIGN LAB — playful visual direction</span><span>This is a preview. Your existing PlayLab is unchanged.</span></div>}
     <header className="pf-header">
       <a className="pf-logo-link" href={preview?labUrl('catalog'):'./'} aria-label={preview?'PlayLab playful design preview home':'PlayLab home'}><PlayLabLogo/></a>
       <nav aria-label={preview?'Design preview navigation':'Main navigation'} className="pf-nav">
-        <a href={preview?labUrl('catalog'):'./'} aria-current={screen==='catalog'?'page':undefined}><Home size={17}/> Game catalog</a>
-        <a href={preview?labUrl('dashboard'):'?page=dashboard'} aria-current={screen==='dashboard'?'page':undefined}><LayoutDashboard size={17}/> {preview?'Dashboard':'My dashboard'}</a>
+        <a href={preview?labUrl('catalog'):'./'} aria-current={screen==='catalog'?'page':undefined}><Home size={17}/> {t('Game catalog')}</a>
+        <a href={preview?labUrl('dashboard'):'?page=dashboard'} aria-current={screen==='dashboard'?'page':undefined}><LayoutDashboard size={17}/> {t(preview?'Dashboard':'My dashboard')}</a>
       </nav>
-      <a href={preview?'./':'?page=dashboard&tab=setup'} className="pf-existing-link">{preview?'Current website':'Set up a game'} <ArrowUpRight size={16}/></a>
+      <LanguageSwitch/>
+      <a href={preview?'./':'?page=dashboard&tab=setup'} className="pf-existing-link">{preview?'Current website':t('Set up a game')} <ArrowUpRight size={16}/></a>
     </header>
     <main className="pf-content">{screen==='catalog'?<CatalogScreen/>:<DashboardScreen/>}</main>
     <footer className="pf-footer"><div><PlayLabLogo/><p>More play. Less ordinary.</p></div>
