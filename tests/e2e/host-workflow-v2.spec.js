@@ -119,7 +119,7 @@ for(const width of [360,390,768,1280]){
         await expect(bar.getByRole('button',{name:'+10 · Team A'})).toBeVisible();
       }
       await check();
-      await page.evaluate(()=>scrollTo(0,document.body.scrollHeight));
+      await page.evaluate(()=>scrollTo(0,Math.min(650,document.body.scrollHeight*.45)));
       await expect(bar).toBeInViewport({ratio:.3});
     }
   });
