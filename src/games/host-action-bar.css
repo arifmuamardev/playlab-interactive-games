@@ -58,3 +58,16 @@
  .gameplay-polished .host-action-btn{transition:none!important}
  .gameplay-polished .host-action-btn:hover:not(:disabled){transform:none}
 }
+
+/* Desktop host controls use a separate right-hand column. Keep the sticky bar
+   within the left column so it never covers strike, award or scoring buttons. */
+@media(min-width:921px){
+ .gameplay-polished .host-action-bar{
+   width:calc((100% - 24px)*.64);
+   margin-right:auto;
+   grid-template-columns:minmax(0,1fr);
+   gap:11px;
+ }
+ .gameplay-polished .host-action-buttons{justify-content:flex-start}
+}
+.gameplay-polished .host-action-btn{overflow-wrap:anywhere}
