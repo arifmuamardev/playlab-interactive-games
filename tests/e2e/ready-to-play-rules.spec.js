@@ -26,7 +26,7 @@ for(const game of ['survey','quickfire']){
       await page.locator('#setup-template').selectOption(template.id);
       await expect(page.locator('.setup-template-card.selected')).toContainText(template.title);
       await expect(page.locator('.setup-template-preview')).toContainText('8 curated');
-      await expect(page.locator('.setup-template-preview li')).toHaveCount(3);
+      await expect(page.locator('.setup-template-preview > ul > li')).toHaveCount(3);
       await expect(page.locator('.setup-template-preview')).toContainText(template.questions[0].question);
       const selected=page.locator('.setup-template-card.selected');
       await expect(selected).toHaveAttribute('aria-pressed','true');
