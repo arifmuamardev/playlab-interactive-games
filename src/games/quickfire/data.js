@@ -10,7 +10,7 @@ export const QUICKFIRE_QUESTIONS=[
   {id:'t6',question:'Dalam grafik batang, tinggi batang biasanya mewakili apa?',options:['Warna kategori','Nilai kategori','Urutan huruf','Ukuran font'],answer:1,explanation:'Panjang atau tinggi batang menyatakan nilai data.'}
 ];
 export function quickfireInitial(){
-  return {version:1,questions:structuredClone(QUICKFIRE_QUESTIONS),questionIndex:0,teamNames:['Team A','Team B'],scores:[0,0],revealed:{},lastAward:null};
+  return {version:1,questions:structuredClone(QUICKFIRE_QUESTIONS),questionIndex:0,teamNames:['Team A','Team B'],scores:[0,0],revealed:{},lastAward:null,finished:false};
 }
 
 export function normalizeQuickfireQuestions(input){
