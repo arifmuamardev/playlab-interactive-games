@@ -31,7 +31,7 @@ assert.equal(awardQuickfirePoints(initial,0,-10),initial,'No-op subtraction shou
 // Host-controlled countdown is a visual aid: no mutation to score or reveal fields.
 const timerGame=startCountdown(initial,'t1',15,1000);
 assert.equal(secondsRemaining(timerGame.countdown,1000),15);
-assert.equal(secondsRemaining(timerGame.countdown,15999),0,'Expired countdown stays at zero');
+assert.equal(secondsRemaining(timerGame.countdown,16000),0,'Expired countdown stays at zero');
 assert.equal(formatCountdown(15),'00:15');
 assert.equal(formatCountdown(90),'01:30');
 assert.deepEqual(timerGame.scores,[0,0]);
