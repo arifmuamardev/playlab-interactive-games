@@ -190,3 +190,7 @@
 @media(prefers-reduced-motion:reduce){
  .dash-playful :is(.dash-game-card,.dash-pack-card,.dash-action){transition:none!important}
 }
+
+
+.dash-top-actions{display:flex;align-items:center;gap:11px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:700px){.dash-playful .dash-topbar{gap:10px;flex-wrap:wrap;align-items:flex-start}.dash-playful .dash-top-actions{margin-left:auto}}
