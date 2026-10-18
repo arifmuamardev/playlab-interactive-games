@@ -8,6 +8,8 @@ import {useProjectorAudio} from '../stageEffects.js';
 import {ResultsBoard,ResultsHost} from '../GameResults.jsx';
 import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {GameRules} from '../GameRules.jsx';
+import {CountdownBadge,CountdownControls} from '../Countdown.jsx';
+import {clearCountdown} from '../countdown.js';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
 import {CHANNEL,STORAGE_KEY,getScores,makeInitialState,normalizeQuestions,progressFor,readSavedState,sampleQuestions,sumBank} from '../../data.js';
@@ -71,7 +73,7 @@ function Stage({game,preview=false,fullscreenAction,soundAction,soundEnabled}){
           <div className="team-number">{scores[team].toLocaleString('id-ID')}</div>
         </div>)}
       </div>
-      <div className="stage-question" ref={questionRef}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><h1>{q.question}</h1></div>
+      <div className="stage-question" ref={questionRef}><span>PERTANYAAN {String(game.roundIndex+1).padStart(2,'0')}</span><CountdownBadge game={game} contextId={q.id}/><h1>{q.question}</h1></div>
       <div ref={answersRef} className={'stage-answer-grid '+(q.answers.length>=7?'stage-answer-grid--dense':'')}>
         {q.answers.map((a,i)=><div key={q.id+'-'+i} className={'stage-answer '+(revealed.includes(i)?'is-revealed':'is-hidden')}>
           <div className="answer-number">{String(i+1).padStart(2,'0')}</div>
@@ -96,7 +98,7 @@ function HostApp({game,change}){
   const notify=msg=>{setNotice(msg);setTimeout(()=>setNotice(''),3600)};
   const goRound=i=>change(old=>{
     const index=Math.max(0,Math.min(old.questions.length-1,i));
-    return old.roundIndex===index?old:{...old,roundIndex:index,lastEvent:dispatchEvent('next')};
+    return old.roundIndex===index?old:{...clearCountdown(old),roundIndex:index,lastEvent:dispatchEvent('next')};
   });
   const jumpToAnswers=()=>document.getElementById('survey-reveal-controls')?.scrollIntoView({block:'start',behavior:'auto'});
   const reveal=i=>change(old=>{
@@ -112,7 +114,7 @@ function HostApp({game,change}){
   const chooseTeam=team=>change(old=>updateProgress(old,{activeTeam:team}));
   const award=team=>change(old=>{
     const qq=old.questions[old.roundIndex],pp=progressFor(old,qq.id);if(pp.awardedTeam!==null)return old;
-    return updateProgress(old,{awardedTeam:team,awardedAmount:sumBank(qq,pp)},'award');
+    return updateProgress(clearCountdown(old),{awardedTeam:team,awardedAmount:sumBank(qq,pp)},'award');
   });
   const undoAward=()=>{
     if(!window.confirm('Undo this round’s award? The assigned points will be removed.'))return;
@@ -120,20 +122,20 @@ function HostApp({game,change}){
   };
   const resetRound=()=>{
     if(!window.confirm('Reset current round? Revealed answers, strikes and its awarded score will be lost.'))return;
-    change(old=>{const id=old.questions[old.roundIndex].id;const progress={...old.progress};delete progress[id];return {...old,progress,lastEvent:dispatchEvent('next')}});
+    change(old=>{const id=old.questions[old.roundIndex].id;const progress={...old.progress};delete progress[id];return {...clearCountdown(old),progress,lastEvent:dispatchEvent('next')}});
   };
   const finishMatch=()=>{
     if(!window.confirm('Finish this match and show final results? Scores and questions stay saved. You can resume if you need to correct anything.'))return;
-    change(old=>old.finished?old:{...old,finished:true,lastEvent:dispatchEvent('finish')});
+    change(old=>old.finished?old:{...clearCountdown(old),finished:true,lastEvent:dispatchEvent('finish')});
   };
   const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:dispatchEvent('next')}));
   const resetFinishedMatch=()=>{
     if(!window.confirm('Reset and play again? ALL round awards, strikes, and revealed answers will be cleared. Questions and team names stay saved.'))return;
-    change(old=>({...old,finished:false,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));
+    change(old=>({...clearCountdown(old),finished:false,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));
   };
   const resetMatch=()=>{
     if(!window.confirm('Reset the ENTIRE match? All team scores and round progress will be cleared. Questions and team names are kept.'))return;
-    change(old=>({...old,roundIndex:0,progress:{},finished:false,lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
+    change(old=>({...clearCountdown(old),roundIndex:0,progress:{},finished:false,lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
   };
   const revealAll=()=>change(old=>{const qq=old.questions[old.roundIndex],pp=progressFor(old,qq.id);return updateProgress(old,{revealed:qq.answers.map((_,i)=>i)},'reveal')});
   const exportData=()=>{
@@ -145,7 +147,7 @@ function HostApp({game,change}){
     try {
       const raw=JSON.parse(await file.text());const questions=normalizeQuestions(raw);
       if(!window.confirm(`Import ${questions.length} questions? This replaces the existing question bank and clears all scores.`))return;
-      change(old=>({...old,questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));notify(`${questions.length} questions imported.`);
+      change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));notify(`${questions.length} questions imported.`);
     }catch(e){window.alert('Could not import questions: '+e.message)}
   };
   useEffect(()=>{
@@ -195,6 +197,7 @@ function HostApp({game,change}){
           </ControlCard>
         </div>
         <aside className="host-sidebar">
+          <ControlCard title="Countdown timer" description="Optional timer for spoken guesses and steal attempts."><CountdownControls game={game} change={change} contextId={q.id}/></ControlCard>
           <ControlCard title="Round controls" description="Choose the question and manage the live round.">
             <div className="round-select-row"><button className="square-btn" disabled={game.roundIndex===0} onClick={()=>goRound(game.roundIndex-1)} aria-label="Previous round"><ChevronLeft/></button><select aria-label="Select round" value={game.roundIndex} onChange={e=>goRound(Number(e.target.value))}>{game.questions.map((v,i)=><option key={v.id} value={i}>Round {i+1} · {v.multiplier}× points</option>)}</select><button className="square-btn" disabled={game.roundIndex===game.questions.length-1} onClick={()=>goRound(game.roundIndex+1)} aria-label="Next round"><ChevronRight/></button></div>
             <div className="current-phase"><div><span>ROUND STATUS</span><strong>{locked?'Finished':p.phase==='steal'?'Steal opportunity':'Playing'}</strong></div><div><span>POINTS IN BANK</span><strong>{locked?p.awardedAmount:bank}</strong></div></div>
@@ -225,7 +228,7 @@ function HostApp({game,change}){
       <footer className="host-footer"><span>PlayLab · Survey Showdown</span><span>Runs entirely in your browser · No participant accounts</span></footer>
     </main>
     {notice&&<div role="status" className="toast">{notice}</div>}
-    {editing&&<QuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...old,questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
+    {editing&&<QuestionEditor questions={game.questions} onClose={()=>setEditing(false)} onSave={questions=>{change(old=>({...clearCountdown(old),questions,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));setEditing(false);notify('Question bank updated; match scores reset.')}}/>}
     {showHelp&&<div className="modal-backdrop" onClick={()=>setShowHelp(false)}><div className="modal modal--help" role="dialog" aria-modal="true" aria-label="How to play" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">HOST QUICK START</span><h2>How to play</h2></div><button className="square-btn" onClick={()=>setShowHelp(false)} aria-label="Close"><X/></button></div><ol className="howto"><li><b>Open projector view</b> and move it to the external screen. Fullscreen it, and enable its sound if desired.</li><li><b>Pick the question</b> and designate which team is playing.</li><li><b>Reveal matching answers</b> by clicking answers or pressing keys 1–8. Their weighted points enter the bank.</li><li><b>Use X for wrong answers</b> and Z to undo. At three strikes, give the other team a chance to steal.</li><li><b>Award the bank</b> to whichever team wins. Then advance to the next round.</li><li><b>Replace sample questions</b> with responses from a real survey before the public event.</li></ol><div className="help-foot"><Keyboard size={18}/> Keyboard controls: <kbd>1</kbd>–<kbd>8</kbd> answers · <kbd>X</kbd> strike · <kbd>Z</kbd> undo</div><button className="btn btn-primary" onClick={()=>setShowHelp(false)}>Got it</button></div></div>}
   </div>;
 }
