@@ -34,7 +34,7 @@ function CatalogScreen(){
     <span className="pf-eyebrow"><span className="pf-online-dot"/> {lang==='id'?'PLATFORM KECIL UNTUK ACARA SERU':'THE LITTLE PLATFORM FOR BIG GAME NIGHTS'}</span>
     <h1 id="pf-hero-title">{lang==='id'?<>Setiap ruangan<br/>bisa jadi <span className="pf-hero-highlight">arena bermain.<Spark className="pf-hero-star"/></span></>:<>Every room<br/>is a <span className="pf-hero-highlight">playground.<Spark className="pf-hero-star"/></span></>}</h1>
     <p>{lang==='id'?'Ubah kelas, lokakarya, atau acara menjadi pengalaman seru. Pilih permainan, bentuk tim, dan mulai!':'Turn an ordinary class, workshop or gathering into something everyone wants to join. Pick a game, bring your teams, and let the fun begin!'}</p>
-    <div className="pf-hero-actions"><a className="pf-button pf-button-dark" href="#pf-games"><Play size={18} fill="currentColor"/> {t('Find your game')} <ArrowRight size={17}/></a><a className="pf-button pf-button-light" href="?page=dashboard&tab=setup"><Settings2 size={17}/> {t('Set up a game')}</a></div>
+    <div className="pf-hero-actions"><a className="pf-button pf-button-dark" href="#pf-games"><Play size={18} fill="currentColor"/> {t('Find your game')} <ArrowRight size={17}/></a><a className="pf-button pf-button-light" href="?page=organizer"><Settings2 size={17}/> {lang==='id'?'Atur acara':'Organize a game'}</a></div>
     <div className="pf-hero-highlights"><span><span>✦</span> {t('No sign-up')}</span><span><span>✦</span> {t('Two playable games')}</span><span><span>✦</span> {t('Projector-ready')}</span></div>
   </div><div className="pf-hero-visual" aria-label="Illustrated game show with quiz and survey mini boards">
     <span className="pf-hero-orbit pf-orbit-one"/><span className="pf-hero-orbit pf-orbit-two"/>
@@ -83,7 +83,7 @@ function PlayfulExperience({screen='catalog',preview=false}){
         <a href={preview?labUrl('dashboard'):'?page=dashboard'} aria-current={screen==='dashboard'?'page':undefined}><LayoutDashboard size={17}/> {t(preview?'Dashboard':'My dashboard')}</a>
       </nav>
       <LanguageSwitch/>
-      <a href={preview?'./':'?page=dashboard&tab=setup'} className="pf-existing-link">{preview?'Current website':t('Set up a game')} <ArrowUpRight size={16}/></a>
+      <a href={preview?'./':'?page=organizer'} className="pf-existing-link">{preview?'Current website':t('Set up a game')} <ArrowUpRight size={16}/></a>
     </header>
     <main className="pf-content">{screen==='catalog'?<CatalogScreen/>:<DashboardScreen/>}</main>
     <footer className="pf-footer"><div><PlayLabLogo/><p>More play. Less ordinary.</p></div>
