@@ -3,6 +3,16 @@
 PlayLab supports two event topologies. Both game modules preserve their existing
 manual scoring and non-enforced optional countdowns.
 
+## Pre-game presentation (both modes)
+
+After preparing a new match through **Game Setup**, the MC guides the audience through three **projector-synchronized** screens: **Welcome → Meet the teams → Game rules**. The first round/question is hidden until the MC explicitly selects **Start Game**. Each screen has an audience-facing design and a separate presenter view with suggested MC talking points.
+
+The MC can return to the earlier screen before starting. The introductions survive browser refresh and network reconnection because the current screen is part of match state. After gameplay begins, the **Show intro** control can replay the introductions without clearing scores or revealed answers (confirmation required).
+
+Important: One-click demo matches created *without* Game Setup retain their original direct-to-game behavior. Resetting a configured match returns it to the welcome screen. Rehearsal introductions stay isolated from live scores.
+
+For paired rooms, open the audience display **using the view-only URL from the pairing lobby**. The controller URL must never be used on the projector; presenter-side projector shortcuts refuse to turn it into a display URL.
+
 ## Mode A: One laptop + projector (local / offline after cache)
 
 1. On the presenting laptop open **Organize event → Mode A**.
