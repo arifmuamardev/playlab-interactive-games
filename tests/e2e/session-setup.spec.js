@@ -46,6 +46,12 @@ test('Setup reuses saved Quickfire question pack and updates live projector only
   dashboard.once('dialog',dialog=>dialog.accept());
   await dashboard.getByRole('button',{name:'Launch host controls'}).click();
   await expect(dashboard).toHaveURL(/\?game=quickfire/);
+  await expect(dashboard.getByRole('heading',{name:'Get the crowd ready!'})).toBeVisible();
+  await expect(projector.locator('.playlab-pregame-welcome')).toBeVisible();
+  await dashboard.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await expect(projector.locator('.playlab-pregame-teams')).toContainText('Group A');
+  await dashboard.getByRole('button',{name:/Next: Game rules/}).click();
+  await dashboard.getByRole('button',{name:'Start Game'}).click();
   await expect(dashboard.getByRole('textbox',{name:'Team 1 name'})).toHaveValue('Group A');
   await expect(projector.locator('.quick-scores > div').first().locator('strong')).toHaveText('0');
   await expect(projector.locator('.quick-scores')).toContainText('Group B');
@@ -70,6 +76,10 @@ test('Setup preselects Survey, reuses saved questions and resets progress',async
   page.once('dialog',dialog=>dialog.accept());
   await page.getByRole('button',{name:'Launch host controls'}).click();
   await expect(page).toHaveURL(/\?game=survey/);
+  await expect(page.locator('.playlab-pregame-welcome')).toBeVisible();
+  await page.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await page.getByRole('button',{name:/Next: Game rules/}).click();
+  await page.getByRole('button',{name:'Start Game'}).click();
   await expect(page.locator('.team-editor--0 strong')).toHaveText('0');
   await expect(page.locator('#team-name-0')).toHaveValue('Course A');
   await expect(page.locator('.reveal-button')).toHaveCount(5);
