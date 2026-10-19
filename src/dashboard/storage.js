@@ -62,12 +62,12 @@ export function resetGameSession(game,storage=localStorage){
   const previous=readGameSession(game,storage);
   if(game==='survey'){
     const initial=makeInitialState();
-    const state=previous?{...initial,questions:previous.questions,teamNames:previous.teams}:initial;
+    const state=previous?{...initial,questions:previous.questions,teamNames:previous.teams,...(previous.rawState.presentation!==undefined?{presentation:'welcome'}:{})}:initial;
     storage.setItem(STORAGE_KEY,JSON.stringify(state));return state;
   }
   if(game==='quickfire'){
     const initial=quickfireInitial();
-    const state=previous?{...initial,questions:previous.questions,teamNames:previous.teams}:initial;
+    const state=previous?{...initial,questions:previous.questions,teamNames:previous.teams,...(previous.rawState.presentation!==undefined?{presentation:'welcome'}:{})}:initial;
     storage.setItem(QUICKFIRE_KEY,JSON.stringify(state));return state;
   }
   throw Error('Unsupported game.');
