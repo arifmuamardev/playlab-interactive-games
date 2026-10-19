@@ -11,6 +11,9 @@ import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {GameRules} from '../GameRules.jsx';
 import {CountdownBadge,CountdownControls} from '../Countdown.jsx';
 import {clearCountdown} from '../countdown.js';
+import {PreGameBoard,PreGameHost} from '../PreGame.jsx';
+import {presentationStep,resetPresentation,navigatePresentation} from '../pregame.js';
+import {remoteParams} from '../../remote/session.js';
 import {LanguageSwitch,useLanguage} from '../../i18n/language.jsx';
 import {REHEARSAL_KEYS,isRehearsal} from '../../core/rehearsal.js';
 import {PlayLabBrand,RoundPill,ControlCard,IconButton} from '../../components/shared.jsx';
@@ -135,11 +138,11 @@ function HostApp({game,change}){
   const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:dispatchEvent('next')}));
   const resetFinishedMatch=()=>{
     if(!window.confirm('Reset and play again? ALL round awards, strikes, and revealed answers will be cleared. Questions and team names stay saved.'))return;
-    change(old=>({...clearCountdown(old),finished:false,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));
+    change(old=>resetPresentation({...clearCountdown(old),finished:false,roundIndex:0,progress:{},lastEvent:dispatchEvent('next')}));
   };
   const resetMatch=()=>{
     if(!window.confirm('Reset the ENTIRE match? All team scores and round progress will be cleared. Questions and team names are kept.'))return;
-    change(old=>({...clearCountdown(old),roundIndex:0,progress:{},finished:false,lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
+    change(old=>resetPresentation({...clearCountdown(old),roundIndex:0,progress:{},finished:false,lastEvent:dispatchEvent('next')}));notify('Match scores and rounds reset.');
   };
   const revealAll=()=>change(old=>{const qq=old.questions[old.roundIndex],pp=progressFor(old,qq.id);return updateProgress(old,{revealed:qq.answers.map((_,i)=>i)},'reveal')});
   const exportData=()=>{
@@ -165,11 +168,12 @@ function HostApp({game,change}){
   },[q,editing,showHelp,game.finished]);
   const [copyOkay,setCopyOkay]=useState(false);
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
-  const openDisplay=()=>window.open(displayUrl.toString(),'playlab-survey-display');
-  const copyDisplay=async()=>{try{await navigator.clipboard.writeText(displayUrl.toString());setCopyOkay(true);setTimeout(()=>setCopyOkay(false),1500)}catch{window.prompt('Copy the display link:',displayUrl.toString())}};
+  const openDisplay=()=>{if(remoteParams()){window.alert('Use the audience view-only link from the organizer pairing screen. Do not share the private controller link.');return;}window.open(displayUrl.toString(),'playlab-survey-display');};
+  const copyDisplay=async()=>{if(remoteParams()){window.alert('The organizer pairing screen contains the audience view-only URL.');return;}try{await navigator.clipboard.writeText(displayUrl.toString());setCopyOkay(true);setTimeout(()=>setCopyOkay(false),1500)}catch{window.prompt('Copy the display link:',displayUrl.toString())}};
   if(game.finished)return <ResultsHost game={game} kind="survey" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={openDisplay}/>;
+  if(presentationStep(game)!=='playing')return <PreGameHost game={game} kind="survey" change={change} openProjector={openDisplay} paired={Boolean(remoteParams())}/>;
   return <div className="host-shell gameplay-polished gameplay-survey">
-    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><LanguageSwitch/><a className="home-link" href="./">← {t('Game library')}</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">{t('How to play')}</IconButton><button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> {t('Open projector view')} <ArrowUpRight size={15}/></button></div></header>
+    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><LanguageSwitch/><a className="home-link" href="./">← {t('Game library')}</a><span className="local-badge"><span/>LOCAL GAME MODE</span><IconButton icon={CircleHelp} onClick={()=>setShowHelp(true)} variant="btn-soft">{t('How to play')}</IconButton>{game.presentation!==undefined&&<button className="btn btn-soft" onClick={()=>{if(window.confirm(lang==='id'?'Tampilkan kembali sambutan? Skor dan jawaban tetap tersimpan.':'Show the introductions again? Scores and revealed answers stay saved.'))change(old=>navigatePresentation(clearCountdown(old),'welcome'));}}>{lang==='id'?'Pembukaan':'Show intro'}</button>}<button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={18}/> {t('Open projector view')} <ArrowUpRight size={15}/></button></div></header>
     <main className="host-main">
       <div className="intro"><div><div className="eyebrow">EVENT TOOLKIT <span> / </span> MC CONTROL ROOM</div><h1>{lang==='id'?'Ayo main':'Let’s play'} <em>Survey Showdown.</em></h1><p>{lang==='id'?'Permainanmu, pertanyaanmu, panggungmu. Kendalikan setiap jawaban dari sini sambil penonton melihat layar besar.':'Your game, your questions, your stage. Control every reveal from here while the audience sees the big board.'}</p></div><div className="gameplay-progress-pill"><span>✦</span> {t('ROUND')} {game.roundIndex+1} {lang==='id'?'DARI':'OF'} {game.questions.length}</div></div>
       <div className="gameplay-status-strip" aria-label="Current game status"><div><span>{lang==='id'?'STATUS RONDE':'ROUND STATE'}</span><strong>{t(locked?'Round finished':p.phase==='steal'?'Steal opportunity':'Answers in play')}</strong></div><div><span>{lang==='id'?'TERBUKA / POIN':'REVEALED / BANK'}</span><strong>{p.revealed.length} {lang==='id'?'dari':'of'} {q.answers.length} · {locked?p.awardedAmount:bank} {lang==='id'?'poin':'points'}</strong></div><div><span>{lang==='id'?'PINTASAN':'QUICK KEYS'}</span><strong>{lang==='id'?'1–8 buka · X salah · Z batalkan':'1–8 reveal · X strike · Z undo strike'}</strong></div></div>
@@ -280,7 +284,7 @@ export function SurveyQuestionEditor({questions,onSave,onClose,saveNote='Saving 
 function DisplayApp({game}){
   const ref=useRef(null);const [soundEnabled,toggleSound]=useProjectorAudio(game.lastEvent);
   const full=()=>{const el=ref.current;if(!document.fullscreenElement){el?.requestFullscreen?.().catch(()=>{})}else{document.exitFullscreen?.()}};
-  return <main className="display-view" ref={ref}>{game.finished?<><div className="results-display-actions"><button type="button" onClick={toggleSound} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} aria-pressed={soundEnabled}>{soundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>} {soundEnabled?'Sound on':'Enable sound'}</button><button type="button" onClick={full}><Maximize size={16}/> Fullscreen</button></div><ResultsBoard game={game} kind="survey"/></>:<Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/>}</main>
+  return <main className="display-view" ref={ref}>{game.finished?<><div className="results-display-actions"><button type="button" onClick={toggleSound} aria-label={soundEnabled?'Mute projector sounds':'Enable projector sounds'} aria-pressed={soundEnabled}>{soundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>} {soundEnabled?'Sound on':'Enable sound'}</button><button type="button" onClick={full}><Maximize size={16}/> Fullscreen</button></div><ResultsBoard game={game} kind="survey"/></>:presentationStep(game)!=='playing'?<PreGameBoard game={game} kind="survey" onFullscreen={full} onSound={toggleSound} soundEnabled={soundEnabled}/>:<Stage game={game} fullscreenAction={full} soundAction={toggleSound} soundEnabled={soundEnabled}/>}</main>
 }
 
 export function SurveyGame(){const [game,change,connection]=useGame();return <RemoteConnectionGate connection={connection} host={!IS_DISPLAY}>{IS_REHEARSAL&&<aside role="status" className="playlab-practice-banner"><strong>Practice mode</strong> · Scores and changes stay separate from your real match. <a href="?page=dashboard&tab=setup&format=survey">Back to setup</a></aside>}{IS_DISPLAY?<DisplayApp game={game}/>:<HostApp game={game} change={change}/>}</RemoteConnectionGate>;}

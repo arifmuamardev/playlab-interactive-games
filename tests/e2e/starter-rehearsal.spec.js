@@ -22,6 +22,10 @@ test('Survey starter rehearsal preserves a scored live match and synchronizes it
   const practice=await opened;
   await expect(practice).toHaveURL(/game=survey&mode=rehearsal/);
   await expect(practice.getByText('Practice mode',{exact:true})).toBeVisible();
+  await expect(practice.locator('.playlab-pregame-welcome')).toBeVisible();
+  await practice.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await practice.getByRole('button',{name:/Next: Game rules/}).click();
+  await practice.getByRole('button',{name:'Start Game'}).click();
   await expect(practice.locator('.team-editor--0 input')).toHaveValue('Event A');
   await expect(practice.locator('.reveal-button')).toHaveCount(5);
   await expect(practice.locator('.stage-question h1')).toContainText('community gathering');
@@ -52,6 +56,10 @@ test('Quickfire event starter rehearses without creating a live game',async({con
   await setup.getByRole('button',{name:/Practice without affecting live game/i}).click();
   const practice=await opened;
   await expect(practice).toHaveURL(/mode=rehearsal/);
+  await expect(practice.locator('.playlab-pregame-welcome')).toBeVisible();
+  await practice.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await practice.getByRole('button',{name:/Next: Game rules/}).click();
+  await practice.getByRole('button',{name:'Start Game'}).click();
   await expect(practice.locator('.quick-question')).toContainText('How many minutes');
   await practice.getByRole('button',{name:'Reveal correct answer'}).click();
   await expect(practice.locator('.quick-option.correct').first()).toContainText('60');

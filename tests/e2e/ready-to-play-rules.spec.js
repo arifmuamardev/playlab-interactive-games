@@ -62,6 +62,11 @@ test('All ready sets preserve custom team names and isolated rehearsal session',
   await page.getByRole('button',{name:'Practice without affecting live game'}).click();
   const practice=await popup;
   await expect(practice).toHaveURL(/mode=rehearsal/);
+  await expect(practice.locator('.playlab-pregame-teams')).toHaveCount(0);
+  await practice.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await expect(practice.locator('.playlab-pregame-team')).toContainText(['Blue Team','Yellow Team']);
+  await practice.getByRole('button',{name:/Next: Game rules/}).click();
+  await practice.getByRole('button',{name:'Start Game'}).click();
   await expect(practice.getByRole('textbox',{name:'Team 1 name'})).toHaveValue('Blue Team');
   await expect(practice.locator('.quick-nav>span')).toHaveText('1 / 8');
   expect((await page.evaluate(()=>JSON.parse(localStorage.getItem('playlab-quickfire-state-v1')))).scores).toEqual([10,0]);

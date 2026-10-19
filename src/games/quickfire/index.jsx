@@ -14,6 +14,9 @@ import {HostActionBar,HostActionButton} from '../HostActionBar.jsx';
 import {GameRules} from '../GameRules.jsx';
 import {CountdownBadge,CountdownControls} from '../Countdown.jsx';
 import {clearCountdown} from '../countdown.js';
+import {PreGameBoard,PreGameHost} from '../PreGame.jsx';
+import {presentationStep,resetPresentation,navigatePresentation} from '../pregame.js';
+import {remoteParams} from '../../remote/session.js';
 import {LanguageSwitch,useLanguage} from '../../i18n/language.jsx';
 const IS_REHEARSAL=isRehearsal();
 // Game 2: a separate classroom-friendly trivia game. All state stays local to this browser.
@@ -94,16 +97,18 @@ function QuickfireHost({game,change}){
   const resumeMatch=()=>change(old=>({...old,finished:false,lastEvent:makeStageEvent('next')}));
   const resetFinishedMatch=()=>{
     if(!window.confirm('Reset and play again? ALL points and revealed answers will be cleared. Questions and team names stay saved.'))return;
-    change(old=>({...clearCountdown(old),finished:false,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,lastEvent:makeStageEvent('next')}));
+    change(old=>resetPresentation({...clearCountdown(old),finished:false,scores:[0,0],questionIndex:0,revealed:{},lastAward:null,lastEvent:makeStageEvent('next')}));
   };
   const openEditor=()=>setEditor(true);
   const exportQuestions=()=>{
     const blob=new Blob([JSON.stringify({questions:game.questions},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='playlab-quickfire-questions.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
   const displayUrl=new URL(location.href);displayUrl.searchParams.set('view','display');
-  if(game.finished)return <ResultsHost game={game} kind="quickfire" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={()=>window.open(displayUrl.toString(),'playlab-quickfire-display')}/>;
+  const openDisplay=()=>{if(remoteParams()){window.alert('Use the audience view-only link from the organizer pairing screen. Never share the controller link.');return;}window.open(displayUrl.toString(),'playlab-quickfire-display');};
+  if(game.finished)return <ResultsHost game={game} kind="quickfire" onResume={resumeMatch} onReset={resetFinishedMatch} openProjector={openDisplay}/>;
+  if(presentationStep(game)!=='playing')return <PreGameHost game={game} kind="quickfire" change={change} openProjector={openDisplay} paired={Boolean(remoteParams())}/>;
   return <div className="host-shell gameplay-polished gameplay-quickfire">
-    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><LanguageSwitch/><a className="home-link" href="./">← {t('Game library')}</a><button className="btn btn-primary" onClick={()=>window.open(displayUrl.toString(),'playlab-quickfire-display')}><MonitorPlay size={17}/> {t('Open projector')} <ArrowUpRight size={14}/></button></div></header>
+    <header className="host-header"><PlayLabBrand/><div className="host-header-right"><LanguageSwitch/><a className="home-link" href="./">← {t('Game library')}</a>{game.presentation!==undefined&&<button className="btn btn-soft" onClick={()=>{if(window.confirm(lang==='id'?'Tampilkan kembali sambutan? Skor dan jawaban tetap tersimpan.':'Show introductions again? Scores and revealed answers stay saved.'))change(old=>navigatePresentation(clearCountdown(old),'welcome'));}}>{lang==='id'?'Pembukaan':'Show intro'}</button>}<button className="btn btn-primary" onClick={openDisplay}><MonitorPlay size={17}/> {t('Open projector')} <ArrowUpRight size={14}/></button></div></header>
     <main className="host-main">
       <div className="intro"><div><div className="eyebrow">CLASSROOM & EVENT TOOLKIT / HOST CONTROL ROOM</div><h1>{lang==='id'?'Ayo main':'Let’s play'} <em>Quickfire Quiz.</em></h1><p>{lang==='id'?'Tampilkan jawaban pilihan ganda, berikan poin, dan tayangkan permainan di proyektor.':'Reveal multiple-choice answers, award team points, and take the whole game to a projector.'}</p></div><div className="gameplay-progress-pill"><span>✦</span> {t('QUESTION')} {game.questionIndex+1} {lang==='id'?'DARI':'OF'} {game.questions.length}</div></div>
       <div className="gameplay-status-strip" aria-label="Current game status"><div><span>{lang==='id'?'DI LAYAR BESAR':'ON THE BIG SCREEN'}</span><strong>{t(visible?'Answer revealed':'Question waiting')}</strong></div><div><span>{lang==='id'?'TIM BERTANDING':'TEAMS READY'}</span><strong>{game.teamNames.join(' vs ')}</strong></div><div><span>{lang==='id'?'PINTASAN':'QUICK KEYS'}</span><strong>{lang==='id'?'R buka · N/P pindah · U batalkan':'R reveal · N/P navigate · U undo'}</strong></div></div>
@@ -132,7 +137,7 @@ function QuickfireHost({game,change}){
           <button className="btn btn-primary results-finish-button" onClick={finishMatch}><Trophy size={18}/> {t('Finish match & show results')}</button>
           <p className="results-finish-note">You can finish early. Your current score stays saved, and you can resume to correct it.</p>
         </ControlCard>
-        <ControlCard title={t('Question bank')} description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>({...clearCountdown(old),scores:[0,0],questionIndex:0,revealed:{},lastAward:null,finished:false}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
+        <ControlCard title={t('Question bank')} description="Use the visual editor to customize questions. Export a JSON backup anytime."><div className="tool-grid"><button className="btn btn-tool" onClick={openEditor}><Edit3 size={17}/> Edit question bank</button><button className="btn btn-tool" onClick={exportQuestions}><Download size={17}/> Export</button><button className="btn btn-tool" onClick={()=>{if(window.confirm('Reset team points and answer reveals?'))change(old=>resetPresentation({...clearCountdown(old),scores:[0,0],questionIndex:0,revealed:{},lastAward:null,finished:false}))}}><RotateCcw size={17}/> Reset match</button></div></ControlCard>
       </aside></div>
       <footer className="host-footer"><span>PlayLab · Quickfire Quiz</span><span>Local-only state · Use the same browser profile for host and projector</span></footer>
     </main>
@@ -155,7 +160,7 @@ function QuickfireDisplay({game}){
       </button>
       <button type="button" onClick={fullscreen}><Maximize size={16}/> {t('Fullscreen')}</button>
     </div>
-    {game.finished?<ResultsBoard game={game} kind="quickfire"/>:<QuickfireBoard game={game}/>}
+    {game.finished?<ResultsBoard game={game} kind="quickfire"/>:presentationStep(game)!=='playing'?<PreGameBoard game={game} kind="quickfire"/>:<QuickfireBoard game={game}/>}
   </main>;
 }
 export function QuickfireApp(){

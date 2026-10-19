@@ -98,6 +98,10 @@ test('Quickfire rehearsal results do not modify the saved real match',async({con
   const popup=setup.waitForEvent('popup');
   await setup.getByRole('button',{name:/Practice without affecting live game/}).click();
   const rehearsal=await popup;
+  await expect(rehearsal.locator('.playlab-pregame-welcome')).toBeVisible();
+  await rehearsal.getByRole('button',{name:/Next: Meet the teams/}).click();
+  await rehearsal.getByRole('button',{name:/Next: Game rules/}).click();
+  await rehearsal.getByRole('button',{name:'Start Game'}).click();
   rehearsal.once('dialog',d=>d.accept());
   await rehearsal.getByRole('button',{name:'Finish match & show results'}).click();
   await expect(rehearsal.locator('.results-board')).toBeVisible();

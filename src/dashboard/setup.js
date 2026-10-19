@@ -34,7 +34,7 @@ export function buildConfiguredMatch(config,storage=localStorage){
   }else throw Error('Choose a question source.');
   const cleanQuestions=game==='survey'?normalizeQuestions(questions):normalizeQuickfireQuestions(questions);
   const initial=game==='survey'?makeInitialState():quickfireInitial();
-  return {...initial,questions:cleanQuestions,teamNames:names};
+  return {...initial,questions:cleanQuestions,teamNames:names,presentation:'welcome'};
 }
 export function writeConfiguredMatch(config,storage=localStorage){
   const result=buildConfiguredMatch(config,storage);
