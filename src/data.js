@@ -1,3 +1,5 @@
+import {PRE_GAME_STEPS} from './games/pregame.js';
+
 // Fictional sample answers and point values. Replace using a real survey before public events.
 export const sampleQuestions = [
   { id:'demo-1', question:'Sebutkan benda yang biasanya dibawa saat pergi ke sekolah atau kampus!', multiplier:1, answers:[{text:'Tas',points:34},{text:'Buku / catatan',points:24},{text:'Laptop',points:18},{text:'Alat tulis',points:14},{text:'Botol minum',points:10}] },
@@ -69,6 +71,7 @@ export function readSavedState() {
         teamNames:Array.isArray(saved.teamNames) && saved.teamNames.length===2 ? saved.teamNames.map((s,i)=>String(s||`Tim ${i+1}`).slice(0,45)) : ['Tim Merah','Tim Biru'],
         progress: typeof saved.progress==='object' && saved.progress && !Array.isArray(saved.progress) ? saved.progress : {},
         finished:saved.finished===true,
+        presentation:PRE_GAME_STEPS.includes(saved.presentation)?saved.presentation:undefined,
         lastEvent:saved.lastEvent||null
       };
     }
