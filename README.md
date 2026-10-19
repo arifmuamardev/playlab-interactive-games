@@ -1,3 +1,7 @@
+## Guided pre-game presentation
+
+Configured matches now start with a bilingual, presenter-controlled **Welcome → Team introductions → Rules → Start Game** sequence. The audience board stays free of questions until the MC explicitly starts. The sequence shares the existing local or paired state, survives refresh, has a 16:9/4:3 responsive layout, and never changes team scores. A confirmed **Show intro** action allows replay during a match without wiping progress. Direct demo game links retain their older immediate-start behavior. [Detailed instructions](docs/GAME_ORGANIZER.md).
+
 ## Game organizer: one or two presenter devices
 
 [Open PlayLab Game Organizer](https://arifmuamardev.github.io/playlab-interactive-games/?page=organizer)
